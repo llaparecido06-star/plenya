@@ -9,6 +9,10 @@ import QuickLog from '@/components/cycle/QuickLog';
 import ChefSuggestion from '@/components/cycle/ChefSuggestion';
 import HistoryCalendar from '@/components/history/HistoryCalendar';
 import DayDataSummary from '@/components/history/DayDataSummary';
+import StreakCounter from '@/components/home/StreakCounter';
+import SOSPartnerButton from '@/components/home/SOSPartnerButton';
+import WaterTracker from '@/components/home/WaterTracker';
+import IntimacyCard from '@/components/home/IntimacyCard';
 import { useCycle } from '@/contexts/CycleContext';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
 
@@ -26,17 +30,22 @@ const Index: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="flex items-center justify-center gap-2">
-            <h1 className="text-2xl font-bold text-foreground">Ciclos</h1>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowCalendar(!showCalendar)}
-              className="ml-2"
-            >
-              <Calendar className="w-5 h-5 text-primary" />
-            </Button>
+          {/* Header with Streak and Actions */}
+          <div className="flex items-center justify-between mb-4">
+            <StreakCounter streak={3} />
+            <div className="flex items-center gap-2">
+              <SOSPartnerButton />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowCalendar(!showCalendar)}
+              >
+                <Calendar className="w-5 h-5 text-primary" />
+              </Button>
+            </div>
           </div>
+          
+          <h1 className="text-2xl font-bold text-foreground">Ciclos</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {isToday ? 'Seu assistente de vida sincronizado' : 'Visualizando histórico'}
           </p>
@@ -62,8 +71,21 @@ const Index: React.FC = () => {
         {/* Show current day components when viewing today */}
         {isToday && (
           <>
+            {/* Water Tracker */}
+            <WaterTracker />
+            
+            {/* Chef Suggestion */}
             <ChefSuggestion />
+            
+            {/* Intimacy & Health Card */}
+            <div className="px-4">
+              <IntimacyCard />
+            </div>
+            
+            {/* Insight Card */}
             <InsightCard />
+            
+            {/* Quick Log */}
             <QuickLog />
           </>
         )}

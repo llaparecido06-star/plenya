@@ -1,40 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Battery, Zap, Check, Loader2 } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { useDailyLog } from '@/hooks/useDailyLog';
 
+const stressLabels = [
+  { value: 1, emoji: '😌', text: 'Tranquila' },
+  { value: 2, emoji: '😐', text: 'Leve tensão' },
+  { value: 3, emoji: '😓', text: 'Moderado' },
+  { value: 4, emoji: '😰', text: 'Elevado' },
+  { value: 5, emoji: '🤯', text: 'Muito alto' },
+];
+
+const energyLabels = [
+  { value: 1, emoji: '😴', text: 'Esgotada' },
+  { value: 2, emoji: '🥱', text: 'Baixa' },
+  { value: 3, emoji: '😐', text: 'Neutra' },
+  { value: 4, emoji: '😊', text: 'Boa' },
+  { value: 5, emoji: '⚡', text: 'Energizada' },
+];
+
 const EmotionalCheckin: React.FC = () => {
   const { data, loading, saving, saveLog, isAuthenticated } = useDailyLog();
-  const [stress, setStress] = useState([50]);
-  const [energy, setEnergy] = useState([50]);
+  const [stress, setStress] = useState(3);
+  const [energy, setEnergy] = useState(3);
   const [saved, setSaved] = useState(false);
 
   // Load saved values
   useEffect(() => {
-    if (data.stress !== null) setStress([data.stress]);
-    if (data.energy !== null) setEnergy([data.energy]);
+    if (data.stress !== null) setStress(data.stress);
+    if (data.energy !== null) setEnergy(data.energy);
   }, [data.stress, data.energy]);
-
-  const getStressLabel = (value: number) => {
-    if (value < 25) return { text: 'Tranquila', emoji: '😌' };
-    if (value < 50) return { text: 'Leve tensão', emoji: '😐' };
-    if (value < 75) return { text: 'Moderado', emoji: '😓' };
-    return { text: 'Elevado', emoji: '😰' };
-  };
-
-  const getEnergyLabel = (value: number) => {
-    if (value < 25) return { text: 'Esgotada', emoji: '😴' };
-    if (value < 50) return { text: 'Baixa', emoji: '🥱' };
-    if (value < 75) return { text: 'Boa', emoji: '😊' };
-    return { text: 'Energizada', emoji: '⚡' };
-  };
 
   const handleSave = async () => {
     const success = await saveLog({
-      stress: stress[0],
-      energy: energy[0],
+      stress: Math.round(stress),
+      energy: Math.round(energy),
     });
     
     if (success) {
@@ -43,8 +44,8 @@ const EmotionalCheckin: React.FC = () => {
     }
   };
 
-  const stressInfo = getStressLabel(stress[0]);
-  const energyInfo = getEnergyLabel(energy[0]);
+  const stressInfo = stressLabels.find(l => l.value === stress) || stressLabels[2];
+  const energyInfo = energyLabels.find(l => l.value === energy) || energyLabels[2];
 
   if (loading) {
     return (
@@ -63,7 +64,7 @@ const EmotionalCheckin: React.FC = () => {
       <h3 className="font-semibold text-foreground mb-6">Check-in Emocional</h3>
 
       <div className="space-y-8">
-        {/* Stress slider */}
+        {/* Stress selector */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -77,20 +78,25 @@ const EmotionalCheckin: React.FC = () => {
               <span className="text-sm text-muted-foreground">{stressInfo.text}</span>
             </div>
           </div>
-          <Slider
-            value={stress}
-            onValueChange={setStress}
-            max={100}
-            step={1}
-            className="[&_[role=slider]]:bg-rose-500 [&_[role=slider]]:border-rose-500"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>Relaxada</span>
-            <span>Estressada</span>
+          <div className="flex justify-between gap-2">
+            {stressLabels.map((label) => (
+              <button
+                key={label.value}
+                onClick={() => setStress(label.value)}
+                className={`flex-1 flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+                  stress === label.value
+                    ? 'bg-rose-100 scale-105'
+                    : 'opacity-50 hover:opacity-100 hover:bg-secondary/50'
+                }`}
+              >
+                <span className="text-xl">{label.emoji}</span>
+                <span className="text-[10px] text-muted-foreground">{label.value}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Energy slider */}
+        {/* Energy selector */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -104,16 +110,21 @@ const EmotionalCheckin: React.FC = () => {
               <span className="text-sm text-muted-foreground">{energyInfo.text}</span>
             </div>
           </div>
-          <Slider
-            value={energy}
-            onValueChange={setEnergy}
-            max={100}
-            step={1}
-            className="[&_[role=slider]]:bg-amber-500 [&_[role=slider]]:border-amber-500"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>Esgotada</span>
-            <span>Energizada</span>
+          <div className="flex justify-between gap-2">
+            {energyLabels.map((label) => (
+              <button
+                key={label.value}
+                onClick={() => setEnergy(label.value)}
+                className={`flex-1 flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+                  energy === label.value
+                    ? 'bg-amber-100 scale-105'
+                    : 'opacity-50 hover:opacity-100 hover:bg-secondary/50'
+                }`}
+              >
+                <span className="text-xl">{label.emoji}</span>
+                <span className="text-[10px] text-muted-foreground">{label.value}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
