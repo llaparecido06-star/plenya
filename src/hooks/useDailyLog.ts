@@ -67,6 +67,7 @@ export const useDailyLog = () => {
 
   const saveLog = useCallback(async (updates: Partial<DailyLogData>) => {
     if (!user) {
+      console.error('[DailyLog] Save failed: No authenticated user');
       toast({
         title: 'Faça login',
         description: 'Você precisa estar logada para salvar registros.',
@@ -79,34 +80,48 @@ export const useDailyLog = () => {
     try {
       const newData = { ...data, ...updates };
       
-      const { error } = await supabase
+      const payload = {
+        user_id: user.id,
+        log_date: today,
+        cycle_phase: currentPhase,
+        symptoms: newData.symptoms,
+        mood: newData.mood,
+        energy: newData.energy,
+        stress: newData.stress,
+        weight: newData.weight,
+      };
+      
+      console.log('[DailyLog] Attempting to save:', payload);
+      
+      const { data: result, error } = await supabase
         .from('daily_logs')
-        .upsert({
-          user_id: user.id,
-          log_date: today,
-          cycle_phase: currentPhase,
-          symptoms: newData.symptoms,
-          mood: newData.mood,
-          energy: newData.energy,
-          stress: newData.stress,
-          weight: newData.weight,
-        }, {
+        .upsert(payload, {
           onConflict: 'user_id,log_date',
+        })
+        .select();
+
+      if (error) {
+        console.error('[DailyLog] Supabase error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
         });
+        throw error;
+      }
 
-      if (error) throw error;
-
+      console.log('[DailyLog] Save successful:', result);
       setData(newData);
       toast({
         title: 'Salvo! ✨',
         description: 'Seu registro foi salvo com sucesso.',
       });
       return true;
-    } catch (error) {
-      console.error('Error saving daily log:', error);
+    } catch (error: any) {
+      console.error('[DailyLog] Full error object:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível salvar o registro.',
+        description: error?.message || 'Não foi possível salvar o registro.',
         variant: 'destructive',
       });
       return false;
