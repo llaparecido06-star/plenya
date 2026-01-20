@@ -2,16 +2,14 @@ import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCycle } from '@/contexts/CycleContext';
 import AuthForm from '@/components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
-import { LogOut, Calendar } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
+import { LogOut } from 'lucide-react';
+import DUMPicker from '@/components/profile/DUMPicker';
 import PatternsCard from '@/components/history/PatternsCard';
 
 const Perfil: React.FC = () => {
   const { user, signOut } = useAuth();
-  const { cycleDay, setCycleDay, cycleLength } = useCycle();
 
   if (!user) {
     return (
@@ -63,27 +61,8 @@ const Perfil: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div
-          className="glass-card p-5"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-foreground">Ajustar Dia do Ciclo</h3>
-          </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Dia atual: <span className="font-bold text-primary">{cycleDay}</span> de {cycleLength}
-          </p>
-          <Slider
-            value={[cycleDay]}
-            onValueChange={([v]) => setCycleDay(v)}
-            min={1}
-            max={cycleLength}
-            step={1}
-          />
-        </motion.div>
+        {/* DUM Calendar Picker */}
+        <DUMPicker />
 
         {/* Patterns Card - Cycle Insights */}
         <motion.div

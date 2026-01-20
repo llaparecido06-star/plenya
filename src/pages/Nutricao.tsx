@@ -5,6 +5,7 @@ import HormonalSuggestion from '@/components/nutrition/HormonalSuggestion';
 import AddMealDrawer from '@/components/nutrition/AddMealDrawer';
 import MealScanner from '@/components/nutrition/MealScanner';
 import RecentMealsHistory from '@/components/nutrition/RecentMealsHistory';
+import ChefIACard from '@/components/nutrition/ChefIACard';
 import { motion } from 'framer-motion';
 
 const Nutricao: React.FC = () => {
@@ -21,7 +22,12 @@ const Nutricao: React.FC = () => {
         <p className="text-muted-foreground">Acompanhe sua alimentação</p>
       </div>
 
-      <div className="px-4 -mt-2">
+      {/* Chef IA Premium Card */}
+      <div className="px-4 -mt-2 mb-4">
+        <ChefIACard />
+      </div>
+
+      <div className="px-4">
         <motion.div
           className="glass-card p-4"
           initial={{ opacity: 0, y: 20 }}
