@@ -4,6 +4,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import CycleWheel from '@/components/cycle/CycleWheel';
 import InsightCard from '@/components/cycle/InsightCard';
 import QuickLog from '@/components/cycle/QuickLog';
+import ChefSuggestion from '@/components/cycle/ChefSuggestion';
 import { useCycle } from '@/contexts/CycleContext';
 
 const Index: React.FC = () => {
@@ -28,6 +29,7 @@ const Index: React.FC = () => {
       </div>
 
       <div className="space-y-6 mt-6">
+        <ChefSuggestion />
         <InsightCard />
         <QuickLog />
       </div>

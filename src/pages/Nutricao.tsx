@@ -3,6 +3,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import MacroRings from '@/components/nutrition/MacroRings';
 import HormonalSuggestion from '@/components/nutrition/HormonalSuggestion';
 import AddMealDrawer from '@/components/nutrition/AddMealDrawer';
+import MealScanner from '@/components/nutrition/MealScanner';
 import { motion } from 'framer-motion';
 
 const Nutricao: React.FC = () => {
@@ -41,6 +42,9 @@ const Nutricao: React.FC = () => {
       <div className="px-4 mt-6">
         <AddMealDrawer />
       </div>
+
+      {/* Floating AI Scanner Button */}
+      <MealScanner />
     </PageLayout>
   );
 };

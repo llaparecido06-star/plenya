@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Wind, Clock, ChevronDown, Check } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import ExerciseDetailDrawer from './ExerciseDetailDrawer';
 
 interface Exercise {
   id: string;
@@ -87,6 +88,8 @@ const WorkoutCard: React.FC = () => {
   const { currentPhase } = useCycle();
   const [isExpanded, setIsExpanded] = useState(false);
   const [exercises, setExercises] = useState(workoutPlans[currentPhase].exercises);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const workout = workoutPlans[currentPhase];
   const Icon = workout.icon;
@@ -104,6 +107,21 @@ const WorkoutCard: React.FC = () => {
     );
   };
 
+  const handleExerciseClick = (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+    setIsDrawerOpen(true);
+  };
+
+  const handleExerciseComplete = (exerciseId: string) => {
+    setExercises(prev =>
+      prev.map(ex =>
+        ex.id === exerciseId
+          ? { ...ex, completed: ex.completed.map(() => true) }
+          : ex
+      )
+    );
+  };
+
   const totalSets = exercises.reduce((acc, ex) => acc + ex.sets, 0);
   const completedSets = exercises.reduce(
     (acc, ex) => acc + ex.completed.filter(Boolean).length,
@@ -112,112 +130,125 @@ const WorkoutCard: React.FC = () => {
   const progress = (completedSets / totalSets) * 100;
 
   return (
-    <motion.div
-      className={`rounded-3xl p-5 mx-4 ${workout.style} transition-all`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      layout
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl phase-gradient shadow-glow">
-            <Icon className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-foreground">{workout.title}</h3>
-            <p className="text-sm text-muted-foreground">{workout.subtitle}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-4 mb-4">
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Clock className="w-4 h-4" />
-          {workout.duration}
-        </div>
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Flame className="w-4 h-4" />
-          {workout.intensity}
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="mb-4">
-        <div className="flex justify-between text-sm mb-1">
-          <span className="text-muted-foreground">Progresso</span>
-          <span className="font-medium text-foreground">
-            {completedSets}/{totalSets} sets
-          </span>
-        </div>
-        <div className="h-2 bg-secondary rounded-full overflow-hidden">
-          <motion.div
-            className="h-full phase-gradient"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-      </div>
-
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-primary"
+    <>
+      <motion.div
+        className={`rounded-3xl p-5 mx-4 ${workout.style} transition-all`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        layout
       >
-        {isExpanded ? 'Ocultar exercícios' : 'Ver exercícios'}
-        <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
-          <ChevronDown className="w-4 h-4" />
-        </motion.div>
-      </button>
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="space-y-3 pt-4 border-t border-border/50">
-              {exercises.map((exercise, exerciseIndex) => (
-                <motion.div
-                  key={exercise.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: exerciseIndex * 0.1 }}
-                  className="flex items-center justify-between p-3 rounded-xl bg-card/50"
-                >
-                  <div>
-                    <p className="font-medium text-foreground">{exercise.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {exercise.sets} sets × {exercise.reps}
-                    </p>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {exercise.completed.map((isCompleted, setIndex) => (
-                      <button
-                        key={setIndex}
-                        onClick={() => toggleSet(exercise.id, setIndex)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                          isCompleted
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                        }`}
-                      >
-                        {isCompleted ? (
-                          <Check className="w-4 h-4" />
-                        ) : (
-                          <span className="text-xs font-medium">{setIndex + 1}</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl phase-gradient shadow-glow">
+              <Icon className="w-6 h-6 text-white" />
             </div>
+            <div>
+              <h3 className="text-xl font-bold text-foreground">{workout.title}</h3>
+              <p className="text-sm text-muted-foreground">{workout.subtitle}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-4 mb-4">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Clock className="w-4 h-4" />
+            {workout.duration}
+          </div>
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Flame className="w-4 h-4" />
+            {workout.intensity}
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mb-4">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="text-muted-foreground">Progresso</span>
+            <span className="font-medium text-foreground">
+              {completedSets}/{totalSets} sets
+            </span>
+          </div>
+          <div className="h-2 bg-secondary rounded-full overflow-hidden">
+            <motion.div
+              className="h-full phase-gradient"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-primary"
+        >
+          {isExpanded ? 'Ocultar exercícios' : 'Ver exercícios'}
+          <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
+            <ChevronDown className="w-4 h-4" />
           </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+        </button>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-3 pt-4 border-t border-border/50">
+                {exercises.map((exercise, exerciseIndex) => (
+                  <motion.button
+                    key={exercise.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: exerciseIndex * 0.1 }}
+                    onClick={() => handleExerciseClick(exercise)}
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-card/50 hover:bg-card/80 transition-colors text-left"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground">{exercise.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {exercise.sets} sets × {exercise.reps}
+                      </p>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {exercise.completed.map((isCompleted, setIndex) => (
+                        <button
+                          key={setIndex}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSet(exercise.id, setIndex);
+                          }}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                            isCompleted
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                          }`}
+                        >
+                          {isCompleted ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            <span className="text-xs font-medium">{setIndex + 1}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      <ExerciseDetailDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        exercise={selectedExercise}
+        onComplete={handleExerciseComplete}
+      />
+    </>
   );
 };
 
