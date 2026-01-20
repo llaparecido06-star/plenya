@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AlertCircle, Send, X } from 'lucide-react';
+import { Heart, Send, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -50,12 +50,14 @@ const SOSPartnerButton: React.FC = () => {
     <>
       <motion.button
         onClick={() => setShowDialog(true)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-pink-500/20 to-rose-500/20 border border-pink-500/30 hover:border-pink-500/50 transition-all"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-36 right-4 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 shadow-lg shadow-rose-500/40 hover:shadow-xl hover:shadow-rose-500/50 transition-all"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       >
-        <AlertCircle className="w-4 h-4 text-pink-500" />
-        <span className="text-sm font-medium text-pink-600">SOS Parceiro</span>
+        <Heart className="w-6 h-6 text-white fill-white" />
       </motion.button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>

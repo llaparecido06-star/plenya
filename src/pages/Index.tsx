@@ -30,19 +30,16 @@ const Index: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Header with Streak and Actions */}
+          {/* Header with Streak and Calendar */}
           <div className="flex items-center justify-between mb-4">
             <StreakCounter streak={3} />
-            <div className="flex items-center gap-2">
-              <SOSPartnerButton />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowCalendar(!showCalendar)}
-              >
-                <Calendar className="w-5 h-5 text-primary" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowCalendar(!showCalendar)}
+            >
+              <Calendar className="w-5 h-5 text-primary" />
+            </Button>
           </div>
           
           <h1 className="text-2xl font-bold text-foreground">Ciclos</h1>
@@ -87,6 +84,9 @@ const Index: React.FC = () => {
             
             {/* Quick Log */}
             <QuickLog />
+            
+            {/* SOS Partner FAB */}
+            <SOSPartnerButton />
           </>
         )}
       </div>
