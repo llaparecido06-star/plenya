@@ -24,6 +24,26 @@ const fluidTypes = [
   { id: 'eggwhite', label: 'Clara de Ovo', emoji: '✨' },
 ];
 
+const emotionalTags = [
+  { id: 'connected', emoji: '🥰', label: 'Conectada' },
+  { id: 'adventurous', emoji: '✨', label: 'Aventureira' },
+  { id: 'relaxed', emoji: '😌', label: 'Relaxada' },
+  { id: 'distant', emoji: '😐', label: 'Distante' },
+];
+
+const physicalTags = [
+  { id: 'arousal', emoji: '🔥', label: 'Alta Excitação' },
+  { id: 'lubrication', emoji: '💦', label: 'Lubrificação Natural' },
+  { id: 'sensitivity', emoji: '⚡', label: 'Sensibilidade' },
+];
+
+const healthAlerts = [
+  { id: 'pain', emoji: '🔴', label: 'Dor na relação' },
+  { id: 'itching', emoji: '🟠', label: 'Coceira/Ardor' },
+  { id: 'odor', emoji: '🟤', label: 'Odor alterado' },
+  { id: 'swelling', emoji: '🟣', label: 'Inchaço' },
+];
+
 const positionsByPhase: Record<CyclePhase, { name: string; description: string; icon: string }[]> = {
   menstrual: [
     { name: 'Conchinha', description: 'Posição de conforto e intimidade', icon: '🌙' },
@@ -55,8 +75,32 @@ const IntimacyCard: React.FC = () => {
   const [blurred, setBlurred] = useState(false);
   const [libido, setLibido] = useState(2);
   const [selectedFluid, setSelectedFluid] = useState<string | null>(null);
+  const [selectedEmotional, setSelectedEmotional] = useState<string[]>([]);
+  const [selectedPhysical, setSelectedPhysical] = useState<string[]>([]);
+  const [selectedAlerts, setSelectedAlerts] = useState<string[]>([]);
+  const [activityType, setActivityType] = useState<'solo' | 'partner' | null>(null);
+  const [isProtected, setIsProtected] = useState(true);
+  const [pleasureLevel, setPleasureLevel] = useState(0);
 
   const positions = positionsByPhase[currentPhase];
+
+  const toggleEmotional = (id: string) => {
+    setSelectedEmotional(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const togglePhysical = (id: string) => {
+    setSelectedPhysical(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleAlert = (id: string) => {
+    setSelectedAlerts(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
 
   return (
     <>
@@ -159,6 +203,145 @@ const IntimacyCard: React.FC = () => {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Diário de Experiência - Emocional */}
+                  <div className="space-y-3 mt-6">
+                    <span className="font-medium text-foreground">Como você se sentiu?</span>
+                    <div className="space-y-2">
+                      <span className="text-xs text-muted-foreground">Emocional</span>
+                      <div className="flex flex-wrap gap-2">
+                        {emotionalTags.map((tag) => (
+                          <button
+                            key={tag.id}
+                            onClick={() => toggleEmotional(tag.id)}
+                            className={`px-3 py-2 rounded-full text-sm transition-all ${
+                              selectedEmotional.includes(tag.id)
+                                ? 'bg-pink-100 dark:bg-pink-950/50 border-2 border-pink-300'
+                                : 'bg-secondary/50 hover:bg-secondary border border-transparent'
+                            }`}
+                          >
+                            {tag.emoji} {tag.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <span className="text-xs text-muted-foreground">Físico</span>
+                      <div className="flex flex-wrap gap-2">
+                        {physicalTags.map((tag) => (
+                          <button
+                            key={tag.id}
+                            onClick={() => togglePhysical(tag.id)}
+                            className={`px-3 py-2 rounded-full text-sm transition-all ${
+                              selectedPhysical.includes(tag.id)
+                                ? 'bg-orange-100 dark:bg-orange-950/50 border-2 border-orange-300'
+                                : 'bg-secondary/50 hover:bg-secondary border border-transparent'
+                            }`}
+                          >
+                            {tag.emoji} {tag.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Alerta de Saúde */}
+                  <div className="space-y-3 mt-6">
+                    <span className="font-medium text-foreground">Sintomas Íntimos</span>
+                    <div className="flex flex-wrap gap-2">
+                      {healthAlerts.map((alert) => (
+                        <button
+                          key={alert.id}
+                          onClick={() => toggleAlert(alert.id)}
+                          className={`px-3 py-2 rounded-full text-sm transition-all ${
+                            selectedAlerts.includes(alert.id)
+                              ? 'bg-red-100 dark:bg-red-950/50 border-2 border-red-300'
+                              : 'bg-secondary/50 hover:bg-secondary border border-transparent'
+                          }`}
+                        >
+                          {alert.emoji} {alert.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Atividade */}
+                  <div className="space-y-3 mt-6">
+                    <span className="font-medium text-foreground">Atividade</span>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setActivityType(activityType === 'solo' ? null : 'solo')}
+                        className={`flex-1 py-4 rounded-xl text-center font-medium transition-all ${
+                          activityType === 'solo'
+                            ? 'bg-purple-100 dark:bg-purple-950/50 border-2 border-purple-400'
+                            : 'bg-secondary/50 hover:bg-secondary'
+                        }`}
+                      >
+                        🧘 Solo
+                      </button>
+                      <button
+                        onClick={() => setActivityType(activityType === 'partner' ? null : 'partner')}
+                        className={`flex-1 py-4 rounded-xl text-center font-medium transition-all ${
+                          activityType === 'partner'
+                            ? 'bg-rose-100 dark:bg-rose-950/50 border-2 border-rose-400'
+                            : 'bg-secondary/50 hover:bg-secondary'
+                        }`}
+                      >
+                        💑 Parceiro(a)
+                      </button>
+                    </div>
+
+                    {activityType === 'partner' && (
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
+                        <span className="text-sm text-foreground">Proteção</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setIsProtected(true)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              isProtected
+                                ? 'bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300'
+                                : 'bg-secondary hover:bg-muted'
+                            }`}
+                          >
+                            ✓ Protegido
+                          </button>
+                          <button
+                            onClick={() => setIsProtected(false)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              !isProtected
+                                ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300'
+                                : 'bg-secondary hover:bg-muted'
+                            }`}
+                          >
+                            Desprotegido
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {activityType && (
+                      <div className="space-y-2">
+                        <span className="text-sm text-muted-foreground">Nível de Prazer</span>
+                        <div className="flex justify-center gap-2">
+                          {[1, 2, 3, 4, 5].map((level) => (
+                            <button
+                              key={level}
+                              onClick={() => setPleasureLevel(level)}
+                              className="p-2 transition-transform hover:scale-110"
+                            >
+                              <Heart
+                                className={`w-7 h-7 transition-all ${
+                                  level <= pleasureLevel
+                                    ? 'text-rose-500 fill-rose-500'
+                                    : 'text-muted-foreground/30'
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               </TabsContent>

@@ -43,7 +43,7 @@ const WaterTracker: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-col items-center mb-3">
         <div className="flex items-center gap-2">
           <Droplets className="w-5 h-5 text-blue-500" />
           <span className="font-medium text-foreground">Hidratação</span>
@@ -51,7 +51,7 @@ const WaterTracker: React.FC = () => {
         <span className="text-sm text-muted-foreground">{filledCount}/5 copos</span>
       </div>
       
-      <div className="flex justify-between gap-2">
+      <div className="flex justify-center gap-3">
         {glasses.map((filled, index) => (
           <motion.button
             key={index}
