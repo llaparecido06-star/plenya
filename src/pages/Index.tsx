@@ -1,13 +1,37 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React from 'react';
+import { motion } from 'framer-motion';
+import PageLayout from '@/components/layout/PageLayout';
+import CycleWheel from '@/components/cycle/CycleWheel';
+import InsightCard from '@/components/cycle/InsightCard';
+import QuickLog from '@/components/cycle/QuickLog';
+import { useCycle } from '@/contexts/CycleContext';
 
-const Index = () => {
+const Index: React.FC = () => {
+  const { getPhaseInfo } = useCycle();
+  const phaseInfo = getPhaseInfo();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <PageLayout>
+      <div className="hero-gradient pt-12 pb-6">
+        <motion.div
+          className="text-center mb-6 px-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="text-2xl font-bold text-foreground">Ciclos</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Seu assistente de vida sincronizado
+          </p>
+        </motion.div>
+
+        <CycleWheel />
       </div>
-    </div>
+
+      <div className="space-y-6 mt-6">
+        <InsightCard />
+        <QuickLog />
+      </div>
+    </PageLayout>
   );
 };
 

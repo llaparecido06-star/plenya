@@ -1,0 +1,186 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Coffee, Sun, Moon, Apple, Plus, Check } from 'lucide-react';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+interface MealPreset {
+  id: string;
+  name: string;
+  icon: React.ElementType;
+  suggestions: string[];
+}
+
+const mealPresets: MealPreset[] = [
+  {
+    id: 'cafe',
+    name: 'Café da Manhã',
+    icon: Coffee,
+    suggestions: ['Ovos mexidos', 'Aveia com frutas', 'Iogurte com granola', 'Tapioca'],
+  },
+  {
+    id: 'almoco',
+    name: 'Almoço',
+    icon: Sun,
+    suggestions: ['Frango grelhado', 'Arroz integral', 'Salada verde', 'Legumes'],
+  },
+  {
+    id: 'jantar',
+    name: 'Jantar',
+    icon: Moon,
+    suggestions: ['Salmão', 'Sopa de legumes', 'Omelete', 'Salada Caesar'],
+  },
+  {
+    id: 'lanche',
+    name: 'Lanche',
+    icon: Apple,
+    suggestions: ['Castanhas', 'Frutas', 'Iogurte', 'Barra de proteína'],
+  },
+];
+
+const AddMealDrawer: React.FC = () => {
+  const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
+  const [selectedFoods, setSelectedFoods] = useState<string[]>([]);
+  const [customFood, setCustomFood] = useState('');
+
+  const toggleFood = (food: string) => {
+    setSelectedFoods(prev =>
+      prev.includes(food)
+        ? prev.filter(f => f !== food)
+        : [...prev, food]
+    );
+  };
+
+  const addCustomFood = () => {
+    if (customFood.trim()) {
+      setSelectedFoods(prev => [...prev, customFood.trim()]);
+      setCustomFood('');
+    }
+  };
+
+  const currentPreset = mealPresets.find(m => m.id === selectedMeal);
+
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>
+        <motion.button
+          className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl phase-gradient text-white font-semibold shadow-glow"
+          whileTap={{ scale: 0.98 }}
+        >
+          <Plus className="w-5 h-5" />
+          Adicionar Refeição
+        </motion.button>
+      </DrawerTrigger>
+      <DrawerContent className="max-h-[85vh]">
+        <DrawerHeader>
+          <DrawerTitle>Adicionar Refeição</DrawerTitle>
+        </DrawerHeader>
+        <div className="px-4 pb-8 overflow-y-auto">
+          {!selectedMeal ? (
+            <div className="grid grid-cols-2 gap-3">
+              {mealPresets.map((meal) => {
+                const Icon = meal.icon;
+                return (
+                  <button
+                    key={meal.id}
+                    onClick={() => setSelectedMeal(meal.id)}
+                    className="flex flex-col items-center gap-3 p-6 rounded-2xl glass-card hover:shadow-soft transition-all"
+                  >
+                    <div className="p-3 rounded-xl phase-gradient">
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="font-medium text-foreground">{meal.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <button
+                onClick={() => {
+                  setSelectedMeal(null);
+                  setSelectedFoods([]);
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                ← Voltar
+              </button>
+
+              <div className="flex items-center gap-2 mb-4">
+                {currentPreset && (
+                  <>
+                    <div className="p-2 rounded-xl phase-gradient">
+                      <currentPreset.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-foreground">{currentPreset.name}</h3>
+                  </>
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground mb-3">Sugestões rápidas</p>
+                <div className="flex flex-wrap gap-2">
+                  {currentPreset?.suggestions.map((food) => (
+                    <button
+                      key={food}
+                      onClick={() => toggleFood(food)}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        selectedFoods.includes(food)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                      }`}
+                    >
+                      {selectedFoods.includes(food) && <Check className="w-3 h-3" />}
+                      {food}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Adicionar outro alimento..."
+                  value={customFood}
+                  onChange={(e) => setCustomFood(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addCustomFood()}
+                />
+                <Button onClick={addCustomFood} size="icon" variant="outline">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {selectedFoods.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Selecionados:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedFoods.map((food) => (
+                      <span
+                        key={food}
+                        className="px-3 py-1 bg-phase-secondary/50 text-phase-primary rounded-full text-sm"
+                      >
+                        {food}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Button className="w-full phase-gradient text-white mt-4">
+                Salvar Refeição
+              </Button>
+            </div>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+};
+
+export default AddMealDrawer;
