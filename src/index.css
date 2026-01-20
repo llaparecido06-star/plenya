@@ -2,95 +2,135 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Ciclos - Biohacking Feminino Design System
+   Clean Luxury aesthetic inspired by Apple Health + Flo
+   Dynamic phase-based theming
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Phase Colors - These change dynamically via CSS classes */
+    --phase-primary: 11 76% 63%; /* Default: Terracotta */
+    --phase-secondary: 11 50% 85%;
+    --phase-accent: 11 90% 70%;
+    --phase-glow: 11 80% 55%;
+    
+    /* Core Design Tokens */
+    --background: 30 20% 98%;
+    --foreground: 240 10% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 240 10% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: var(--phase-primary);
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 5% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: var(--phase-accent);
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: var(--phase-primary);
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
+    /* Gradients */
+    --gradient-phase: linear-gradient(135deg, hsl(var(--phase-primary)), hsl(var(--phase-glow)));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(240 5% 98%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(var(--phase-secondary) / 0.3) 0%, hsl(var(--background)) 100%);
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(var(--phase-primary) / 0.15);
+    --shadow-glow: 0 8px 32px -8px hsl(var(--phase-primary) / 0.25);
+    --shadow-card: 0 2px 12px -2px hsl(240 10% 10% / 0.08);
+    
+    /* Typography */
+    --font-display: 'SF Pro Display', system-ui, -apple-system, sans-serif;
+    --font-body: 'SF Pro Text', system-ui, -apple-system, sans-serif;
+
+    /* Sidebar defaults */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Phase: Menstrual - Warm Terracotta */
+  .phase-menstrual {
+    --phase-primary: 11 76% 63%;
+    --phase-secondary: 11 50% 92%;
+    --phase-accent: 11 90% 70%;
+    --phase-glow: 6 70% 55%;
+  }
+
+  /* Phase: Folicular - Fresh Spring Green */
+  .phase-folicular {
+    --phase-primary: 158 41% 53%;
+    --phase-secondary: 158 35% 90%;
+    --phase-accent: 158 50% 60%;
+    --phase-glow: 165 45% 45%;
+  }
+
+  /* Phase: Ovulatória - Vibrant Coral */
+  .phase-ovulatoria {
+    --phase-primary: 29 89% 67%;
+    --phase-secondary: 29 70% 92%;
+    --phase-accent: 29 95% 72%;
+    --phase-glow: 20 85% 58%;
+  }
+
+  /* Phase: Lútea - Serene Lavender */
+  .phase-lutea {
+    --phase-primary: 270 25% 62%;
+    --phase-secondary: 270 25% 92%;
+    --phase-accent: 270 35% 70%;
+    --phase-glow: 280 30% 52%;
+  }
+
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 240 10% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 240 10% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 240 10% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: var(--phase-primary);
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 5% 18%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 240 5% 18%;
+    --muted-foreground: 240 5% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: var(--phase-accent);
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: var(--phase-primary);
   }
 }
 
@@ -100,6 +140,153 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+  /* Glass morphism card */
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Phase gradient background */
+  .phase-gradient {
+    background: var(--gradient-phase);
+  }
+
+  /* Hero gradient */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  /* Glow effect */
+  .phase-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Soft shadow */
+  .soft-shadow {
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Progress ring animation */
+  .progress-ring {
+    transition: stroke-dashoffset 0.5s ease-out;
+  }
+
+  /* Cycle wheel */
+  .cycle-wheel {
+    background: conic-gradient(
+      hsl(11 76% 63%) 0deg 90deg,
+      hsl(158 41% 53%) 90deg 180deg,
+      hsl(29 89% 67%) 180deg 270deg,
+      hsl(270 25% 62%) 270deg 360deg
+    );
+  }
+
+  /* Bottom nav styling */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50;
+    background: linear-gradient(180deg, transparent 0%, hsl(var(--background)) 20%);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .bottom-nav-inner {
+    @apply bg-card/95 backdrop-blur-xl border-t border-border/50 mx-4 mb-4 rounded-2xl;
+    box-shadow: 0 -4px 24px -4px hsl(240 10% 10% / 0.1);
+  }
+
+  /* Chat bubble */
+  .chat-bubble-user {
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-3;
+  }
+
+  .chat-bubble-assistant {
+    @apply bg-secondary text-secondary-foreground rounded-2xl rounded-bl-md px-4 py-3;
+  }
+
+  /* Macro ring */
+  .macro-ring {
+    @apply relative flex items-center justify-center;
+  }
+
+  .macro-ring svg {
+    transform: rotate(-90deg);
+  }
+
+  /* Workout card variants */
+  .workout-card-energetic {
+    @apply border-2 border-orange-300 bg-gradient-to-br from-orange-50 to-rose-50;
+  }
+
+  .workout-card-calm {
+    @apply border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-fade-up {
+    animation: fadeUp 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Stagger children animation */
+  .stagger-children > * {
+    animation: fadeUp 0.5s ease-out forwards;
+    opacity: 0;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 100ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 400ms; }
 }
