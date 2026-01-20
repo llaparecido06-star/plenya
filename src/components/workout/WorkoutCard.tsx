@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Wind, Clock, ChevronDown, Check } from 'lucide-react';
+import { Flame, Wind, Clock, ChevronDown, Check, Loader2 } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import { useWorkouts } from '@/hooks/useWorkouts';
 import ExerciseDetailDrawer from './ExerciseDetailDrawer';
 
 interface Exercise {
@@ -10,6 +11,8 @@ interface Exercise {
   sets: number;
   reps: string;
   completed: boolean[];
+  weight?: number;
+  actualReps?: number;
 }
 
 interface WorkoutPlan {
@@ -86,25 +89,37 @@ const workoutPlans: Record<CyclePhase, WorkoutPlan> = {
 
 const WorkoutCard: React.FC = () => {
   const { currentPhase } = useCycle();
+  const { workout: savedWorkout, loading, saving, saveExercises, completeExercise } = useWorkouts();
   const [isExpanded, setIsExpanded] = useState(false);
   const [exercises, setExercises] = useState(workoutPlans[currentPhase].exercises);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const workout = workoutPlans[currentPhase];
-  const Icon = workout.icon;
+  const defaultPlan = workoutPlans[currentPhase];
+  const Icon = defaultPlan.icon;
 
-  const toggleSet = (exerciseId: string, setIndex: number) => {
-    setExercises(prev =>
-      prev.map(ex =>
-        ex.id === exerciseId
-          ? {
-              ...ex,
-              completed: ex.completed.map((c, i) => (i === setIndex ? !c : c)),
-            }
-          : ex
-      )
+  // Load saved exercises or use defaults
+  useEffect(() => {
+    if (savedWorkout?.exercises && savedWorkout.exercises.length > 0) {
+      setExercises(savedWorkout.exercises);
+    } else {
+      setExercises(workoutPlans[currentPhase].exercises);
+    }
+  }, [savedWorkout, currentPhase]);
+
+  const toggleSet = async (exerciseId: string, setIndex: number) => {
+    const updatedExercises = exercises.map(ex =>
+      ex.id === exerciseId
+        ? {
+            ...ex,
+            completed: ex.completed.map((c, i) => (i === setIndex ? !c : c)),
+          }
+        : ex
     );
+    setExercises(updatedExercises);
+    
+    // Auto-save after toggling
+    await saveExercises(defaultPlan.title, updatedExercises);
   };
 
   const handleExerciseClick = (exercise: Exercise) => {
@@ -112,14 +127,18 @@ const WorkoutCard: React.FC = () => {
     setIsDrawerOpen(true);
   };
 
-  const handleExerciseComplete = (exerciseId: string) => {
+  const handleExerciseComplete = async (exerciseId: string, weight?: number, reps?: number) => {
+    await completeExercise(defaultPlan.title, exerciseId, exercises, weight, reps);
+    
+    // Update local state
     setExercises(prev =>
       prev.map(ex =>
         ex.id === exerciseId
-          ? { ...ex, completed: ex.completed.map(() => true) }
+          ? { ...ex, completed: ex.completed.map(() => true), weight, actualReps: reps }
           : ex
       )
     );
+    setIsDrawerOpen(false);
   };
 
   const totalSets = exercises.reduce((acc, ex) => acc + ex.sets, 0);
@@ -129,10 +148,18 @@ const WorkoutCard: React.FC = () => {
   );
   const progress = (completedSets / totalSets) * 100;
 
+  if (loading) {
+    return (
+      <div className="rounded-3xl p-5 mx-4 glass-card flex items-center justify-center h-48">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <>
       <motion.div
-        className={`rounded-3xl p-5 mx-4 ${workout.style} transition-all`}
+        className={`rounded-3xl p-5 mx-4 ${defaultPlan.style} transition-all`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         layout
@@ -143,20 +170,21 @@ const WorkoutCard: React.FC = () => {
               <Icon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-foreground">{workout.title}</h3>
-              <p className="text-sm text-muted-foreground">{workout.subtitle}</p>
+              <h3 className="text-xl font-bold text-foreground">{defaultPlan.title}</h3>
+              <p className="text-sm text-muted-foreground">{defaultPlan.subtitle}</p>
             </div>
           </div>
+          {saving && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
         </div>
 
         <div className="flex gap-4 mb-4">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
-            {workout.duration}
+            {defaultPlan.duration}
           </div>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Flame className="w-4 h-4" />
-            {workout.intensity}
+            {defaultPlan.intensity}
           </div>
         </div>
 
@@ -210,6 +238,7 @@ const WorkoutCard: React.FC = () => {
                       <p className="font-medium text-foreground">{exercise.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {exercise.sets} sets × {exercise.reps}
+                        {exercise.weight && ` • ${exercise.weight}kg`}
                       </p>
                     </div>
                     <div className="flex gap-1.5">

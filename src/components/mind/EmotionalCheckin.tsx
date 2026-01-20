@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Battery, Zap, Check } from 'lucide-react';
+import { Battery, Zap, Check, Loader2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { useDailyLog } from '@/hooks/useDailyLog';
 
 const EmotionalCheckin: React.FC = () => {
+  const { data, loading, saving, saveLog, isAuthenticated } = useDailyLog();
   const [stress, setStress] = useState([50]);
   const [energy, setEnergy] = useState([50]);
   const [saved, setSaved] = useState(false);
+
+  // Load saved values
+  useEffect(() => {
+    if (data.stress !== null) setStress([data.stress]);
+    if (data.energy !== null) setEnergy([data.energy]);
+  }, [data.stress, data.energy]);
 
   const getStressLabel = (value: number) => {
     if (value < 25) return { text: 'Tranquila', emoji: '😌' };
@@ -23,13 +31,28 @@ const EmotionalCheckin: React.FC = () => {
     return { text: 'Energizada', emoji: '⚡' };
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    const success = await saveLog({
+      stress: stress[0],
+      energy: energy[0],
+    });
+    
+    if (success) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
   };
 
   const stressInfo = getStressLabel(stress[0]);
   const energyInfo = getEnergyLabel(energy[0]);
+
+  if (loading) {
+    return (
+      <div className="glass-card p-5 mx-4 flex items-center justify-center h-48">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -98,13 +121,20 @@ const EmotionalCheckin: React.FC = () => {
       <Button
         onClick={handleSave}
         className="w-full mt-6 phase-gradient text-white"
-        disabled={saved}
+        disabled={saved || saving || !isAuthenticated}
       >
-        {saved ? (
+        {saving ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Salvando...
+          </span>
+        ) : saved ? (
           <span className="flex items-center gap-2">
             <Check className="w-4 h-4" />
             Salvo!
           </span>
+        ) : !isAuthenticated ? (
+          'Faça login para salvar'
         ) : (
           'Salvar Check-in'
         )}
