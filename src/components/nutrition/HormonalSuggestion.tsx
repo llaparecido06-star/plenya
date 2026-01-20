@@ -60,7 +60,7 @@ const HormonalSuggestion: React.FC = () => {
       </div>
 
       <h4 className="text-lg font-semibold text-primary mb-2">{suggestion.title}</h4>
-      <p className="text-sm text-muted-foreground mb-4">{suggestion.description}</p>
+      <p className="text-sm text-foreground/70 mb-4">{suggestion.description}</p>
 
       <div className="space-y-3">
         <div>

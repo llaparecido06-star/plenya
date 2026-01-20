@@ -38,14 +38,7 @@ const BottomNav: React.FC = () => {
                 className="relative flex flex-col items-center justify-center py-2 px-4 rounded-xl transition-colors"
                 whileTap={{ scale: 0.95 }}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 phase-gradient rounded-xl opacity-15"
-                    initial={false}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  />
-                )}
+                {/* Active indicator - subtle underline only, no background */}
                 <Icon
                   className={`w-6 h-6 transition-colors ${
                     isActive ? 'text-primary' : 'text-muted-foreground'
