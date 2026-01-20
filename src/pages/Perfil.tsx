@@ -5,8 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCycle } from '@/contexts/CycleContext';
 import AuthForm from '@/components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
-import { LogOut, Calendar, Settings } from 'lucide-react';
+import { LogOut, Calendar } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import PatternsCard from '@/components/history/PatternsCard';
 
 const Perfil: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -82,6 +83,15 @@ const Perfil: React.FC = () => {
             max={cycleLength}
             step={1}
           />
+        </motion.div>
+
+        {/* Patterns Card - Cycle Insights */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <PatternsCard />
         </motion.div>
 
         <Button

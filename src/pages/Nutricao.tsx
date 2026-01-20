@@ -4,6 +4,7 @@ import MacroRings from '@/components/nutrition/MacroRings';
 import HormonalSuggestion from '@/components/nutrition/HormonalSuggestion';
 import AddMealDrawer from '@/components/nutrition/AddMealDrawer';
 import MealScanner from '@/components/nutrition/MealScanner';
+import RecentMealsHistory from '@/components/nutrition/RecentMealsHistory';
 import { motion } from 'framer-motion';
 
 const Nutricao: React.FC = () => {
@@ -41,6 +42,11 @@ const Nutricao: React.FC = () => {
 
       <div className="px-4 mt-6">
         <AddMealDrawer />
+      </div>
+
+      {/* Recent Meals with Mood Correlation */}
+      <div className="mt-6">
+        <RecentMealsHistory />
       </div>
 
       {/* Floating AI Scanner Button */}
