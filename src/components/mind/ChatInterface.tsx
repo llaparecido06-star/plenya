@@ -3,29 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useCycle } from '@/contexts/CycleContext';
-
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
-
-const initialMessages: Message[] = [
-  {
-    id: '1',
-    role: 'assistant',
-    content: 'Olá! 💜 Sou sua assistente de bem-estar. Como você está se sentindo hoje? Posso ajudar com reflexões, técnicas de relaxamento ou simplesmente ouvir.',
-    timestamp: new Date(),
-  },
-];
+import { useChatMessages } from '@/hooks/useChatMessages';
 
 const ChatInterface: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const { messages, loading, addMessage } = useChatMessages();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { currentPhase, getPhaseInfo } = useCycle();
+  const { getPhaseInfo } = useCycle();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,29 +34,32 @@ const ChatInterface: React.FC = () => {
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    // Save user message
+    await addMessage('user', input);
     setInput('');
     setIsTyping(true);
 
     // Simulate AI response delay
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: generateResponse(input),
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
+    setTimeout(async () => {
+      const response = generateResponse(input);
+      await addMessage('assistant', response);
       setIsTyping(false);
     }, 1500);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+        <motion.div
+          className="p-4 rounded-full phase-gradient"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        >
+          <Sparkles className="w-6 h-6 text-white" />
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Coffee, Sun, Moon, Apple, Plus, Check } from 'lucide-react';
+import { Coffee, Sun, Moon, Apple, Plus, Check, Loader2 } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -10,9 +10,13 @@ import {
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useNutrition } from '@/hooks/useNutrition';
+import type { Database } from '@/integrations/supabase/types';
+
+type MealType = Database['public']['Enums']['meal_type'];
 
 interface MealPreset {
-  id: string;
+  id: MealType;
   name: string;
   icon: React.ElementType;
   suggestions: string[];
@@ -46,9 +50,12 @@ const mealPresets: MealPreset[] = [
 ];
 
 const AddMealDrawer: React.FC = () => {
-  const [selectedMeal, setSelectedMeal] = useState<string | null>(null);
+  const { addMeal, saving, isAuthenticated } = useNutrition();
+  const [selectedMeal, setSelectedMeal] = useState<MealType | null>(null);
   const [selectedFoods, setSelectedFoods] = useState<string[]>([]);
   const [customFood, setCustomFood] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const toggleFood = (food: string) => {
     setSelectedFoods(prev =>
@@ -65,10 +72,27 @@ const AddMealDrawer: React.FC = () => {
     }
   };
 
+  const handleSave = async () => {
+    if (!selectedMeal || selectedFoods.length === 0) return;
+
+    const mealName = selectedFoods.join(', ');
+    const success = await addMeal(selectedMeal, mealName);
+    
+    if (success) {
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+        setDrawerOpen(false);
+        setSelectedMeal(null);
+        setSelectedFoods([]);
+      }, 1500);
+    }
+  };
+
   const currentPreset = mealPresets.find(m => m.id === selectedMeal);
 
   return (
-    <Drawer>
+    <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
       <DrawerTrigger asChild>
         <motion.button
           className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl phase-gradient text-white font-semibold shadow-glow"
@@ -172,8 +196,26 @@ const AddMealDrawer: React.FC = () => {
                 </div>
               )}
 
-              <Button className="w-full phase-gradient text-white mt-4">
-                Salvar Refeição
+              <Button 
+                className="w-full phase-gradient text-white mt-4"
+                onClick={handleSave}
+                disabled={saving || saved || !isAuthenticated || selectedFoods.length === 0}
+              >
+                {saving ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Salvando...
+                  </span>
+                ) : saved ? (
+                  <span className="flex items-center gap-2">
+                    <Check className="w-4 h-4" />
+                    Salvo!
+                  </span>
+                ) : !isAuthenticated ? (
+                  'Faça login para salvar'
+                ) : (
+                  'Salvar Refeição'
+                )}
               </Button>
             </div>
           )}

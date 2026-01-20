@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Smile, Scale } from 'lucide-react';
+import { Heart, Smile, Scale, Loader2, Check } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { useDailyLog } from '@/hooks/useDailyLog';
 
 interface LogType {
   id: string;
@@ -30,18 +31,28 @@ const symptoms = [
 ];
 
 const moods = [
-  { emoji: '😢', label: 'Triste' },
-  { emoji: '😔', label: 'Baixa' },
-  { emoji: '😐', label: 'Neutra' },
-  { emoji: '😊', label: 'Bem' },
-  { emoji: '🤩', label: 'Ótima' },
+  { emoji: '😢', label: 'Triste', value: 1 },
+  { emoji: '😔', label: 'Baixa', value: 2 },
+  { emoji: '😐', label: 'Neutra', value: 3 },
+  { emoji: '😊', label: 'Bem', value: 4 },
+  { emoji: '🤩', label: 'Ótima', value: 5 },
 ];
 
 const QuickLog: React.FC = () => {
+  const { data, loading, saving, saveLog, isAuthenticated } = useDailyLog();
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedMood, setSelectedMood] = useState<number>(2);
   const [weight, setWeight] = useState<number[]>([60]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // Load saved values
+  useEffect(() => {
+    if (data.symptoms.length > 0) setSelectedSymptoms(data.symptoms);
+    if (data.mood !== null) setSelectedMood(data.mood - 1); // Convert 1-5 to 0-4 index
+    if (data.weight !== null) setWeight([data.weight]);
+  }, [data]);
 
   const toggleSymptom = (symptom: string) => {
     setSelectedSymptoms(prev =>
@@ -49,6 +60,30 @@ const QuickLog: React.FC = () => {
         ? prev.filter(s => s !== symptom)
         : [...prev, symptom]
     );
+  };
+
+  const handleSave = async () => {
+    let success = false;
+    
+    switch (selectedLog) {
+      case 'symptom':
+        success = await saveLog({ symptoms: selectedSymptoms });
+        break;
+      case 'mood':
+        success = await saveLog({ mood: moods[selectedMood].value });
+        break;
+      case 'weight':
+        success = await saveLog({ weight: weight[0] });
+        break;
+    }
+    
+    if (success) {
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+        setDrawerOpen(false);
+      }, 1500);
+    }
   };
 
   const renderLogContent = () => {
@@ -107,7 +142,7 @@ const QuickLog: React.FC = () => {
               Registre seu peso de hoje
             </p>
             <div className="text-center">
-              <span className="text-5xl font-bold text-foreground">{weight[0]}</span>
+              <span className="text-5xl font-bold text-foreground">{weight[0].toFixed(1)}</span>
               <span className="text-2xl text-muted-foreground ml-1">kg</span>
             </div>
             <Slider
@@ -125,6 +160,14 @@ const QuickLog: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="px-4 flex items-center justify-center h-32">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <motion.div
       className="px-4"
@@ -139,7 +182,10 @@ const QuickLog: React.FC = () => {
         {logTypes.map((log, index) => {
           const Icon = log.icon;
           return (
-            <Drawer key={log.id}>
+            <Drawer key={log.id} open={drawerOpen && selectedLog === log.id} onOpenChange={(open) => {
+              setDrawerOpen(open);
+              if (open) setSelectedLog(log.id);
+            }}>
               <DrawerTrigger asChild>
                 <motion.button
                   onClick={() => setSelectedLog(log.id)}
@@ -166,8 +212,26 @@ const QuickLog: React.FC = () => {
                 </DrawerHeader>
                 <div className="px-4 pb-8">
                   {renderLogContent()}
-                  <Button className="w-full mt-6 phase-gradient text-white">
-                    Salvar Registro
+                  <Button 
+                    className="w-full mt-6 phase-gradient text-white"
+                    onClick={handleSave}
+                    disabled={saving || saved || !isAuthenticated}
+                  >
+                    {saving ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Salvando...
+                      </span>
+                    ) : saved ? (
+                      <span className="flex items-center gap-2">
+                        <Check className="w-4 h-4" />
+                        Salvo!
+                      </span>
+                    ) : !isAuthenticated ? (
+                      'Faça login para salvar'
+                    ) : (
+                      'Salvar Registro'
+                    )}
                   </Button>
                 </div>
               </DrawerContent>

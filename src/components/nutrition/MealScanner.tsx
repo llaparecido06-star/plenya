@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Sparkles, Check, X } from 'lucide-react';
+import { Camera, Upload, Sparkles, Check, X, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useNutrition } from '@/hooks/useNutrition';
 
 interface ScanResult {
   name: string;
@@ -19,10 +20,12 @@ interface ScanResult {
 }
 
 const MealScanner: React.FC = () => {
+  const { addMeal, saving, isAuthenticated } = useNutrition();
   const [isOpen, setIsOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const mockResults: ScanResult[] = [
     { name: 'Frango Grelhado com Salada', calories: 350, protein: 30, carbs: 15, fat: 12 },
@@ -55,11 +58,25 @@ const MealScanner: React.FC = () => {
     }, 2500);
   };
 
-  const handleConfirm = () => {
-    // Here you would save to database
-    setIsOpen(false);
-    setScanResult(null);
-    setImagePreview(null);
+  const handleConfirm = async () => {
+    if (!scanResult) return;
+
+    const success = await addMeal('lanche', scanResult.name, {
+      calories: scanResult.calories,
+      protein: scanResult.protein,
+      carbs: scanResult.carbs,
+      fat: scanResult.fat,
+    });
+
+    if (success) {
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+        setIsOpen(false);
+        setScanResult(null);
+        setImagePreview(null);
+      }, 1500);
+    }
   };
 
   const handleClose = () => {
@@ -234,9 +251,24 @@ const MealScanner: React.FC = () => {
                 <Button
                   onClick={handleConfirm}
                   className="flex-1 phase-gradient text-white"
+                  disabled={saving || saved || !isAuthenticated}
                 >
-                  <Check className="w-4 h-4 mr-2" />
-                  Confirmar e Registrar
+                  {saving ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Salvando...
+                    </span>
+                  ) : saved ? (
+                    <span className="flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Salvo!
+                    </span>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Confirmar e Registrar
+                    </>
+                  )}
                 </Button>
               </div>
             </motion.div>
