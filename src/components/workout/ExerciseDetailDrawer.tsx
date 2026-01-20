@@ -127,10 +127,10 @@ const ExerciseDetailDrawer: React.FC<ExerciseDetailDrawerProps> = ({
           </DrawerTitle>
         </DrawerHeader>
 
-        <div className="px-4 pb-8 space-y-4 overflow-y-auto">
+        <div className="px-4 pb-12 space-y-4 overflow-y-auto">
           {/* Video placeholder */}
           <motion.div
-            className="relative w-full h-48 bg-secondary rounded-2xl flex items-center justify-center overflow-hidden"
+            className="relative w-full h-48 bg-secondary rounded-3xl flex items-center justify-center overflow-hidden"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >

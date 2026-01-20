@@ -73,7 +73,7 @@ const MealScanner: React.FC = () => {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <motion.button
-          className="fixed bottom-28 right-4 z-40 w-14 h-14 rounded-full phase-gradient shadow-glow flex items-center justify-center"
+          className="fixed bottom-36 right-4 z-40 w-14 h-14 rounded-full phase-gradient shadow-glow flex items-center justify-center"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           initial={{ scale: 0, opacity: 0 }}
