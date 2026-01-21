@@ -83,6 +83,54 @@ export type Database = {
         }
         Relationships: []
       }
+      intimacy_logs: {
+        Row: {
+          activity_type: string | null
+          created_at: string
+          fluid_type: string | null
+          id: string
+          is_protected: boolean | null
+          libido: number | null
+          log_date: string
+          pleasure_rating: number | null
+          sensation_emotional: string[] | null
+          sensation_physical: string[] | null
+          symptoms: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_type?: string | null
+          created_at?: string
+          fluid_type?: string | null
+          id?: string
+          is_protected?: boolean | null
+          libido?: number | null
+          log_date?: string
+          pleasure_rating?: number | null
+          sensation_emotional?: string[] | null
+          sensation_physical?: string[] | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string | null
+          created_at?: string
+          fluid_type?: string | null
+          id?: string
+          is_protected?: boolean | null
+          libido?: number | null
+          log_date?: string
+          pleasure_rating?: number | null
+          sensation_emotional?: string[] | null
+          sensation_physical?: string[] | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       nutrition_intake: {
         Row: {
           calories: number | null
@@ -127,7 +175,10 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           cycle_length: number | null
+          diet_type: string | null
+          fitness_level: string | null
           full_name: string | null
+          goal: string | null
           id: string
           last_period_start: string | null
           updated_at: string
@@ -137,7 +188,10 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           cycle_length?: number | null
+          diet_type?: string | null
+          fitness_level?: string | null
           full_name?: string | null
+          goal?: string | null
           id?: string
           last_period_start?: string | null
           updated_at?: string
@@ -147,7 +201,10 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           cycle_length?: number | null
+          diet_type?: string | null
+          fitness_level?: string | null
           full_name?: string | null
+          goal?: string | null
           id?: string
           last_period_start?: string | null
           updated_at?: string

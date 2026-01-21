@@ -12,6 +12,7 @@ import Nutricao from "./pages/Nutricao";
 import Corpo from "./pages/Corpo";
 import Mente from "./pages/Mente";
 import Perfil from "./pages/Perfil";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
               <AnimatePresence mode="wait">
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
                   <Route path="/nutricao" element={<Nutricao />} />
                   <Route path="/corpo" element={<Corpo />} />
                   <Route path="/mente" element={<Mente />} />

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import { useSelectedDate } from '@/contexts/SelectedDateContext';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -35,29 +36,45 @@ const phaseToWorkoutType: Record<CyclePhase, WorkoutType> = {
 
 export const useWorkouts = () => {
   const { user } = useAuth();
-  const { currentPhase } = useCycle();
+  const { currentPhase, cycleLength, lastPeriodStart, getPhaseByDay } = useCycle();
+  const { selectedDate, isToday } = useSelectedDate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [workout, setWorkout] = useState<WorkoutData | null>(null);
 
-  const today = new Date().toISOString().split('T')[0];
-  const workoutType = phaseToWorkoutType[currentPhase];
+  const dateString = selectedDate.toISOString().split('T')[0];
+  
+  // Calculate the phase for the selected date
+  const getPhaseForDate = useCallback((date: Date): CyclePhase => {
+    if (!lastPeriodStart) return currentPhase;
+    
+    const lastPeriod = new Date(lastPeriodStart);
+    const diffTime = date.getTime() - lastPeriod.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const dayOfCycle = ((diffDays % cycleLength) + cycleLength) % cycleLength + 1;
+    
+    return getPhaseByDay(dayOfCycle);
+  }, [lastPeriodStart, cycleLength, currentPhase, getPhaseByDay]);
 
-  // Load today's workout on mount
+  const workoutPhase = getPhaseForDate(selectedDate);
+  const workoutType = phaseToWorkoutType[workoutPhase];
+
+  // Load workout for selected date
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    const loadTodayWorkout = async () => {
+    const loadWorkout = async () => {
+      setLoading(true);
       try {
         const { data, error } = await supabase
           .from('workouts')
           .select('*')
           .eq('user_id', user.id)
-          .eq('workout_date', today)
+          .eq('workout_date', dateString)
           .maybeSingle();
 
         if (error) throw error;
@@ -71,6 +88,8 @@ export const useWorkouts = () => {
             completed: data.completed || false,
             duration_minutes: data.duration_minutes,
           });
+        } else {
+          setWorkout(null);
         }
       } catch (error) {
         console.error('Error loading workout:', error);
@@ -79,8 +98,8 @@ export const useWorkouts = () => {
       }
     };
 
-    loadTodayWorkout();
-  }, [user, today]);
+    loadWorkout();
+  }, [user, dateString]); // Now depends on dateString (from selectedDate)
 
   const saveExercises = useCallback(async (
     workoutName: string,
@@ -96,9 +115,19 @@ export const useWorkouts = () => {
       return false;
     }
 
+    if (!isToday) {
+      toast({
+        title: 'Histórico',
+        description: 'Você só pode editar o treino de hoje.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
     setSaving(true);
     try {
       const allCompleted = exercises.every(ex => ex.completed.every(Boolean));
+      const today = new Date().toISOString().split('T')[0];
 
       if (workout?.id) {
         // Update existing workout
@@ -159,7 +188,7 @@ export const useWorkouts = () => {
     } finally {
       setSaving(false);
     }
-  }, [user, workout, today, workoutType, toast]);
+  }, [user, workout, workoutType, toast, isToday]);
 
   const completeExercise = useCallback(async (
     workoutName: string,
@@ -196,5 +225,7 @@ export const useWorkouts = () => {
     saveExercises,
     completeExercise,
     isAuthenticated: !!user,
+    workoutPhase,
+    isToday,
   };
 };

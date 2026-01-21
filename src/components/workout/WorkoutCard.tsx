@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Wind, Clock, ChevronDown, Check, Loader2 } from 'lucide-react';
+import { Flame, Wind, Clock, ChevronDown, Check, Loader2, Timer, Shuffle, Moon } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
 import { useWorkouts } from '@/hooks/useWorkouts';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import ExerciseDetailDrawer from './ExerciseDetailDrawer';
+import RestTimerModal from './RestTimerModal';
 
 interface Exercise {
   id: string;
@@ -87,27 +90,40 @@ const workoutPlans: Record<CyclePhase, WorkoutPlan> = {
   },
 };
 
+// Exercise alternatives for swap feature
+const exerciseAlternatives: Record<string, string[]> = {
+  'Agachamento com salto': ['Agachamento búlgaro', 'Leg Press', 'Afundo com salto'],
+  'Flexão': ['Supino com halteres', 'Flexão diamante', 'Flexão inclinada'],
+  'Burpees': ['Jumping jacks', 'High knees', 'Squat jumps'],
+  'Prancha': ['Prancha lateral', 'Dead bug', 'Bird dog'],
+  'Levantamento terra': ['Stiff', 'Romanian deadlift', 'Hip thrust'],
+  'Supino': ['Crucifixo', 'Push-up com peso', 'Floor press'],
+};
+
 const WorkoutCard: React.FC = () => {
-  const { currentPhase } = useCycle();
-  const { workout: savedWorkout, loading, saving, saveExercises, completeExercise } = useWorkouts();
+  const { workout: savedWorkout, loading, saving, saveExercises, completeExercise, workoutPhase, isToday } = useWorkouts();
+  const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [exercises, setExercises] = useState(workoutPlans[currentPhase].exercises);
+  const [exercises, setExercises] = useState(workoutPlans[workoutPhase].exercises);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showRestTimer, setShowRestTimer] = useState(false);
 
-  const defaultPlan = workoutPlans[currentPhase];
+  const defaultPlan = workoutPlans[workoutPhase];
   const Icon = defaultPlan.icon;
 
-  // Load saved exercises or use defaults
+  // Load saved exercises or use defaults for the phase
   useEffect(() => {
     if (savedWorkout?.exercises && savedWorkout.exercises.length > 0) {
       setExercises(savedWorkout.exercises);
     } else {
-      setExercises(workoutPlans[currentPhase].exercises);
+      setExercises(workoutPlans[workoutPhase].exercises);
     }
-  }, [savedWorkout, currentPhase]);
+  }, [savedWorkout, workoutPhase]);
 
   const toggleSet = async (exerciseId: string, setIndex: number) => {
+    if (!isToday) return;
+    
     const updatedExercises = exercises.map(ex =>
       ex.id === exerciseId
         ? {
@@ -141,6 +157,44 @@ const WorkoutCard: React.FC = () => {
     setIsDrawerOpen(false);
   };
 
+  const handleSwapExercise = async (exerciseId: string, exerciseName: string) => {
+    const alternatives = exerciseAlternatives[exerciseName];
+    if (!alternatives || alternatives.length === 0) {
+      toast({
+        title: 'Sem alternativas',
+        description: 'Não há alternativas disponíveis para este exercício.',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Buscando alternativa...',
+      description: 'Encontrando um exercício equivalente.',
+    });
+
+    // Simulate loading
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const randomAlternative = alternatives[Math.floor(Math.random() * alternatives.length)];
+    
+    const updatedExercises = exercises.map(ex =>
+      ex.id === exerciseId
+        ? { ...ex, name: randomAlternative }
+        : ex
+    );
+    
+    setExercises(updatedExercises);
+    
+    if (isToday) {
+      await saveExercises(defaultPlan.title, updatedExercises);
+    }
+
+    toast({
+      title: 'Exercício trocado! 🔄',
+      description: `Agora você fará ${randomAlternative}`,
+    });
+  };
+
   const totalSets = exercises.reduce((acc, ex) => acc + ex.sets, 0);
   const completedSets = exercises.reduce(
     (acc, ex) => acc + ex.completed.filter(Boolean).length,
@@ -153,6 +207,30 @@ const WorkoutCard: React.FC = () => {
       <div className="rounded-3xl p-5 mx-4 glass-card flex items-center justify-center h-48">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
+    );
+  }
+
+  // Show rest day message if no workout and viewing history
+  if (!isToday && !savedWorkout) {
+    return (
+      <motion.div
+        className="rounded-3xl p-5 mx-4 glass-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-3 rounded-2xl bg-secondary">
+            <Moon className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-foreground">Dia de Descanso</h3>
+            <p className="text-sm text-muted-foreground">Nenhum treino registrado nesta data</p>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground text-center py-4">
+          O treino planejado para esta fase seria: <span className="font-medium text-foreground">{defaultPlan.title}</span>
+        </p>
+      </motion.div>
     );
   }
 
@@ -174,7 +252,18 @@ const WorkoutCard: React.FC = () => {
               <p className="text-sm text-muted-foreground">{defaultPlan.subtitle}</p>
             </div>
           </div>
-          {saving && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+          <div className="flex items-center gap-2">
+            {saving && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+            {/* Rest Timer Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowRestTimer(true)}
+              className="h-9 w-9"
+            >
+              <Timer className="w-4 h-4 text-primary" />
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-4 mb-4">
@@ -226,44 +315,65 @@ const WorkoutCard: React.FC = () => {
             >
               <div className="space-y-3 pt-4 border-t border-border/50">
                 {exercises.map((exercise, exerciseIndex) => (
-                  <motion.button
+                  <motion.div
                     key={exercise.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: exerciseIndex * 0.1 }}
-                    onClick={() => handleExerciseClick(exercise)}
-                    className="w-full flex items-center justify-between p-3 rounded-xl bg-card/50 hover:bg-card/80 transition-colors text-left"
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-card/50 hover:bg-card/80 transition-colors"
                   >
-                    <div>
+                    <button
+                      onClick={() => handleExerciseClick(exercise)}
+                      className="flex-1 text-left"
+                    >
                       <p className="font-medium text-foreground">{exercise.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {exercise.sets} sets × {exercise.reps}
                         {exercise.weight && ` • ${exercise.weight}kg`}
                       </p>
-                    </div>
-                    <div className="flex gap-1.5">
-                      {exercise.completed.map((isCompleted, setIndex) => (
+                    </button>
+                    
+                    <div className="flex items-center gap-2">
+                      {/* Swap button */}
+                      {isToday && exerciseAlternatives[exercise.name] && (
                         <button
-                          key={setIndex}
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleSet(exercise.id, setIndex);
+                            handleSwapExercise(exercise.id, exercise.name);
                           }}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                            isCompleted
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                          }`}
+                          className="p-2 rounded-full hover:bg-secondary/80 transition-colors"
+                          title="Trocar exercício"
                         >
-                          {isCompleted ? (
-                            <Check className="w-4 h-4" />
-                          ) : (
-                            <span className="text-xs font-medium">{setIndex + 1}</span>
-                          )}
+                          <Shuffle className="w-4 h-4 text-muted-foreground" />
                         </button>
-                      ))}
+                      )}
+                      
+                      {/* Set buttons */}
+                      <div className="flex gap-1.5">
+                        {exercise.completed.map((isCompleted, setIndex) => (
+                          <button
+                            key={setIndex}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSet(exercise.id, setIndex);
+                            }}
+                            disabled={!isToday}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                              isCompleted
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                            } ${!isToday ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {isCompleted ? (
+                              <Check className="w-4 h-4" />
+                            ) : (
+                              <span className="text-xs font-medium">{setIndex + 1}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </motion.button>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -276,6 +386,12 @@ const WorkoutCard: React.FC = () => {
         onClose={() => setIsDrawerOpen(false)}
         exercise={selectedExercise}
         onComplete={handleExerciseComplete}
+        readOnly={!isToday}
+      />
+
+      <RestTimerModal
+        isOpen={showRestTimer}
+        onClose={() => setShowRestTimer(false)}
       />
     </>
   );

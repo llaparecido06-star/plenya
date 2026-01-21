@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Eye, EyeOff, Droplets, Flame, Headphones } from 'lucide-react';
+import { Heart, Eye, EyeOff, Droplets, Flame, Headphones, Loader2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import { useIntimacyLog } from '@/hooks/useIntimacyLog';
 
 const libidoLabels = [
   { value: 1, emoji: '💤', text: 'Baixa' },
@@ -71,6 +72,8 @@ const audioCards = [
 
 const IntimacyCard: React.FC = () => {
   const { currentPhase } = useCycle();
+  const { existingLog, loading, saving, saveLog, isAuthenticated } = useIntimacyLog();
+  
   const [showDialog, setShowDialog] = useState(false);
   const [blurred, setBlurred] = useState(false);
   const [libido, setLibido] = useState(2);
@@ -83,6 +86,20 @@ const IntimacyCard: React.FC = () => {
   const [pleasureLevel, setPleasureLevel] = useState(0);
 
   const positions = positionsByPhase[currentPhase];
+
+  // Load existing data
+  useEffect(() => {
+    if (existingLog) {
+      setLibido(existingLog.libido);
+      setSelectedFluid(existingLog.fluid_type);
+      setSelectedEmotional(existingLog.sensation_emotional);
+      setSelectedPhysical(existingLog.sensation_physical);
+      setSelectedAlerts(existingLog.symptoms);
+      setActivityType(existingLog.activity_type);
+      setIsProtected(existingLog.is_protected ?? true);
+      setPleasureLevel(existingLog.pleasure_rating ?? 0);
+    }
+  }, [existingLog]);
 
   const toggleEmotional = (id: string) => {
     setSelectedEmotional(prev => 
@@ -100,6 +117,23 @@ const IntimacyCard: React.FC = () => {
     setSelectedAlerts(prev => 
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
+  };
+
+  const handleSave = async () => {
+    const success = await saveLog({
+      libido,
+      fluid_type: selectedFluid,
+      sensation_emotional: selectedEmotional,
+      sensation_physical: selectedPhysical,
+      symptoms: selectedAlerts,
+      activity_type: activityType,
+      is_protected: activityType === 'partner' ? isProtected : null,
+      pleasure_rating: activityType ? pleasureLevel : null,
+    });
+    
+    if (success) {
+      setShowDialog(false);
+    }
   };
 
   return (
@@ -121,6 +155,11 @@ const IntimacyCard: React.FC = () => {
             <h3 className="font-semibold text-foreground">Intimidade & Saúde</h3>
             <p className="text-sm text-muted-foreground">Bem-estar íntimo sincronizado</p>
           </div>
+          {existingLog && (
+            <span className="text-xs bg-green-100 dark:bg-green-950/50 text-green-600 dark:text-green-400 px-2 py-1 rounded-full">
+              Registrado
+            </span>
+          )}
         </div>
       </motion.button>
 
@@ -343,6 +382,27 @@ const IntimacyCard: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Save Button */}
+                  {isAuthenticated && (
+                    <Button
+                      onClick={handleSave}
+                      className="w-full mt-6 phase-gradient text-white"
+                      disabled={saving}
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Salvar Diário
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </motion.div>
               </TabsContent>
 
@@ -386,18 +446,16 @@ const IntimacyCard: React.FC = () => {
                     {audioCards.map((audio) => (
                       <button
                         key={audio.id}
-                        className="w-full p-4 rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 border border-purple-200/30 flex items-center gap-3 hover:shadow-md transition-all"
+                        className="w-full flex items-center gap-4 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors text-left"
                       >
-                        <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/50">
-                          <Headphones className="w-5 h-5 text-purple-600" />
+                        <div className="p-3 rounded-full bg-gradient-to-br from-violet-400 to-purple-500">
+                          <Headphones className="w-5 h-5 text-white" />
                         </div>
-                        <div className="flex-1 text-left">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{audio.icon}</span>
-                            <span className="font-medium text-foreground">{audio.title}</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">{audio.duration}</span>
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground">{audio.title}</p>
+                          <p className="text-sm text-muted-foreground">{audio.duration}</p>
                         </div>
+                        <span className="text-xl">{audio.icon}</span>
                       </button>
                     ))}
                   </div>
