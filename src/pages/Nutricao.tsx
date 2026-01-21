@@ -6,6 +6,8 @@ import AddMealDrawer from '@/components/nutrition/AddMealDrawer';
 import MealScanner from '@/components/nutrition/MealScanner';
 import RecentMealsHistory from '@/components/nutrition/RecentMealsHistory';
 import ChefIACard from '@/components/nutrition/ChefIACard';
+import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
+import { nutritionTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 
 const Nutricao: React.FC = () => {
@@ -57,6 +59,9 @@ const Nutricao: React.FC = () => {
 
       {/* Floating AI Scanner Button */}
       <MealScanner />
+
+      {/* Tutorial Overlay */}
+      <TutorialOverlay tutorialKey="nutrition" steps={nutritionTutorialSteps} />
     </PageLayout>
   );
 };

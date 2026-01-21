@@ -49,6 +49,7 @@ const SOSPartnerButton: React.FC = () => {
   return (
     <>
       <motion.button
+        id="sos-partner-button"
         onClick={() => setShowDialog(true)}
         className="fixed bottom-36 right-4 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 shadow-lg shadow-rose-500/40 hover:shadow-xl hover:shadow-rose-500/50 transition-all"
         whileHover={{ scale: 1.1 }}
