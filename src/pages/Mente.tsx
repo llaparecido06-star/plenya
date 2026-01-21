@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
 import ChatInterface from '@/components/mind/ChatInterface';
 import EmotionalCheckin from '@/components/mind/EmotionalCheckin';
+import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
+import { mindTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -31,6 +33,9 @@ const Mente: React.FC = () => {
           <EmotionalCheckin />
         </TabsContent>
       </Tabs>
+
+      {/* Tutorial Overlay */}
+      <TutorialOverlay tutorialKey="mind" steps={mindTutorialSteps} />
     </PageLayout>
   );
 };

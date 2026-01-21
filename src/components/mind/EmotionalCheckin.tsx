@@ -57,6 +57,7 @@ const EmotionalCheckin: React.FC = () => {
 
   return (
     <motion.div
+      id="emotional-checkin"
       className="glass-card p-5 mx-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}

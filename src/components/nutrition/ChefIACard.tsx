@@ -91,6 +91,7 @@ const ChefIACard: React.FC = () => {
   return (
     <>
       <motion.button
+        id="chef-ia-card"
         onClick={() => { setShowDialog(true); resetState(); }}
         className="w-full glass-card p-4 text-left hover:shadow-soft transition-all"
         whileHover={{ scale: 1.01 }}

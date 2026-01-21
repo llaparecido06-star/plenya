@@ -1,6 +1,8 @@
 import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
 import WorkoutCard from '@/components/workout/WorkoutCard';
+import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
+import { bodyTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { useCycle } from '@/contexts/CycleContext';
 
@@ -26,6 +28,9 @@ const Corpo: React.FC = () => {
       <div className="mt-4">
         <WorkoutCard />
       </div>
+
+      {/* Tutorial Overlay */}
+      <TutorialOverlay tutorialKey="body" steps={bodyTutorialSteps} />
     </PageLayout>
   );
 };

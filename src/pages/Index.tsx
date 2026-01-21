@@ -13,6 +13,8 @@ import StreakCounter from '@/components/home/StreakCounter';
 import SOSPartnerButton from '@/components/home/SOSPartnerButton';
 import WaterTracker from '@/components/home/WaterTracker';
 import IntimacyCard from '@/components/home/IntimacyCard';
+import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
+import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
 
@@ -90,6 +92,9 @@ const Index: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Tutorial Overlay */}
+      <TutorialOverlay tutorialKey="home" steps={homeTutorialSteps} />
     </PageLayout>
   );
 };

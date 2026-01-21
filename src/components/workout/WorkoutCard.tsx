@@ -237,6 +237,7 @@ const WorkoutCard: React.FC = () => {
   return (
     <>
       <motion.div
+        id="workout-card"
         className={`rounded-3xl p-5 mx-4 ${defaultPlan.style} transition-all`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -256,6 +257,7 @@ const WorkoutCard: React.FC = () => {
             {saving && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
             {/* Rest Timer Button */}
             <Button
+              id="rest-timer-button"
               variant="ghost"
               size="icon"
               onClick={() => setShowRestTimer(true)}

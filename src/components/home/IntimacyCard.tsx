@@ -139,6 +139,7 @@ const IntimacyCard: React.FC = () => {
   return (
     <>
       <motion.button
+        id="intimacy-card"
         onClick={() => setShowDialog(true)}
         className="w-full glass-card p-4 text-left hover:shadow-soft transition-all"
         whileHover={{ scale: 1.01 }}

@@ -62,7 +62,7 @@ const ChatInterface: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-200px)]">
+    <div id="chat-interface" className="flex flex-col h-[calc(100vh-200px)]">
       {/* Chat header */}
       <div className="flex items-center gap-3 p-4 border-b border-border/50">
         <div className="p-2 rounded-xl phase-gradient">

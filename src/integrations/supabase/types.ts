@@ -181,6 +181,7 @@ export type Database = {
           goal: string | null
           id: string
           last_period_start: string | null
+          tutorial_progress: Json | null
           updated_at: string
           user_id: string
         }
@@ -194,6 +195,7 @@ export type Database = {
           goal?: string | null
           id?: string
           last_period_start?: string | null
+          tutorial_progress?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -207,6 +209,7 @@ export type Database = {
           goal?: string | null
           id?: string
           last_period_start?: string | null
+          tutorial_progress?: Json | null
           updated_at?: string
           user_id?: string
         }
@@ -253,7 +256,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_tutorial: { Args: { tutorial_key: string }; Returns: undefined }
     }
     Enums: {
       cycle_phase: "menstrual" | "folicular" | "ovulatoria" | "lutea"
