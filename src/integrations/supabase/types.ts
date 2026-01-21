@@ -38,6 +38,39 @@ export type Database = {
         }
         Relationships: []
       }
+      contraceptive_history: {
+        Row: {
+          contraceptive_brand: string | null
+          contraceptive_type: string
+          created_at: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          contraceptive_brand?: string | null
+          contraceptive_type: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string
+          user_id: string
+        }
+        Update: {
+          contraceptive_brand?: string | null
+          contraceptive_type?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_logs: {
         Row: {
           created_at: string
