@@ -126,15 +126,14 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[100]"
+        className="fixed inset-0 z-[9999]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
         {/* Dark overlay with spotlight cutout */}
         <svg
-          className="absolute inset-0 w-full h-full"
-          style={{ pointerEvents: 'none' }}
+          className="absolute inset-0 w-full h-full pointer-events-none"
         >
           <defs>
             <mask id="spotlight-mask">
@@ -161,6 +160,9 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           />
         </svg>
 
+        {/* Click blocker overlay */}
+        <div className="absolute inset-0" onClick={(e) => e.stopPropagation()} />
+
         {/* Spotlight glow effect */}
         {targetRect && (
           <motion.div
@@ -181,13 +183,13 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
         {/* Tooltip card */}
         <motion.div
-          className="absolute z-10 w-80 max-w-[calc(100vw-32px)]"
+          className="absolute z-[10000] w-80 max-w-[calc(100vw-32px)]"
           style={getTooltipPosition()}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="glass-card p-5 rounded-2xl border border-primary/30 shadow-2xl">
+          <div className="bg-card p-5 rounded-2xl border border-primary/30 shadow-2xl">
             {/* Step indicator */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex gap-1.5">
@@ -211,10 +213,10 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
             {/* Content */}
             <h3 className="font-semibold text-foreground text-lg mb-2">
-              {step.title}
+              {step?.title || 'Tutorial'}
             </h3>
             <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-              {step.description}
+              {step?.description || 'Continue explorando o app!'}
             </p>
 
             {/* Actions */}
