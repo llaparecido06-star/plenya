@@ -4,12 +4,15 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthForm from '@/components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, Loader2 } from 'lucide-react';
 import DUMPicker from '@/components/profile/DUMPicker';
 import PatternsCard from '@/components/history/PatternsCard';
+import MedicationSearch from '@/components/profile/MedicationSearch';
+import { useMedication } from '@/hooks/useMedication';
 
 const Perfil: React.FC = () => {
   const { user, signOut } = useAuth();
+  const { medicationName, medicationType, loading: medicationLoading, saveMedication } = useMedication();
 
   if (!user) {
     return (
@@ -63,6 +66,26 @@ const Perfil: React.FC = () => {
 
         {/* DUM Calendar Picker */}
         <DUMPicker />
+
+        {/* Medication Search */}
+        <motion.div
+          className="glass-card p-5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          {medicationLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            </div>
+          ) : (
+            <MedicationSearch
+              value={medicationName}
+              medicationType={medicationType}
+              onChange={saveMedication}
+            />
+          )}
+        </motion.div>
 
         {/* Patterns Card - Cycle Insights */}
         <motion.div

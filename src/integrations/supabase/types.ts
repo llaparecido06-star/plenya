@@ -181,6 +181,8 @@ export type Database = {
           goal: string | null
           id: string
           last_period_start: string | null
+          medication_name: string | null
+          medication_type: string | null
           tutorial_progress: Json | null
           updated_at: string
           user_id: string
@@ -195,6 +197,8 @@ export type Database = {
           goal?: string | null
           id?: string
           last_period_start?: string | null
+          medication_name?: string | null
+          medication_type?: string | null
           tutorial_progress?: Json | null
           updated_at?: string
           user_id: string
@@ -209,6 +213,8 @@ export type Database = {
           goal?: string | null
           id?: string
           last_period_start?: string | null
+          medication_name?: string | null
+          medication_type?: string | null
           tutorial_progress?: Json | null
           updated_at?: string
           user_id?: string

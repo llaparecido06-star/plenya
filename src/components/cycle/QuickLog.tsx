@@ -11,6 +11,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useDailyLog } from '@/hooks/useDailyLog';
+import { useMedication } from '@/hooks/useMedication';
+import MedicationEffectBadge from '@/components/profile/MedicationEffectBadge';
 
 interface LogType {
   id: string;
@@ -40,6 +42,7 @@ const moods = [
 
 const QuickLog: React.FC = () => {
   const { data, loading, saving, saveLog, isAuthenticated } = useDailyLog();
+  const { medicationName } = useMedication();
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedMood, setSelectedMood] = useState<number>(2);
@@ -96,17 +99,24 @@ const QuickLog: React.FC = () => {
             </p>
             <div className="flex flex-wrap gap-2">
               {symptoms.map(symptom => (
-                <button
-                  key={symptom}
-                  onClick={() => toggleSymptom(symptom)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedSymptoms.includes(symptom)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                >
-                  {symptom}
-                </button>
+                <div key={symptom} className="flex flex-col items-start gap-1">
+                  <button
+                    onClick={() => toggleSymptom(symptom)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedSymptoms.includes(symptom)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    }`}
+                  >
+                    {symptom}
+                  </button>
+                  {selectedSymptoms.includes(symptom) && (
+                    <MedicationEffectBadge
+                      medicationName={medicationName}
+                      symptom={symptom}
+                    />
+                  )}
+                </div>
               ))}
             </div>
           </div>
