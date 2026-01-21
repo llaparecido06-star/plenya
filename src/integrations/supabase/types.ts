@@ -170,9 +170,39 @@ export type Database = {
         }
         Relationships: []
       }
+      pill_logs: {
+        Row: {
+          created_at: string
+          id: string
+          log_date: string
+          skipped: boolean | null
+          taken_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          log_date?: string
+          skipped?: boolean | null
+          taken_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          log_date?: string
+          skipped?: boolean | null
+          taken_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          contraceptive_brand: string | null
+          contraceptive_start_date: string | null
+          contraceptive_type: string | null
           created_at: string
           cycle_length: number | null
           diet_type: string | null
@@ -183,12 +213,16 @@ export type Database = {
           last_period_start: string | null
           medication_name: string | null
           medication_type: string | null
+          pill_reminder_time: string | null
           tutorial_progress: Json | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          contraceptive_brand?: string | null
+          contraceptive_start_date?: string | null
+          contraceptive_type?: string | null
           created_at?: string
           cycle_length?: number | null
           diet_type?: string | null
@@ -199,12 +233,16 @@ export type Database = {
           last_period_start?: string | null
           medication_name?: string | null
           medication_type?: string | null
+          pill_reminder_time?: string | null
           tutorial_progress?: Json | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          contraceptive_brand?: string | null
+          contraceptive_start_date?: string | null
+          contraceptive_type?: string | null
           created_at?: string
           cycle_length?: number | null
           diet_type?: string | null
@@ -215,6 +253,7 @@ export type Database = {
           last_period_start?: string | null
           medication_name?: string | null
           medication_type?: string | null
+          pill_reminder_time?: string | null
           tutorial_progress?: Json | null
           updated_at?: string
           user_id?: string
