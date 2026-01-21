@@ -213,6 +213,7 @@ export type Database = {
           last_period_start: string | null
           medication_name: string | null
           medication_type: string | null
+          onboarding_completed: boolean
           pill_reminder_time: string | null
           tutorial_progress: Json | null
           updated_at: string
@@ -233,6 +234,7 @@ export type Database = {
           last_period_start?: string | null
           medication_name?: string | null
           medication_type?: string | null
+          onboarding_completed?: boolean
           pill_reminder_time?: string | null
           tutorial_progress?: Json | null
           updated_at?: string
@@ -253,6 +255,7 @@ export type Database = {
           last_period_start?: string | null
           medication_name?: string | null
           medication_type?: string | null
+          onboarding_completed?: boolean
           pill_reminder_time?: string | null
           tutorial_progress?: Json | null
           updated_at?: string

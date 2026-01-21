@@ -7,12 +7,14 @@ import { AnimatePresence } from "framer-motion";
 import { CycleProvider } from "@/contexts/CycleContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SelectedDateProvider } from "@/contexts/SelectedDateContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Nutricao from "./pages/Nutricao";
 import Corpo from "./pages/Corpo";
 import Mente from "./pages/Mente";
 import Perfil from "./pages/Perfil";
 import Auth from "./pages/Auth";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,12 +30,48 @@ const App = () => (
             <BrowserRouter>
               <AnimatePresence mode="wait">
                 <Routes>
-                  <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
-                  <Route path="/nutricao" element={<Nutricao />} />
-                  <Route path="/corpo" element={<Corpo />} />
-                  <Route path="/mente" element={<Mente />} />
-                  <Route path="/perfil" element={<Perfil />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Index />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/nutricao"
+                    element={
+                      <ProtectedRoute>
+                        <Nutricao />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/corpo"
+                    element={
+                      <ProtectedRoute>
+                        <Corpo />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/mente"
+                    element={
+                      <ProtectedRoute>
+                        <Mente />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/perfil"
+                    element={
+                      <ProtectedRoute>
+                        <Perfil />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </AnimatePresence>
