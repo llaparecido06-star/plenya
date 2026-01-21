@@ -79,10 +79,50 @@ const ContraceptiveConfig: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Current Method Summary - Show when method is saved */}
+      {contraceptive_type && !hasChanges && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl bg-primary/10 border border-primary/30"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-2xl">
+                {getMethodById(contraceptive_type)?.icon || '💊'}
+              </span>
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-foreground">
+                {getMethodById(contraceptive_type)?.label || contraceptive_type}
+              </p>
+              {contraceptive_brand && (
+                <p className="text-sm text-primary font-medium">
+                  {contraceptive_brand}
+                </p>
+              )}
+              {pill_reminder_time && isPillMethod(contraceptive_type) && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                  <Clock className="w-3 h-3" />
+                  Lembrete às {pill_reminder_time.slice(0, 5)}
+                </p>
+              )}
+              {contraceptive_start_date && hasExpirationDate(contraceptive_type) && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                  <Calendar className="w-3 h-3" />
+                  Desde {format(new Date(contraceptive_start_date), 'dd/MM/yyyy', { locale: ptBR })}
+                </p>
+              )}
+            </div>
+            <Check className="w-5 h-5 text-primary" />
+          </div>
+        </motion.div>
+      )}
+
       {/* Method Selection */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-3">
-          Qual seu método contraceptivo?
+          {contraceptive_type && !hasChanges ? 'Alterar método:' : 'Qual seu método contraceptivo?'}
         </label>
         <div className="grid grid-cols-2 gap-2">
           {contraceptiveMethods.map((method) => (
