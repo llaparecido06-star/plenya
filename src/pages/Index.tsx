@@ -13,16 +13,25 @@ import StreakCounter from '@/components/home/StreakCounter';
 import SOSPartnerButton from '@/components/home/SOSPartnerButton';
 import WaterTracker from '@/components/home/WaterTracker';
 import IntimacyCard from '@/components/home/IntimacyCard';
+import PillTracker from '@/components/home/PillTracker';
+import DeviceExpirationCard from '@/components/home/DeviceExpirationCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
+import { useContraceptive } from '@/hooks/useContraceptive';
+import { isPillMethod, hasExpirationDate, isHormonalMethod } from '@/data/contraceptiveMethods';
 
 const Index: React.FC = () => {
   const { getPhaseInfo } = useCycle();
   const { isToday } = useSelectedDate();
+  const { contraceptive_type } = useContraceptive();
   const phaseInfo = getPhaseInfo();
   const [showCalendar, setShowCalendar] = useState(false);
+
+  const showPillTracker = isPillMethod(contraceptive_type);
+  const showDeviceExpiration = hasExpirationDate(contraceptive_type);
+  const usesHormonal = isHormonalMethod(contraceptive_type);
 
   return (
     <PageLayout>
@@ -72,6 +81,20 @@ const Index: React.FC = () => {
           <>
             {/* Water Tracker */}
             <WaterTracker />
+
+            {/* Pill Tracker (only for pill users) */}
+            {showPillTracker && (
+              <div className="px-4">
+                <PillTracker />
+              </div>
+            )}
+
+            {/* Device Expiration Card (DIU/Implant) */}
+            {showDeviceExpiration && (
+              <div className="px-4">
+                <DeviceExpirationCard />
+              </div>
+            )}
             
             {/* Chef Suggestion */}
             <ChefSuggestion />
