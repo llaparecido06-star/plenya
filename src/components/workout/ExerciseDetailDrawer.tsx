@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Check, Dumbbell, Target, AlertCircle } from 'lucide-react';
+import { Play, Check, Dumbbell, Target, AlertCircle, History } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useExerciseHistory } from '@/hooks/useExerciseHistory';
 
 interface ExerciseDetailDrawerProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface ExerciseDetailDrawerProps {
     reps: string;
   } | null;
   onComplete: (exerciseId: string, weight?: number, reps?: number) => void;
+  readOnly?: boolean;
 }
 
 interface ExerciseInstruction {
@@ -96,9 +98,25 @@ const ExerciseDetailDrawer: React.FC<ExerciseDetailDrawerProps> = ({
   onClose,
   exercise,
   onComplete,
+  readOnly = false,
 }) => {
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
+  const [lastWeight, setLastWeight] = useState<number | null>(null);
+  const { getLastWeight } = useExerciseHistory();
+
+  // Load last weight when exercise changes
+  useEffect(() => {
+    if (exercise?.name) {
+      getLastWeight(exercise.name).then((record) => {
+        if (record?.weight) {
+          setLastWeight(record.weight);
+        } else {
+          setLastWeight(null);
+        }
+      });
+    }
+  }, [exercise?.name, getLastWeight]);
 
   if (!exercise) return null;
 
@@ -215,44 +233,59 @@ const ExerciseDetailDrawer: React.FC<ExerciseDetailDrawerProps> = ({
             ))}
           </div>
 
-          {/* Weight and reps input */}
-          <motion.div
-            className="glass-card p-4 space-y-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <h4 className="font-semibold text-foreground">Registrar performance</h4>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="text-xs text-muted-foreground mb-1 block">Peso (kg)</label>
-                <Input
-                  type="number"
-                  placeholder="Ex: 20"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                />
+          {/* Weight and reps input - only show if not read only */}
+          {!readOnly && (
+            <motion.div
+              className="glass-card p-4 space-y-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h4 className="font-semibold text-foreground">Registrar performance</h4>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground mb-1 block">Peso (kg)</label>
+                  <Input
+                    type="number"
+                    placeholder="Ex: 20"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                  />
+                  {/* Last weight indicator */}
+                  {lastWeight && (
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <History className="w-3 h-3" />
+                      Última vez: {lastWeight}kg
+                    </p>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground mb-1 block">Repetições</label>
+                  <Input
+                    type="number"
+                    placeholder="Ex: 12"
+                    value={reps}
+                    onChange={(e) => setReps(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label className="text-xs text-muted-foreground mb-1 block">Repetições</label>
-                <Input
-                  type="number"
-                  placeholder="Ex: 12"
-                  value={reps}
-                  onChange={(e) => setReps(e.target.value)}
-                />
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
 
-          {/* Complete button */}
-          <Button
-            onClick={handleComplete}
-            className="w-full h-14 text-lg font-semibold phase-gradient text-white shadow-glow"
-          >
-            <Check className="w-5 h-5 mr-2" />
-            Concluir Exercício
-          </Button>
+          {/* Complete button - only show if not read only */}
+          {!readOnly ? (
+            <Button
+              onClick={handleComplete}
+              className="w-full h-14 text-lg font-semibold phase-gradient text-white shadow-glow"
+            >
+              <Check className="w-5 h-5 mr-2" />
+              Concluir Exercício
+            </Button>
+          ) : (
+            <p className="text-center text-sm text-muted-foreground py-4">
+              Visualizando histórico - não é possível editar
+            </p>
+          )}
         </div>
       </DrawerContent>
     </Drawer>
