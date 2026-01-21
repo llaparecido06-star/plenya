@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
 
 interface ContraceptiveData {
   contraceptive_type: string | null;
@@ -36,7 +35,7 @@ export const useContraceptive = () => {
           .from('profiles')
           .select('contraceptive_type, contraceptive_brand, contraceptive_start_date, pill_reminder_time')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching contraceptive data:', error);
@@ -61,7 +60,7 @@ export const useContraceptive = () => {
     fetchData();
   }, [user]);
 
-  // Save contraceptive settings
+  // Save contraceptive settings and add to history if type changed
   const saveSettings = useCallback(
     async (settings: Partial<ContraceptiveData>) => {
       if (!user) {
@@ -76,6 +75,11 @@ export const useContraceptive = () => {
       setSaving(true);
 
       try {
+        const previousType = data.contraceptive_type;
+        const newType = settings.contraceptive_type;
+        const typeChanged = newType && newType !== previousType;
+
+        // Update profile
         const { error } = await supabase
           .from('profiles')
           .update(settings)
@@ -91,11 +95,33 @@ export const useContraceptive = () => {
           return false;
         }
 
+        // Add to history if method type changed
+        if (typeChanged) {
+          // Close previous entry
+          await supabase
+            .from('contraceptive_history')
+            .update({ end_date: new Date().toISOString().split('T')[0] })
+            .eq('user_id', user.id)
+            .is('end_date', null);
+
+          // Insert new entry
+          await supabase
+            .from('contraceptive_history')
+            .insert({
+              user_id: user.id,
+              contraceptive_type: newType,
+              contraceptive_brand: settings.contraceptive_brand || null,
+              start_date: new Date().toISOString().split('T')[0],
+            });
+        }
+
         setData(prev => ({ ...prev, ...settings }));
         
         toast({
           title: 'Configurações salvas! ✅',
-          description: 'Seu método contraceptivo foi atualizado.',
+          description: typeChanged 
+            ? 'Método atualizado e adicionado ao histórico.' 
+            : 'Seu método contraceptivo foi atualizado.',
         });
 
         return true;
@@ -106,7 +132,7 @@ export const useContraceptive = () => {
         setSaving(false);
       }
     },
-    [user, toast]
+    [user, toast, data.contraceptive_type]
   );
 
   return {

@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import ContraceptiveHistoryCard from './ContraceptiveHistoryCard';
 
 const ContraceptiveConfig: React.FC = () => {
   const { 
@@ -271,6 +272,9 @@ const ContraceptiveConfig: React.FC = () => {
           'Salvar Configurações'
         )}
       </Button>
+
+      {/* History Card */}
+      <ContraceptiveHistoryCard />
     </div>
   );
 };
