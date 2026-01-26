@@ -78,7 +78,13 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     return null;
   }
 
-  const getTooltipPosition = () => {
+  const getTooltipPosition = (): React.CSSProperties => {
+    const padding = 16;
+    const tooltipHeight = 220;
+    const tooltipWidth = 320;
+    const safeBottomMargin = 100; // Space for bottom nav
+
+    // Center if no target
     if (!targetRect) {
       return {
         top: '50%',
@@ -87,31 +93,51 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       };
     }
 
-    const padding = 16;
-    const tooltipHeight = 200;
-    const tooltipWidth = 320;
-
     const position = step?.position || 'bottom';
+    const horizontalCenter = Math.max(
+      padding,
+      Math.min(
+        targetRect.left + targetRect.width / 2 - tooltipWidth / 2,
+        window.innerWidth - tooltipWidth - padding
+      )
+    );
 
-    switch (position) {
+    // Check if there's enough space below
+    const spaceBelow = window.innerHeight - targetRect.bottom - safeBottomMargin;
+    const spaceAbove = targetRect.top;
+
+    // Auto-adjust: if requested bottom but not enough space, go top
+    let finalPosition = position;
+    if (position === 'bottom' && spaceBelow < tooltipHeight && spaceAbove > tooltipHeight) {
+      finalPosition = 'top';
+    } else if (position === 'top' && spaceAbove < tooltipHeight && spaceBelow > tooltipHeight) {
+      finalPosition = 'bottom';
+    }
+
+    switch (finalPosition) {
       case 'top':
         return {
           bottom: `${window.innerHeight - targetRect.top + padding}px`,
-          left: `${Math.max(padding, Math.min(targetRect.left + targetRect.width / 2 - tooltipWidth / 2, window.innerWidth - tooltipWidth - padding))}px`,
+          left: `${horizontalCenter}px`,
         };
       case 'bottom':
+        // Ensure it doesn't go below safe area
+        const bottomTop = Math.min(
+          targetRect.bottom + padding,
+          window.innerHeight - tooltipHeight - safeBottomMargin
+        );
         return {
-          top: `${targetRect.bottom + padding}px`,
-          left: `${Math.max(padding, Math.min(targetRect.left + targetRect.width / 2 - tooltipWidth / 2, window.innerWidth - tooltipWidth - padding))}px`,
+          top: `${bottomTop}px`,
+          left: `${horizontalCenter}px`,
         };
       case 'left':
         return {
-          top: `${targetRect.top + targetRect.height / 2 - tooltipHeight / 2}px`,
+          top: `${Math.max(padding, Math.min(targetRect.top + targetRect.height / 2 - tooltipHeight / 2, window.innerHeight - tooltipHeight - safeBottomMargin))}px`,
           right: `${window.innerWidth - targetRect.left + padding}px`,
         };
       case 'right':
         return {
-          top: `${targetRect.top + targetRect.height / 2 - tooltipHeight / 2}px`,
+          top: `${Math.max(padding, Math.min(targetRect.top + targetRect.height / 2 - tooltipHeight / 2, window.innerHeight - tooltipHeight - safeBottomMargin))}px`,
           left: `${targetRect.right + padding}px`,
         };
       default:
@@ -183,20 +209,20 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
         {/* Tooltip card */}
         <motion.div
-          className="absolute z-[10000] w-80 max-w-[calc(100vw-32px)]"
+          className="fixed z-[10000] w-80 max-w-[calc(100vw-32px)]"
           style={getTooltipPosition()}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15, duration: 0.2 }}
         >
-          <div className="bg-card p-5 rounded-2xl border border-primary/30 shadow-2xl">
-            {/* Step indicator */}
-            <div className="flex items-center justify-between mb-3">
+          <div className="bg-card p-4 rounded-2xl border-2 border-primary/40 shadow-2xl">
+            {/* Header with close button */}
+            <div className="flex items-center justify-between mb-2">
               <div className="flex gap-1.5">
                 {steps.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-2 h-2 rounded-full transition-colors ${
+                    className={`w-2.5 h-2.5 rounded-full transition-colors ${
                       index === currentStep
                         ? 'bg-primary'
                         : index < currentStep
@@ -206,34 +232,37 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                   />
                 ))}
               </div>
-              <span className="text-xs text-muted-foreground">
-                {currentStep + 1}/{steps.length}
-              </span>
+              <button
+                onClick={handleSkip}
+                className="p-1.5 rounded-full hover:bg-muted transition-colors"
+                aria-label="Fechar tutorial"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
 
             {/* Content */}
-            <h3 className="font-semibold text-foreground text-lg mb-2">
+            <h3 className="font-semibold text-foreground text-base mb-1.5">
               {step?.title || 'Tutorial'}
             </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-5">
+            <p className="text-muted-foreground text-sm leading-relaxed mb-4">
               {step?.description || 'Continue explorando o app!'}
             </p>
 
-            {/* Actions */}
-            <div className="flex items-center justify-between">
+            {/* Actions - more prominent */}
+            <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={handleSkip}
-                className="text-muted-foreground hover:text-foreground"
+                className="flex-1 text-muted-foreground border-muted-foreground/30"
               >
-                <X className="w-4 h-4 mr-1" />
-                Pular
+                Pular tudo
               </Button>
               <Button
                 size="sm"
                 onClick={handleNext}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
               >
                 {currentStep < steps.length - 1 ? (
                   <>
@@ -245,6 +274,11 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                 )}
               </Button>
             </div>
+
+            {/* Step counter */}
+            <p className="text-center text-xs text-muted-foreground mt-2">
+              Passo {currentStep + 1} de {steps.length}
+            </p>
           </div>
         </motion.div>
       </motion.div>
