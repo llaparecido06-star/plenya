@@ -185,8 +185,8 @@ const QuickLog: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
     >
-      {/* Pregnancy risk alert */}
-      <IntimacyLog showAlert={true} />
+      {/* Pregnancy risk alert - only shows if there's a risk */}
+      <IntimacyLog showAlert={true} alertOnly={true} />
       
       <h3 className="text-sm font-semibold text-muted-foreground mb-3">
         REGISTRO RÁPIDO
