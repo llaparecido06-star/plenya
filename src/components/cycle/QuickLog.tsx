@@ -191,7 +191,7 @@ const QuickLog: React.FC = () => {
       <h3 className="text-sm font-semibold text-muted-foreground mb-3">
         REGISTRO RÁPIDO
       </h3>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-3 pb-24">
         {logTypes.map((log, index) => {
           const Icon = log.icon;
           return (

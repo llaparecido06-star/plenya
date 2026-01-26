@@ -29,30 +29,42 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const [intimacyDates, setIntimacyDates] = useState<string[]>([]);
 
   // Fetch intimacy log dates
-  React.useEffect(() => {
+  const fetchIntimacyDates = React.useCallback(async () => {
     if (!user) return;
     
-    const fetchIntimacyDates = async () => {
-      const sixtyDaysAgo = new Date();
-      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-      
-      const { data, error } = await supabase
-        .from('intimacy_logs')
-        .select('log_date, sensation_physical')
-        .eq('user_id', user.id)
-        .gte('log_date', sixtyDaysAgo.toISOString().split('T')[0]);
-      
-      if (!error && data) {
-        // Only include dates that have actual intimacy activity
-        const datesWithActivity = data
-          .filter(log => log.sensation_physical && log.sensation_physical.length > 0)
-          .map(log => log.log_date);
-        setIntimacyDates(datesWithActivity);
-      }
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+    
+    const { data, error } = await supabase
+      .from('intimacy_logs')
+      .select('log_date, sensation_physical')
+      .eq('user_id', user.id)
+      .gte('log_date', sixtyDaysAgo.toISOString().split('T')[0]);
+    
+    if (!error && data) {
+      // Only include dates that have actual intimacy activity
+      const datesWithActivity = data
+        .filter(log => log.sensation_physical && log.sensation_physical.length > 0)
+        .map(log => log.log_date);
+      setIntimacyDates(datesWithActivity);
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    fetchIntimacyDates();
+  }, [fetchIntimacyDates]);
+
+  // Listen for intimacy log saves to refresh calendar
+  React.useEffect(() => {
+    const handleIntimacySaved = () => {
+      fetchIntimacyDates();
     };
     
-    fetchIntimacyDates();
-  }, [user]);
+    window.addEventListener('intimacy-log-saved', handleIntimacySaved);
+    return () => {
+      window.removeEventListener('intimacy-log-saved', handleIntimacySaved);
+    };
+  }, [fetchIntimacyDates]);
 
   // Get predicted period dates for the current view
   const predictedPeriodDates = useMemo(() => {
