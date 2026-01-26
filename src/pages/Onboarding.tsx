@@ -139,8 +139,8 @@ const Onboarding: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Step 1: Goals
-  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  // Step 1: Goals (multiple selection)
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   
   // Step 2: Cycle data
   const [lastPeriodDate, setLastPeriodDate] = useState<Date | undefined>(undefined);
@@ -169,8 +169,8 @@ const Onboarding: React.FC = () => {
   const needsInsertionDate = ['iud', 'implant'].includes(selectedMethod || '');
 
   const handleNext = () => {
-    if (currentStep === 1 && !selectedGoal) {
-      toast({ title: 'Selecione um objetivo', variant: 'destructive' });
+    if (currentStep === 1 && selectedGoals.length === 0) {
+      toast({ title: 'Selecione pelo menos um objetivo', variant: 'destructive' });
       return;
     }
     if (currentStep === 2 && !lastPeriodDate) {
@@ -204,7 +204,7 @@ const Onboarding: React.FC = () => {
       const { error } = await supabase
         .from('profiles')
         .update({
-          goal: selectedGoal,
+          goal: selectedGoals.join(','),
           last_period_start: lastPeriodDate ? format(lastPeriodDate, 'yyyy-MM-dd') : null,
           cycle_length: cycleLength,
           contraceptive_type: selectedMethod,
@@ -269,19 +269,27 @@ const Onboarding: React.FC = () => {
             className="space-y-6"
           >
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">Qual seu objetivo?</h2>
-              <p className="text-muted-foreground">Vamos personalizar sua experiência</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Quais são seus objetivos?</h2>
+              <p className="text-muted-foreground">Selecione um ou mais para personalizar sua experiência</p>
             </div>
             
             <div className="grid gap-3">
               {goals.map((goal) => {
                 const Icon = goal.icon;
-                const isSelected = selectedGoal === goal.id;
+                const isSelected = selectedGoals.includes(goal.id);
+                
+                const toggleGoal = () => {
+                  setSelectedGoals(prev => 
+                    prev.includes(goal.id)
+                      ? prev.filter(g => g !== goal.id)
+                      : [...prev, goal.id]
+                  );
+                };
                 
                 return (
                   <button
                     key={goal.id}
-                    onClick={() => setSelectedGoal(goal.id)}
+                    onClick={toggleGoal}
                     className={cn(
                       "flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200",
                       isSelected
@@ -303,6 +311,12 @@ const Onboarding: React.FC = () => {
                 );
               })}
             </div>
+            
+            {selectedGoals.length > 0 && (
+              <p className="text-sm text-muted-foreground text-center">
+                {selectedGoals.length} objetivo{selectedGoals.length > 1 ? 's' : ''} selecionado{selectedGoals.length > 1 ? 's' : ''}
+              </p>
+            )}
           </motion.div>
         );
 
@@ -340,13 +354,14 @@ const Onboarding: React.FC = () => {
                         : "Selecione a data"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="center">
+                  <PopoverContent className="w-auto p-0 pointer-events-auto" align="center">
                     <Calendar
                       mode="single"
                       selected={lastPeriodDate}
                       onSelect={setLastPeriodDate}
                       disabled={(date) => date > new Date()}
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
