@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -7,7 +7,6 @@ import {
   Pill,
   Syringe,
   CircleDot,
-  Ban,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -21,7 +20,10 @@ import {
   Baby, 
   Activity,
   Utensils,
-  Zap
+  Zap,
+  Sparkles,
+  User,
+  Cake
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -35,69 +37,49 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { toLocalDateString } from '@/lib/dateUtils';
 
-// Goal options
-const goals = [
-  { id: 'lose_weight', label: 'Perder Peso', icon: Target, color: 'text-terracotta' },
-  { id: 'gain_muscle', label: 'Ganhar Massa', icon: Dumbbell, color: 'text-leaf-green' },
-  { id: 'pms_relief', label: 'Alívio de TPM', icon: Heart, color: 'text-burnt-pink' },
-  { id: 'get_pregnant', label: 'Engravidar', icon: Baby, color: 'text-terracotta' },
-  { id: 'health_monitor', label: 'Monitorar Saúde', icon: Activity, color: 'text-leaf-green' },
+// Life phase options - THE BIG FILTER
+const lifePhases = [
+  { id: 'menstruating', label: 'Ciclo Ativo', icon: '🩸', description: 'Menstruo regularmente ou uso anticoncepcional' },
+  { id: 'pregnant', label: 'Estou Grávida', icon: '🤰', description: 'Acompanhar minha gestação' },
+  { id: 'menopause', label: 'Menopausa', icon: '🧘', description: 'Climatério e bem-estar' },
 ];
 
-// Dietary preference options
+// Goal options with hormonal explanation
+const goals = [
+  { id: 'lose_weight', label: 'Perder Peso', icon: Target, color: 'text-terracotta', tip: 'Otimizado para seu metabolismo hormonal' },
+  { id: 'gain_muscle', label: 'Ganhar Massa', icon: Dumbbell, color: 'text-leaf-green', tip: 'Treinos sincronizados com seu ciclo' },
+  { id: 'pms_relief', label: 'Alívio de TPM', icon: Heart, color: 'text-burnt-pink', tip: 'Nutrição e exercícios anti-inflamatórios' },
+  { id: 'get_pregnant', label: 'Engravidar', icon: Baby, color: 'text-terracotta', tip: 'Janela fértil destacada' },
+  { id: 'health_monitor', label: 'Monitorar Saúde', icon: Activity, color: 'text-leaf-green', tip: 'Padrões e tendências do seu corpo' },
+];
+
+// Dietary preference options with hormonal context
 const dietaryOptions = [
-  { id: 'omnivore', label: 'Onívora', icon: '🍖', description: 'Come de tudo' },
-  { id: 'vegetarian', label: 'Vegetariana', icon: '🥗', description: 'Sem carnes' },
-  { id: 'vegan', label: 'Vegana', icon: '🌱', description: 'Sem produtos animais' },
-  { id: 'low_carb', label: 'Low Carb', icon: '🥑', description: 'Baixo carboidrato' },
-  { id: 'lactose_free', label: 'Sem Lactose', icon: '🥛', description: 'Evita laticínios' },
+  { id: 'omnivore', label: 'Onívora', icon: '🍖', description: 'Proteínas variadas para equilíbrio hormonal' },
+  { id: 'vegetarian', label: 'Vegetariana', icon: '🥗', description: 'Fontes vegetais de ferro e B12' },
+  { id: 'vegan', label: 'Vegana', icon: '🌱', description: 'Ômega-3 de algas e proteínas completas' },
+  { id: 'low_carb', label: 'Low Carb', icon: '🥑', description: 'Estabiliza insulina e energia' },
+  { id: 'lactose_free', label: 'Sem Lactose', icon: '🥛', description: 'Alternativas ricas em cálcio' },
 ];
 
 // Activity level options
 const activityOptions = [
-  { id: 'sedentary', label: 'Sedentária', icon: '🛋️', description: 'Pouca ou nenhuma atividade' },
+  { id: 'sedentary', label: 'Sedentária', icon: '🛋️', description: 'Começaremos devagar e seguro' },
   { id: 'light', label: 'Leve', icon: '🚶‍♀️', description: '1-2 vezes por semana' },
   { id: 'moderate', label: 'Moderada', icon: '🏃‍♀️', description: '3-4 vezes por semana' },
   { id: 'intense', label: 'Intensa/Atleta', icon: '💪', description: '5+ vezes por semana' },
 ];
 
-// Contraceptive categories with methods
+// Contraceptive categories
 const contraceptiveCategories = [
-  {
-    id: 'hormonal_daily',
-    label: 'Hormonal Diário',
-    icon: Pill,
-    description: 'Pílula anticoncepcional',
-    methods: ['pill'],
-  },
-  {
-    id: 'injection_patch_ring',
-    label: 'Injeção/Adesivo/Anel',
-    icon: Syringe,
-    description: 'Aplicação periódica',
-    methods: ['injection', 'patch', 'ring'],
-  },
-  {
-    id: 'long_duration',
-    label: 'Longa Duração',
-    icon: CircleDot,
-    description: 'DIU ou Implante',
-    methods: ['iud', 'implant'],
-  },
-  {
-    id: 'natural_none',
-    label: 'Natural/Nenhum',
-    icon: Leaf,
-    description: 'Sem hormônios',
-    methods: ['condom', 'natural', 'none'],
-  },
+  { id: 'hormonal_daily', label: 'Pílula', icon: Pill, description: 'Hormonal diário', methods: ['pill'] },
+  { id: 'injection_patch_ring', label: 'Injeção/Anel', icon: Syringe, description: 'Aplicação periódica', methods: ['injection', 'patch', 'ring'] },
+  { id: 'long_duration', label: 'DIU/Implante', icon: CircleDot, description: 'Longa duração', methods: ['iud', 'implant'] },
+  { id: 'natural_none', label: 'Natural', icon: Leaf, description: 'Sem hormônios', methods: ['condom', 'natural', 'none'] },
 ];
 
-// Sub-methods for detailed selection
 const subMethods = {
-  hormonal_daily: [
-    { id: 'pill', label: 'Pílula' },
-  ],
+  hormonal_daily: [{ id: 'pill', label: 'Pílula' }],
   injection_patch_ring: [
     { id: 'injection', label: 'Injeção' },
     { id: 'patch', label: 'Adesivo' },
@@ -114,7 +96,6 @@ const subMethods = {
   ],
 };
 
-// Contraceptive brands for autocomplete
 const contraceptiveBrands = [
   { label: "Yasmin", type: "Pílula Combinada" },
   { label: "Selene", type: "Pílula Anti-androgênica" },
@@ -149,78 +130,164 @@ interface ContraceptiveDetails {
   usageCycle?: string;
 }
 
+// Chapter definitions for storytelling
+const chapters = [
+  { id: 1, title: 'Identidade', subtitle: 'Quem é você?' },
+  { id: 2, title: 'O Momento', subtitle: 'Sua fase biológica' },
+  { id: 3, title: 'Estilo', subtitle: 'Nutrição e movimento' },
+  { id: 4, title: 'Sincronização', subtitle: 'Seu ciclo' },
+];
+
 const Onboarding: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const { refreshCycleData } = useCycle();
   
-  // Wizard state - Now 5 steps total
+  // Wizard state
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showBuildingProfile, setShowBuildingProfile] = useState(false);
+  const [buildingStep, setBuildingStep] = useState(0);
   
-  // Step 1: Goals (multiple selection)
+  // CHAPTER 1: Identity
+  const [fullName, setFullName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
+  
+  // CHAPTER 2: Life Phase (The Big Filter)
+  const [lifePhase, setLifePhase] = useState<string | null>(null);
+  const [isTryingToConceive, setIsTryingToConceive] = useState(false);
+  
+  // CHAPTER 3: Goals & Style
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-  
-  // Step 2: Dietary Preferences (NEW)
   const [selectedDiet, setSelectedDiet] = useState<string | null>(null);
-  
-  // Step 3: Activity Level (NEW)
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   
-  // Step 4: Cycle data
+  // CHAPTER 4: Cycle Sync (conditional)
   const [lastPeriodDate, setLastPeriodDate] = useState<Date | undefined>(undefined);
   const [cycleLength, setCycleLength] = useState<number>(28);
+  const [pregnancyStartDate, setPregnancyStartDate] = useState<Date | undefined>(undefined);
   
-  // Step 5: Contraceptive
+  // Contraceptive (for menstruating)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [contraceptiveDetails, setContraceptiveDetails] = useState<ContraceptiveDetails>({});
   const [brandSearch, setBrandSearch] = useState('');
   const [showBrandSuggestions, setShowBrandSuggestions] = useState(false);
 
-  const totalSteps = 5;
-  
+  // Calculate total steps based on life phase
+  const getTotalSteps = () => {
+    if (lifePhase === 'menopause') return 6; // Identity (2) + Phase (1) + Style (2) + Skip sync = 6 sub-steps
+    if (lifePhase === 'pregnant') return 7; // Identity + Phase + Style + Pregnancy date
+    return 9; // Full flow with contraceptive
+  };
+
+  const totalSteps = getTotalSteps();
+
   // Filter brands based on search
   const filteredBrands = contraceptiveBrands.filter(brand =>
     brand.label.toLowerCase().includes(brandSearch.toLowerCase()) ||
     brand.type.toLowerCase().includes(brandSearch.toLowerCase())
   );
 
-  // Check if method needs specific inputs
+  // Check contraceptive requirements
   const needsBrand = ['pill', 'injection', 'iud', 'implant'].includes(selectedMethod || '');
   const needsReminder = selectedMethod === 'pill';
   const needsInjectionDetails = selectedMethod === 'injection';
   const needsRingPatchDetails = ['ring', 'patch'].includes(selectedMethod || '');
   const needsInsertionDate = ['iud', 'implant'].includes(selectedMethod || '');
 
+  // Building profile animation steps
+  const buildingSteps = [
+    { label: 'Analisando seu perfil...', icon: '🔍' },
+    { label: 'Personalizando Chef IA...', icon: '👩‍🍳' },
+    { label: `Configurando modo ${lifePhase === 'pregnant' ? 'Gestante' : lifePhase === 'menopause' ? 'Menopausa' : 'Ciclo'}...`, icon: '⚡' },
+    { label: 'Seu santuário está pronto!', icon: '🌸' },
+  ];
+
+  // Animate building profile
+  useEffect(() => {
+    if (showBuildingProfile && buildingStep < buildingSteps.length) {
+      const timer = setTimeout(() => {
+        setBuildingStep(prev => prev + 1);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+    if (showBuildingProfile && buildingStep >= buildingSteps.length) {
+      const timer = setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [showBuildingProfile, buildingStep, navigate]);
+
   const handleNext = () => {
-    if (currentStep === 1 && selectedGoals.length === 0) {
+    // Validation per step
+    if (currentStep === 1 && !fullName.trim()) {
+      toast({ title: 'Como quer ser chamada?', variant: 'destructive' });
+      return;
+    }
+    if (currentStep === 2 && !dateOfBirth) {
+      toast({ title: 'Informe sua data de nascimento', variant: 'destructive' });
+      return;
+    }
+    if (currentStep === 3 && !lifePhase) {
+      toast({ title: 'Selecione sua fase biológica', variant: 'destructive' });
+      return;
+    }
+    if (currentStep === 4 && selectedGoals.length === 0) {
       toast({ title: 'Selecione pelo menos um objetivo', variant: 'destructive' });
       return;
     }
-    if (currentStep === 2 && !selectedDiet) {
+    if (currentStep === 5 && !selectedDiet) {
       toast({ title: 'Selecione seu estilo alimentar', variant: 'destructive' });
       return;
     }
-    if (currentStep === 3 && !selectedActivity) {
+    if (currentStep === 6 && !selectedActivity) {
       toast({ title: 'Selecione seu ritmo de movimento', variant: 'destructive' });
       return;
     }
-    if (currentStep === 4 && !lastPeriodDate) {
+    
+    // For menstruating: validate cycle step
+    if (lifePhase === 'menstruating') {
+      if (currentStep === 7 && !lastPeriodDate) {
+        toast({ title: 'Informe a data da última menstruação', variant: 'destructive' });
+        return;
+      }
+      if (currentStep === 8 && !selectedCategory) {
+        toast({ title: 'Selecione uma categoria', variant: 'destructive' });
+        return;
+      }
+      if (currentStep === 9 && !selectedMethod) {
+        toast({ title: 'Selecione um método', variant: 'destructive' });
+        return;
+      }
+    }
+    
+    // For pregnant: validate pregnancy date
+    if (lifePhase === 'pregnant' && currentStep === 7 && !pregnancyStartDate) {
       toast({ title: 'Informe a data da última menstruação', variant: 'destructive' });
       return;
     }
-    if (currentStep === 5 && !selectedMethod) {
-      toast({ title: 'Selecione um método contraceptivo', variant: 'destructive' });
+    
+    // Determine next step based on life phase
+    if (currentStep === 6 && lifePhase === 'menopause') {
+      // Menopause skips cycle config
+      handleComplete();
       return;
     }
     
-    if (currentStep < totalSteps) {
-      setCurrentStep(prev => prev + 1);
-    } else {
+    if (lifePhase === 'pregnant' && currentStep === 7) {
       handleComplete();
+      return;
     }
+    
+    if (lifePhase === 'menstruating' && currentStep === 9) {
+      handleComplete();
+      return;
+    }
+    
+    setCurrentStep(prev => prev + 1);
   };
 
   const handleBack = () => {
@@ -235,34 +302,44 @@ const Onboarding: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Use toLocalDateString to prevent timezone bugs
+      const updateData: any = {
+        full_name: fullName,
+        date_of_birth: dateOfBirth ? toLocalDateString(dateOfBirth) : null,
+        life_phase: lifePhase,
+        is_trying_to_conceive: isTryingToConceive || selectedGoals.includes('get_pregnant'),
+        goal: selectedGoals.join(','),
+        diet_type: selectedDiet,
+        fitness_level: selectedActivity,
+        onboarding_completed: true,
+      };
+
+      // Add cycle data for menstruating users
+      if (lifePhase === 'menstruating') {
+        updateData.last_period_start = lastPeriodDate ? toLocalDateString(lastPeriodDate) : null;
+        updateData.cycle_length = cycleLength;
+        updateData.contraceptive_type = selectedMethod;
+        updateData.contraceptive_brand = contraceptiveDetails.brand || null;
+        updateData.pill_reminder_time = contraceptiveDetails.reminderTime || null;
+        updateData.contraceptive_details = contraceptiveDetails;
+      }
+
+      // Add pregnancy data for pregnant users
+      if (lifePhase === 'pregnant') {
+        updateData.pregnancy_start_date = pregnancyStartDate ? toLocalDateString(pregnancyStartDate) : null;
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .update({
-          goal: selectedGoals.join(','),
-          diet_type: selectedDiet,
-          fitness_level: selectedActivity,
-          last_period_start: lastPeriodDate ? toLocalDateString(lastPeriodDate) : null,
-          cycle_length: cycleLength,
-          contraceptive_type: selectedMethod,
-          contraceptive_brand: contraceptiveDetails.brand || null,
-          pill_reminder_time: contraceptiveDetails.reminderTime || null,
-          contraceptive_details: contraceptiveDetails as any,
-          onboarding_completed: true,
-        })
+        .update(updateData)
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      // Refresh cycle data immediately to sync the Today tab
       await refreshCycleData();
 
-      toast({
-        title: '🌿 Bem-vinda ao Plenya!',
-        description: 'Seu perfil foi configurado com sucesso.',
-      });
-
-      navigate('/', { replace: true });
+      // Show building profile animation
+      setShowBuildingProfile(true);
+      
     } catch (error) {
       console.error('Error completing onboarding:', error);
       toast({
@@ -270,7 +347,6 @@ const Onboarding: React.FC = () => {
         description: 'Tente novamente.',
         variant: 'destructive',
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -283,23 +359,16 @@ const Onboarding: React.FC = () => {
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    setSelectedMethod(null);
+    const methods = subMethods[categoryId as keyof typeof subMethods];
+    if (methods.length === 1) {
+      setSelectedMethod(methods[0].id);
+    } else {
+      setSelectedMethod(null);
+    }
     setContraceptiveDetails({});
     setBrandSearch('');
   };
 
-  const handleMethodSelect = (methodId: string) => {
-    setSelectedMethod(methodId);
-    setContraceptiveDetails({});
-    setBrandSearch('');
-  };
-
-  // Helper to handle date selection with timezone fix
-  const handleDateSelect = (date: Date | undefined, setter: (date: Date | undefined) => void) => {
-    setter(date);
-  };
-
-  // Helper to handle contraceptive date selection with local string conversion
   const handleContraceptiveDateSelect = (date: Date | undefined, field: 'lastApplicationDate' | 'insertionDate') => {
     setContraceptiveDetails(prev => ({
       ...prev,
@@ -307,8 +376,75 @@ const Onboarding: React.FC = () => {
     }));
   };
 
+  // Calculate current chapter
+  const getCurrentChapter = () => {
+    if (currentStep <= 2) return 1;
+    if (currentStep === 3) return 2;
+    if (currentStep <= 6) return 3;
+    return 4;
+  };
+
+  // Building Profile Screen
+  if (showBuildingProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 flex flex-col items-center justify-center p-6">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center"
+        >
+          {/* Pulsing Logo */}
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-gradient-to-br from-primary to-terracotta flex items-center justify-center shadow-lg"
+          >
+            <Sparkles className="w-12 h-12 text-white" />
+          </motion.div>
+
+          <h2 className="text-2xl font-bold text-foreground mb-2">Preparando seu Plenya</h2>
+          <p className="text-muted-foreground mb-8">Um momento, {fullName.split(' ')[0]}...</p>
+
+          {/* Animated Checklist */}
+          <div className="space-y-4 text-left max-w-xs mx-auto">
+            {buildingSteps.map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ 
+                  opacity: buildingStep > index ? 1 : buildingStep === index ? 0.7 : 0.3,
+                  x: 0 
+                }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center gap-3"
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                  buildingStep > index ? "bg-leaf-green/20" : "bg-muted"
+                )}>
+                  {buildingStep > index ? (
+                    <Check className="w-4 h-4 text-leaf-green" />
+                  ) : (
+                    <span className="text-lg">{step.icon}</span>
+                  )}
+                </div>
+                <span className={cn(
+                  "text-sm transition-all",
+                  buildingStep > index ? "text-foreground" : "text-muted-foreground"
+                )}>
+                  {step.label}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   const renderStep = () => {
     switch (currentStep) {
+      // CHAPTER 1: Identity - Name
       case 1:
         return (
           <motion.div
@@ -319,57 +455,26 @@ const Onboarding: React.FC = () => {
             className="space-y-6"
           >
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">Quais são seus objetivos?</h2>
-              <p className="text-muted-foreground">Selecione um ou mais para personalizar sua experiência</p>
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-terracotta/20 flex items-center justify-center">
+                <User className="w-10 h-10 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Como quer ser chamada?</h2>
+              <p className="text-muted-foreground">Este é o começo da sua jornada</p>
             </div>
             
-            <div className="grid gap-3">
-              {goals.map((goal) => {
-                const Icon = goal.icon;
-                const isSelected = selectedGoals.includes(goal.id);
-                
-                const toggleGoal = () => {
-                  setSelectedGoals(prev => 
-                    prev.includes(goal.id)
-                      ? prev.filter(g => g !== goal.id)
-                      : [...prev, goal.id]
-                  );
-                };
-                
-                return (
-                  <button
-                    key={goal.id}
-                    onClick={toggleGoal}
-                    className={cn(
-                      "flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200",
-                      isSelected
-                        ? "border-primary bg-primary/10 shadow-md"
-                        : "border-border bg-card hover:border-primary/50 hover:bg-accent/50"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-12 h-12 rounded-full flex items-center justify-center",
-                      isSelected ? "bg-primary/20" : "bg-muted"
-                    )}>
-                      <Icon className={cn("w-6 h-6", goal.color)} />
-                    </div>
-                    <span className="font-medium text-foreground">{goal.label}</span>
-                    {isSelected && (
-                      <Check className="w-5 h-5 text-primary ml-auto" />
-                    )}
-                  </button>
-                );
-              })}
+            <div className="space-y-4">
+              <Input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Seu nome ou apelido"
+                className="h-14 text-lg text-center"
+                autoFocus
+              />
             </div>
-            
-            {selectedGoals.length > 0 && (
-              <p className="text-sm text-muted-foreground text-center">
-                {selectedGoals.length} objetivo{selectedGoals.length > 1 ? 's' : ''} selecionado{selectedGoals.length > 1 ? 's' : ''}
-              </p>
-            )}
           </motion.div>
         );
 
+      // CHAPTER 1: Identity - Birth Date
       case 2:
         return (
           <motion.div
@@ -380,11 +485,181 @@ const Onboarding: React.FC = () => {
             className="space-y-6"
           >
             <div className="text-center mb-8">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-terracotta/20 flex items-center justify-center">
+                <Cake className="w-10 h-10 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Quando iniciou sua jornada?</h2>
+              <p className="text-muted-foreground">Para calcular sua idade metabólica</p>
+            </div>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-center text-left font-normal h-14 text-lg",
+                    !dateOfBirth && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-3 h-5 w-5" />
+                  {dateOfBirth
+                    ? format(dateOfBirth, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                    : "Selecione sua data de nascimento"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 pointer-events-auto" align="center">
+                <Calendar
+                  mode="single"
+                  selected={dateOfBirth}
+                  onSelect={setDateOfBirth}
+                  disabled={(date) => date > new Date() || date < new Date('1940-01-01')}
+                  initialFocus
+                  captionLayout="dropdown-buttons"
+                  fromYear={1940}
+                  toYear={new Date().getFullYear()}
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </motion.div>
+        );
+
+      // CHAPTER 2: Life Phase (The Big Filter)
+      case 3:
+        return (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Em qual fase você está?</h2>
+              <p className="text-muted-foreground">Isso define como o Plenya vai te acompanhar</p>
+            </div>
+            
+            <div className="grid gap-4">
+              {lifePhases.map((phase) => {
+                const isSelected = lifePhase === phase.id;
+                
+                return (
+                  <button
+                    key={phase.id}
+                    onClick={() => setLifePhase(phase.id)}
+                    className={cn(
+                      "flex items-center gap-4 p-5 rounded-2xl border-2 transition-all duration-200",
+                      isSelected
+                        ? "border-primary bg-primary/10 shadow-lg scale-[1.02]"
+                        : "border-border bg-card hover:border-primary/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl",
+                      isSelected ? "bg-primary/20" : "bg-muted"
+                    )}>
+                      {phase.icon}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-semibold text-lg text-foreground block">{phase.label}</span>
+                      <span className="text-sm text-muted-foreground">{phase.description}</span>
+                    </div>
+                    {isSelected && (
+                      <Check className="w-6 h-6 text-primary" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        );
+
+      // CHAPTER 3: Goals
+      case 4:
+        return (
+          <motion.div
+            key="step4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-2">Quais são seus objetivos?</h2>
+              <p className="text-muted-foreground">Selecione um ou mais</p>
+            </div>
+            
+            <div className="grid gap-3">
+              {goals.map((goal) => {
+                const Icon = goal.icon;
+                const isSelected = selectedGoals.includes(goal.id);
+                
+                // Hide "Engravidar" for pregnant/menopause users
+                if ((lifePhase === 'pregnant' || lifePhase === 'menopause') && goal.id === 'get_pregnant') {
+                  return null;
+                }
+                
+                // Hide "Alívio de TPM" for pregnant/menopause
+                if ((lifePhase === 'pregnant' || lifePhase === 'menopause') && goal.id === 'pms_relief') {
+                  return null;
+                }
+                
+                return (
+                  <button
+                    key={goal.id}
+                    onClick={() => {
+                      setSelectedGoals(prev => 
+                        prev.includes(goal.id)
+                          ? prev.filter(g => g !== goal.id)
+                          : [...prev, goal.id]
+                      );
+                      if (goal.id === 'get_pregnant') {
+                        setIsTryingToConceive(!selectedGoals.includes(goal.id));
+                      }
+                    }}
+                    className={cn(
+                      "flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200",
+                      isSelected
+                        ? "border-primary bg-primary/10 shadow-md"
+                        : "border-border bg-card hover:border-primary/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center",
+                      isSelected ? "bg-primary/20" : "bg-muted"
+                    )}>
+                      <Icon className={cn("w-6 h-6", goal.color)} />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-medium text-foreground block">{goal.label}</span>
+                      <span className="text-xs text-muted-foreground">{goal.tip}</span>
+                    </div>
+                    {isSelected && (
+                      <Check className="w-5 h-5 text-primary" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        );
+
+      // CHAPTER 3: Dietary Style
+      case 5:
+        return (
+          <motion.div
+            key="step5"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
                 <Utensils className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Qual seu estilo alimentar?</h2>
-              <p className="text-muted-foreground">Para receitas e sugestões personalizadas</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Seu estilo alimentar</h2>
+              <p className="text-muted-foreground">O Chef IA vai se adaptar a você</p>
             </div>
             
             <div className="grid gap-3">
@@ -399,7 +674,7 @@ const Onboarding: React.FC = () => {
                       "flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200",
                       isSelected
                         ? "border-primary bg-primary/10 shadow-md"
-                        : "border-border bg-card hover:border-primary/50 hover:bg-accent/50"
+                        : "border-border bg-card hover:border-primary/50"
                     )}
                   >
                     <div className={cn(
@@ -410,7 +685,7 @@ const Onboarding: React.FC = () => {
                     </div>
                     <div className="flex-1 text-left">
                       <span className="font-medium text-foreground block">{diet.label}</span>
-                      <span className="text-sm text-muted-foreground">{diet.description}</span>
+                      <span className="text-xs text-muted-foreground">{diet.description}</span>
                     </div>
                     {isSelected && (
                       <Check className="w-5 h-5 text-primary" />
@@ -422,21 +697,28 @@ const Onboarding: React.FC = () => {
           </motion.div>
         );
 
-      case 3:
+      // CHAPTER 3: Activity Level
+      case 6:
         return (
           <motion.div
-            key="step3"
+            key="step6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6"
           >
-            <div className="text-center mb-8">
+            <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
                 <Zap className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Seu ritmo de movimento:</h2>
-              <p className="text-muted-foreground">Para treinos na medida certa</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Seu ritmo de movimento</h2>
+              <p className="text-muted-foreground">
+                {lifePhase === 'pregnant' 
+                  ? 'Adaptaremos para gestação segura' 
+                  : lifePhase === 'menopause'
+                    ? 'Exercícios para equilíbrio hormonal'
+                    : 'Treinos sincronizados com seu ciclo'}
+              </p>
             </div>
             
             <div className="grid gap-3">
@@ -451,7 +733,7 @@ const Onboarding: React.FC = () => {
                       "flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200",
                       isSelected
                         ? "border-primary bg-primary/10 shadow-md"
-                        : "border-border bg-card hover:border-primary/50 hover:bg-accent/50"
+                        : "border-border bg-card hover:border-primary/50"
                     )}
                   >
                     <div className={cn(
@@ -462,7 +744,7 @@ const Onboarding: React.FC = () => {
                     </div>
                     <div className="flex-1 text-left">
                       <span className="font-medium text-foreground block">{activity.label}</span>
-                      <span className="text-sm text-muted-foreground">{activity.description}</span>
+                      <span className="text-xs text-muted-foreground">{activity.description}</span>
                     </div>
                     {isSelected && (
                       <Check className="w-5 h-5 text-primary" />
@@ -474,16 +756,74 @@ const Onboarding: React.FC = () => {
           </motion.div>
         );
 
-      case 4:
+      // CHAPTER 4: Cycle Sync - DUM (for menstruating) OR Pregnancy Date (for pregnant)
+      case 7:
+        if (lifePhase === 'pregnant') {
+          return (
+            <motion.div
+              key="step7-pregnant"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-terracotta/20 to-burnt-pink/20 flex items-center justify-center text-4xl">
+                  🤰
+                </div>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Data da Última Menstruação</h2>
+                <p className="text-muted-foreground">Para calcular suas semanas de gestação</p>
+              </div>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-center text-left font-normal h-14 text-lg",
+                      !pregnancyStartDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-3 h-5 w-5" />
+                    {pregnancyStartDate
+                      ? format(pregnancyStartDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                      : "Selecione a data da DUM"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 pointer-events-auto" align="center">
+                  <Calendar
+                    mode="single"
+                    selected={pregnancyStartDate}
+                    onSelect={setPregnancyStartDate}
+                    disabled={(date) => date > new Date() || date < new Date(Date.now() - 280 * 24 * 60 * 60 * 1000)}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+
+              {pregnancyStartDate && (
+                <div className="p-4 bg-terracotta/10 rounded-xl text-center">
+                  <p className="text-sm text-muted-foreground">Você está com aproximadamente</p>
+                  <p className="text-3xl font-bold text-terracotta">
+                    {Math.floor((Date.now() - pregnancyStartDate.getTime()) / (7 * 24 * 60 * 60 * 1000))} semanas
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          );
+        }
+
+        // Menstruating: DUM
         return (
           <motion.div
-            key="step4"
+            key="step7-cycle"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6"
           >
-            <div className="text-center mb-8">
+            <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-foreground mb-2">Dados do Ciclo</h2>
               <p className="text-muted-foreground">Para previsões mais precisas</p>
             </div>
@@ -512,7 +852,7 @@ const Onboarding: React.FC = () => {
                     <Calendar
                       mode="single"
                       selected={lastPeriodDate}
-                      onSelect={(date) => handleDateSelect(date, setLastPeriodDate)}
+                      onSelect={setLastPeriodDate}
                       disabled={(date) => date > new Date()}
                       initialFocus
                       className="p-3 pointer-events-auto"
@@ -545,18 +885,16 @@ const Onboarding: React.FC = () => {
                     +
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  Geralmente varia entre 21 e 35 dias
-                </p>
               </div>
             </div>
           </motion.div>
         );
 
-      case 5:
+      // CHAPTER 4: Contraceptive Category
+      case 8:
         return (
           <motion.div
-            key="step5"
+            key="step8"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -564,10 +902,9 @@ const Onboarding: React.FC = () => {
           >
             <div className="text-center mb-4">
               <h2 className="text-2xl font-bold text-foreground mb-2">Método Contraceptivo</h2>
-              <p className="text-muted-foreground">Para um acompanhamento personalizado</p>
+              <p className="text-muted-foreground">Para acompanhamento personalizado</p>
             </div>
             
-            {/* Category Selection */}
             <div className="grid grid-cols-2 gap-3">
               {contraceptiveCategories.map((category) => {
                 const Icon = category.icon;
@@ -609,7 +946,7 @@ const Onboarding: React.FC = () => {
                   {subMethods[selectedCategory as keyof typeof subMethods].map((method) => (
                     <button
                       key={method.id}
-                      onClick={() => handleMethodSelect(method.id)}
+                      onClick={() => setSelectedMethod(method.id)}
                       className={cn(
                         "px-4 py-2 rounded-full text-sm font-medium transition-all",
                         selectedMethod === method.id
@@ -623,21 +960,28 @@ const Onboarding: React.FC = () => {
                 </div>
               </div>
             )}
+          </motion.div>
+        );
 
-            {/* Auto-select single methods */}
-            {selectedCategory && subMethods[selectedCategory as keyof typeof subMethods]?.length === 1 && !selectedMethod && (
-              (() => {
-                const singleMethod = subMethods[selectedCategory as keyof typeof subMethods][0];
-                handleMethodSelect(singleMethod.id);
-                return null;
-              })()
-            )}
+      // CHAPTER 4: Contraceptive Details
+      case 9:
+        return (
+          <motion.div
+            key="step9"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-5"
+          >
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-foreground mb-2">Detalhes do Método</h2>
+            </div>
 
             {/* Brand Search */}
-            {selectedMethod && needsBrand && (
-              <div className="space-y-3 pt-3 border-t border-border">
+            {needsBrand && (
+              <div className="space-y-3">
                 <label className="text-sm font-medium text-foreground">
-                  Nome/Marca do medicamento
+                  Nome/Marca
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -649,7 +993,7 @@ const Onboarding: React.FC = () => {
                       setShowBrandSuggestions(true);
                     }}
                     onFocus={() => setShowBrandSuggestions(true)}
-                    placeholder="Ex: Yasmin, Mirena, Depo-Provera..."
+                    placeholder="Ex: Yasmin, Mirena..."
                     className="pl-10"
                   />
                   
@@ -672,7 +1016,7 @@ const Onboarding: React.FC = () => {
             )}
 
             {/* Pill Reminder */}
-            {selectedMethod && needsReminder && (
+            {needsReminder && (
               <div className="space-y-3 pt-3 border-t border-border">
                 <div className="flex items-center justify-between">
                   <div>
@@ -709,7 +1053,7 @@ const Onboarding: React.FC = () => {
             )}
 
             {/* Injection Details */}
-            {selectedMethod && needsInjectionDetails && (
+            {needsInjectionDetails && (
               <div className="space-y-4 pt-3 border-t border-border">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
@@ -746,15 +1090,10 @@ const Onboarding: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Frequência
-                  </label>
+                  <label className="text-sm font-medium text-foreground">Frequência</label>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setContraceptiveDetails(prev => ({ 
-                        ...prev, 
-                        frequency: 'monthly' 
-                      }))}
+                      onClick={() => setContraceptiveDetails(prev => ({ ...prev, frequency: 'monthly' }))}
                       className={cn(
                         "flex-1 py-3 rounded-lg text-sm font-medium transition-all",
                         contraceptiveDetails.frequency === 'monthly'
@@ -765,10 +1104,7 @@ const Onboarding: React.FC = () => {
                       Mensal (30 dias)
                     </button>
                     <button
-                      onClick={() => setContraceptiveDetails(prev => ({ 
-                        ...prev, 
-                        frequency: 'quarterly' 
-                      }))}
+                      onClick={() => setContraceptiveDetails(prev => ({ ...prev, frequency: 'quarterly' }))}
                       className={cn(
                         "flex-1 py-3 rounded-lg text-sm font-medium transition-all",
                         contraceptiveDetails.frequency === 'quarterly'
@@ -784,12 +1120,10 @@ const Onboarding: React.FC = () => {
             )}
 
             {/* Ring/Patch Details */}
-            {selectedMethod && needsRingPatchDetails && (
+            {needsRingPatchDetails && (
               <div className="space-y-4 pt-3 border-t border-border">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Dia da última troca/colocação
-                  </label>
+                  <label className="text-sm font-medium text-foreground">Dia da última troca</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -821,15 +1155,10 @@ const Onboarding: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Ciclo de uso
-                  </label>
+                  <label className="text-sm font-medium text-foreground">Ciclo de uso</label>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setContraceptiveDetails(prev => ({ 
-                        ...prev, 
-                        usageCycle: '21-7' 
-                      }))}
+                      onClick={() => setContraceptiveDetails(prev => ({ ...prev, usageCycle: '21-7' }))}
                       className={cn(
                         "flex-1 py-3 rounded-lg text-sm font-medium transition-all",
                         contraceptiveDetails.usageCycle === '21-7'
@@ -840,10 +1169,7 @@ const Onboarding: React.FC = () => {
                       21 dias + 7 pausa
                     </button>
                     <button
-                      onClick={() => setContraceptiveDetails(prev => ({ 
-                        ...prev, 
-                        usageCycle: 'continuous' 
-                      }))}
+                      onClick={() => setContraceptiveDetails(prev => ({ ...prev, usageCycle: 'continuous' }))}
                       className={cn(
                         "flex-1 py-3 rounded-lg text-sm font-medium transition-all",
                         contraceptiveDetails.usageCycle === 'continuous'
@@ -858,12 +1184,10 @@ const Onboarding: React.FC = () => {
               </div>
             )}
 
-            {/* DIU/Implant Insertion Date */}
-            {selectedMethod && needsInsertionDate && (
+            {/* DIU/Implant Details */}
+            {needsInsertionDate && (
               <div className="space-y-3 pt-3 border-t border-border">
-                <label className="text-sm font-medium text-foreground">
-                  Data de Inserção
-                </label>
+                <label className="text-sm font-medium text-foreground">Data de Inserção</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -892,11 +1216,6 @@ const Onboarding: React.FC = () => {
                     />
                   </PopoverContent>
                 </Popover>
-                <p className="text-xs text-muted-foreground">
-                  {selectedMethod === 'iud' 
-                    ? 'Usado para calcular a validade (5-10 anos dependendo do tipo)'
-                    : 'Usado para calcular a validade (3 anos)'}
-                </p>
               </div>
             )}
           </motion.div>
@@ -907,67 +1226,73 @@ const Onboarding: React.FC = () => {
     }
   };
 
+  const currentChapter = getCurrentChapter();
+  const progressPercent = (currentStep / totalSteps) * 100;
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col">
-      {/* Progress Bar */}
-      <div className="p-4 pt-8">
-        <div className="flex gap-2 mb-2">
-          {Array.from({ length: totalSteps }).map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "h-1.5 flex-1 rounded-full transition-colors duration-300",
-                i < currentStep ? "bg-primary" : "bg-muted"
-              )}
-            />
-          ))}
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 flex flex-col">
+      {/* Header with Chapter Info */}
+      <div className="px-6 pt-6 pb-2">
+        <div className="flex items-center justify-between mb-4">
+          {currentStep > 1 ? (
+            <Button variant="ghost" size="icon" onClick={handleBack}>
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+          ) : (
+            <div className="w-10" />
+          )}
+          
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">
+              Capítulo {currentChapter} de 4
+            </p>
+            <p className="text-sm font-medium text-foreground">
+              {chapters[currentChapter - 1]?.title}
+            </p>
+          </div>
+          
+          <div className="w-10" />
         </div>
-        <p className="text-sm text-muted-foreground text-center">
-          Passo {currentStep} de {totalSteps}
-        </p>
+
+        {/* Progress Bar */}
+        <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-primary to-terracotta rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 py-4 overflow-auto">
+      <div className="flex-1 px-6 py-6 overflow-auto">
         <AnimatePresence mode="wait">
           {renderStep()}
         </AnimatePresence>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="p-6 border-t border-border bg-background/80 backdrop-blur-sm">
-        <div className="flex gap-3">
-          {currentStep > 1 && (
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Voltar
-            </Button>
+      {/* Bottom Navigation */}
+      <div className="p-6 pt-2">
+        <Button
+          onClick={handleNext}
+          disabled={isSubmitting}
+          className="w-full h-14 text-lg phase-gradient text-white"
+        >
+          {isSubmitting ? (
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : currentStep === totalSteps ? (
+            <>
+              <Sparkles className="w-5 h-5 mr-2" />
+              Criar Meu Santuário
+            </>
+          ) : (
+            <>
+              Continuar
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </>
           )}
-          <Button
-            onClick={handleNext}
-            className="flex-1 phase-gradient text-white"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : currentStep === totalSteps ? (
-              <>
-                Começar
-                <Check className="w-4 h-4 ml-1" />
-              </>
-            ) : (
-              <>
-                Próximo
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </>
-            )}
-          </Button>
-        </div>
+        </Button>
       </div>
     </div>
   );

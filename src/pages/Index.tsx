@@ -17,23 +17,33 @@ import IntimacyCard from '@/components/home/IntimacyCard';
 import PillTracker from '@/components/home/PillTracker';
 import DeviceExpirationCard from '@/components/home/DeviceExpirationCard';
 import NextPeriodCard from '@/components/home/NextPeriodCard';
+import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
+import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
+import MenopauseCard from '@/components/home/MenopauseCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
 import { useContraceptive } from '@/hooks/useContraceptive';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { isPillMethod, hasExpirationDate, isHormonalMethod } from '@/data/contraceptiveMethods';
 
 const Index: React.FC = () => {
   const { getPhaseInfo } = useCycle();
   const { isToday } = useSelectedDate();
   const { contraceptive_type } = useContraceptive();
+  const { lifePhase, pregnancyWeeks, pregnancyStartDate, isTryingToConceive, age, loading: lifePhaseLoading } = useLifePhase();
   const phaseInfo = getPhaseInfo();
   const [showCalendar, setShowCalendar] = useState(false);
 
   const showPillTracker = isPillMethod(contraceptive_type);
   const showDeviceExpiration = hasExpirationDate(contraceptive_type);
   const usesHormonal = isHormonalMethod(contraceptive_type);
+
+  // Determine what mode we're in based on life phase
+  const isPregnant = lifePhase === 'pregnant';
+  const isMenopause = lifePhase === 'menopause';
+  const isMenstruating = lifePhase === 'menstruating' || !lifePhase;
 
   return (
     <PageLayout>
@@ -57,7 +67,13 @@ const Index: React.FC = () => {
           
           <h1 className="text-2xl font-bold text-foreground">Plenya</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isToday ? 'Sinta-se em casa no seu corpo' : 'Visualizando histórico'}
+            {isToday 
+              ? isPregnant 
+                ? 'Acompanhando sua gestação' 
+                : isMenopause 
+                  ? 'Seu bem-estar em primeiro lugar'
+                  : 'Sinta-se em casa no seu corpo' 
+              : 'Visualizando histórico'}
           </p>
         </motion.div>
 
@@ -70,49 +86,72 @@ const Index: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Show CycleWheel only for today */}
-        {isToday && <CycleWheel />}
+        {/* Show CycleWheel only for menstruating users viewing today */}
+        {isToday && isMenstruating && <CycleWheel />}
       </div>
 
       <div className="space-y-4 mt-4">
-        {/* Next Period Prediction Card */}
-        {isToday && <NextPeriodCard />}
+        {/* === PREGNANT MODE === */}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyStartDate && (
+          <PregnancyWeeksCard weeks={pregnancyWeeks} pregnancyStartDate={pregnancyStartDate} />
+        )}
+
+        {/* === MENOPAUSE MODE === */}
+        {isToday && isMenopause && (
+          <MenopauseCard age={age} />
+        )}
+
+        {/* === MENSTRUATING MODE === */}
+        {isToday && isMenstruating && (
+          <>
+            {/* Trying to Conceive Card - Golden Fertile Window */}
+            {isTryingToConceive && <TryingToConceiveCard />}
+
+            {/* Next Period Prediction Card */}
+            <NextPeriodCard />
+          </>
+        )}
+
         {/* Show historical data summary when viewing past dates */}
         {!isToday && <DayDataSummary />}
         
         {/* Show current day components when viewing today */}
         {isToday && (
           <>
-            {/* Adaptive Home Card - Shows based on contraceptive method */}
-            <AdaptiveHomeCard />
+            {/* Adaptive Home Card - Shows based on contraceptive method (menstruating only) */}
+            {isMenstruating && <AdaptiveHomeCard />}
             
-            {/* Water Tracker */}
+            {/* Water Tracker - All modes */}
             <WaterTracker />
-            {showPillTracker && (
+
+            {/* Pill Tracker - Menstruating only */}
+            {isMenstruating && showPillTracker && (
               <div className="px-4">
                 <PillTracker />
               </div>
             )}
 
-            {/* Device Expiration Card (DIU/Implant) */}
-            {showDeviceExpiration && (
+            {/* Device Expiration Card (DIU/Implant) - Menstruating only */}
+            {isMenstruating && showDeviceExpiration && (
               <div className="px-4">
                 <DeviceExpirationCard />
               </div>
             )}
             
-            {/* Chef Suggestion */}
+            {/* Chef Suggestion - All modes */}
             <ChefSuggestion />
             
-            {/* Intimacy & Health Card */}
-            <div className="px-4">
-              <IntimacyCard />
-            </div>
+            {/* Intimacy & Health Card - Menstruating and Menopause */}
+            {(isMenstruating || isMenopause) && (
+              <div className="px-4">
+                <IntimacyCard />
+              </div>
+            )}
             
-            {/* Insight Card */}
-            <InsightCard />
+            {/* Insight Card - Menstruating only */}
+            {isMenstruating && <InsightCard />}
             
-            {/* Quick Log */}
+            {/* Quick Log - All modes */}
             <QuickLog />
             
             {/* SOS Partner FAB */}

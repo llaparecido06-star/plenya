@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X, Droplets, Heart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Droplets, Heart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useCycle } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { format, isSameDay } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +23,8 @@ interface HistoryCalendarProps {
 const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const { selectedDate, setSelectedDate, isToday, goToToday } = useSelectedDate();
   const { datesWithData } = useHistoricalData();
-  const { getPredictedPeriodDates } = useCycle();
+  const { getPredictedPeriodDates, cycleLength, lastPeriodStart } = useCycle();
+  const { isTryingToConceive, lifePhase } = useLifePhase();
   const { user } = useAuth();
   
   const [viewMonth, setViewMonth] = useState(new Date(selectedDate));
@@ -83,6 +85,28 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     return getPredictedPeriodDates(6); // 6 months ahead
   }, [getPredictedPeriodDates]);
 
+  // Calculate fertile window dates for trying to conceive users
+  const fertileWindowDates = useMemo(() => {
+    if (!isTryingToConceive || !lastPeriodStart || lifePhase !== 'menstruating') return [];
+    
+    const dates: Date[] = [];
+    const ovulationDay = cycleLength - 14;
+    const fertileStart = ovulationDay - 4;
+    const fertileEnd = ovulationDay + 1;
+    
+    // Calculate fertile days for next 3 cycles
+    for (let cycle = 0; cycle < 3; cycle++) {
+      const cycleStartOffset = cycle * cycleLength;
+      for (let day = fertileStart; day <= fertileEnd; day++) {
+        const fertileDate = new Date(lastPeriodStart);
+        fertileDate.setDate(lastPeriodStart.getDate() + cycleStartOffset + day - 1);
+        dates.push(fertileDate);
+      }
+    }
+    
+    return dates;
+  }, [isTryingToConceive, lastPeriodStart, cycleLength, lifePhase]);
+
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -140,6 +164,12 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const isPredictedPeriod = (day: number): boolean => {
     const date = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
     return predictedPeriodDates.some(periodDate => isSameDay(periodDate, date));
+  };
+
+  const isFertileDay = (day: number): boolean => {
+    if (!isTryingToConceive) return false;
+    const date = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    return fertileWindowDates.some(fertileDate => isSameDay(fertileDate, date));
   };
 
   const isSelectedDay = (day: number): boolean => {
@@ -224,21 +254,32 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                     ? 'bg-primary text-primary-foreground' 
                     : isTodayDay(day)
                       ? 'bg-primary/20 text-primary'
-                      : isPredictedPeriod(day) && isFutureDay(day)
-                        ? 'bg-red-500/20 text-red-500 border border-red-500/30'
-                        : isFutureDay(day)
-                          ? 'text-muted-foreground/40'
-                          : 'text-foreground hover:bg-muted'
+                      : isFertileDay(day) && !isFutureDay(day)
+                        ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30'
+                        : isFertileDay(day) && isFutureDay(day)
+                          ? 'bg-amber-500/10 text-amber-500/70 border border-amber-500/20'
+                          : isPredictedPeriod(day) && isFutureDay(day)
+                            ? 'bg-red-500/20 text-red-500 border border-red-500/30'
+                            : isFutureDay(day)
+                              ? 'text-muted-foreground/40'
+                              : 'text-foreground hover:bg-muted'
                   }
                 `}
               >
                 {day}
+                {/* Fertile day indicator - golden star for trying to conceive */}
+                {isFertileDay(day) && !isSelectedDay(day) && (
+                  <Star 
+                    className="absolute -top-0.5 -right-0.5 w-3 h-3 text-amber-500" 
+                    fill="currentColor"
+                  />
+                )}
                 {/* Predicted period indicator */}
-                {isPredictedPeriod(day) && isFutureDay(day) && !isSelectedDay(day) && (
+                {isPredictedPeriod(day) && isFutureDay(day) && !isSelectedDay(day) && !isFertileDay(day) && (
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500" />
                 )}
                 {/* Intimacy log indicator - purple heart with animation */}
-                {hasIntimacyLog(day) && !isSelectedDay(day) && !isFutureDay(day) && (
+                {hasIntimacyLog(day) && !isSelectedDay(day) && !isFutureDay(day) && !isFertileDay(day) && (
                   <motion.span 
                     className="absolute -top-0.5 -right-0.5 text-purple-500"
                     initial={isNewlyAddedIntimacy(day) ? { scale: 0, opacity: 0 } : false}
@@ -255,7 +296,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                   </motion.span>
                 )}
                 {/* Data indicator dot */}
-                {isDateWithData(day) && !isSelectedDay(day) && !isFutureDay(day) && !hasIntimacyLog(day) && (
+                {isDateWithData(day) && !isSelectedDay(day) && !isFutureDay(day) && !hasIntimacyLog(day) && !isFertileDay(day) && (
                   <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
                 )}
               </button>
@@ -274,6 +315,12 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
           <Heart className="w-3 h-3 text-purple-500" fill="currentColor" />
           <span>Intimidade</span>
         </div>
+        {isTryingToConceive && (
+          <div className="flex items-center gap-1.5">
+            <Star className="w-3 h-3 text-amber-500" fill="currentColor" />
+            <span>Fértil</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-4 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
             <Droplets className="w-2.5 h-2.5 text-red-500" />
