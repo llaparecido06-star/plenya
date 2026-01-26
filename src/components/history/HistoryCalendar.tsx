@@ -27,9 +27,10 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   
   const [viewMonth, setViewMonth] = useState(new Date(selectedDate));
   const [intimacyDates, setIntimacyDates] = useState<string[]>([]);
+  const [newlyAddedDates, setNewlyAddedDates] = useState<string[]>([]);
 
   // Fetch intimacy log dates
-  const fetchIntimacyDates = React.useCallback(async () => {
+  const fetchIntimacyDates = React.useCallback(async (isRefresh = false) => {
     if (!user) return;
     
     const sixtyDaysAgo = new Date();
@@ -46,9 +47,20 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
       const datesWithActivity = data
         .filter(log => log.sensation_physical && log.sensation_physical.length > 0)
         .map(log => log.log_date);
+      
+      // Track newly added dates for animation
+      if (isRefresh) {
+        const newDates = datesWithActivity.filter(d => !intimacyDates.includes(d));
+        if (newDates.length > 0) {
+          setNewlyAddedDates(newDates);
+          // Clear animation after 2 seconds
+          setTimeout(() => setNewlyAddedDates([]), 2000);
+        }
+      }
+      
       setIntimacyDates(datesWithActivity);
     }
-  }, [user]);
+  }, [user, intimacyDates]);
 
   React.useEffect(() => {
     fetchIntimacyDates();
@@ -57,7 +69,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   // Listen for intimacy log saves to refresh calendar
   React.useEffect(() => {
     const handleIntimacySaved = () => {
-      fetchIntimacyDates();
+      fetchIntimacyDates(true); // Pass true to indicate this is a refresh
     };
     
     window.addEventListener('intimacy-log-saved', handleIntimacySaved);
@@ -118,6 +130,11 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const hasIntimacyLog = (day: number): boolean => {
     const dateStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return intimacyDates.includes(dateStr);
+  };
+
+  const isNewlyAddedIntimacy = (day: number): boolean => {
+    const dateStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return newlyAddedDates.includes(dateStr);
   };
 
   const isPredictedPeriod = (day: number): boolean => {
@@ -220,11 +237,22 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                 {isPredictedPeriod(day) && isFutureDay(day) && !isSelectedDay(day) && (
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500" />
                 )}
-                {/* Intimacy log indicator - purple heart */}
+                {/* Intimacy log indicator - purple heart with animation */}
                 {hasIntimacyLog(day) && !isSelectedDay(day) && !isFutureDay(day) && (
-                  <span className="absolute -top-0.5 -right-0.5 text-purple-500">
-                    <Heart className="w-3 h-3" fill="currentColor" />
-                  </span>
+                  <motion.span 
+                    className="absolute -top-0.5 -right-0.5 text-purple-500"
+                    initial={isNewlyAddedIntimacy(day) ? { scale: 0, opacity: 0 } : false}
+                    animate={isNewlyAddedIntimacy(day) ? { 
+                      scale: [0, 1.3, 1], 
+                      opacity: 1 
+                    } : {}}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                  >
+                    <Heart 
+                      className={`w-3 h-3 ${isNewlyAddedIntimacy(day) ? 'animate-pulse' : ''}`} 
+                      fill="currentColor" 
+                    />
+                  </motion.span>
                 )}
                 {/* Data indicator dot */}
                 {isDateWithData(day) && !isSelectedDay(day) && !isFutureDay(day) && !hasIntimacyLog(day) && (
