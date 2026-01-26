@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Wind, Clock, ChevronDown, Check, Loader2, Timer, Shuffle, Moon } from 'lucide-react';
+import { Flame, Wind, Clock, ChevronDown, Check, Loader2, Timer, Shuffle, Moon, Info } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import ExerciseDetailDrawer from './ExerciseDetailDrawer';
 import RestTimerModal from './RestTimerModal';
+import { useProfile } from '@/hooks/useProfile';
 
 interface Exercise {
   id: string;
