@@ -2,37 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Ciclos - Biohacking Feminino Design System
-   Clean Luxury aesthetic inspired by Apple Health + Flo
+/* Plenya - Sinta-se em casa no seu corpo
+   Tropical Tech aesthetic - Terracotta, Leaf Green, Burnt Pink
    Dynamic phase-based theming
 */
 
 @layer base {
   :root {
+    /* Plenya Brand Colors - Tropical Tech */
+    --terracotta: 14 65% 55%; /* Main brand color */
+    --leaf-green: 145 45% 42%; /* Secondary nature color */
+    --burnt-pink: 350 50% 60%; /* Accent warm pink */
+    --cream: 35 30% 96%; /* Light background */
+    
     /* Phase Colors - These change dynamically via CSS classes */
-    --phase-primary: 11 76% 63%; /* Default: Terracotta */
-    --phase-secondary: 11 50% 85%;
-    --phase-accent: 11 90% 70%;
-    --phase-glow: 11 80% 55%;
+    --phase-primary: 14 65% 55%; /* Default: Terracotta */
+    --phase-secondary: 14 40% 92%;
+    --phase-accent: 350 50% 60%;
+    --phase-glow: 14 70% 48%;
     
     /* Core Design Tokens */
-    --background: 30 20% 98%;
-    --foreground: 240 10% 15%;
+    --background: 35 30% 98%;
+    --foreground: 20 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 15%;
+    --card-foreground: 20 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 15%;
+    --popover-foreground: 20 15% 15%;
 
     --primary: var(--phase-primary);
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 25%;
+    --secondary: 35 20% 95%;
+    --secondary-foreground: 20 15% 25%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 5% 45%;
+    --muted: 35 15% 94%;
+    --muted-foreground: 20 10% 45%;
 
     --accent: var(--phase-accent);
     --accent-foreground: 0 0% 100%;
@@ -40,67 +46,67 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
+    --border: 35 15% 88%;
+    --input: 35 15% 88%;
     --ring: var(--phase-primary);
 
     --radius: 1rem;
 
     /* Gradients */
     --gradient-phase: linear-gradient(135deg, hsl(var(--phase-primary)), hsl(var(--phase-glow)));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(240 5% 98%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(var(--phase-secondary) / 0.3) 0%, hsl(var(--background)) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(35 20% 97%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(var(--phase-secondary) / 0.4) 0%, hsl(var(--background)) 100%);
     
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(var(--phase-primary) / 0.15);
     --shadow-glow: 0 8px 32px -8px hsl(var(--phase-primary) / 0.25);
-    --shadow-card: 0 2px 12px -2px hsl(240 10% 10% / 0.08);
+    --shadow-card: 0 2px 12px -2px hsl(20 10% 10% / 0.08);
     
     /* Typography */
     --font-display: 'SF Pro Display', system-ui, -apple-system, sans-serif;
     --font-body: 'SF Pro Text', system-ui, -apple-system, sans-serif;
 
     /* Sidebar defaults */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-background: 35 20% 98%;
+    --sidebar-foreground: 20 10% 26%;
+    --sidebar-primary: 20 15% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 35 15% 95%;
+    --sidebar-accent-foreground: 20 15% 10%;
+    --sidebar-border: 35 15% 90%;
+    --sidebar-ring: 14 65% 55%;
   }
 
   /* Phase: Menstrual - Warm Terracotta */
   .phase-menstrual {
-    --phase-primary: 11 76% 63%;
-    --phase-secondary: 11 50% 92%;
-    --phase-accent: 11 90% 70%;
-    --phase-glow: 6 70% 55%;
+    --phase-primary: 14 65% 55%;
+    --phase-secondary: 14 40% 92%;
+    --phase-accent: 350 50% 60%;
+    --phase-glow: 14 70% 48%;
   }
 
-  /* Phase: Folicular - Fresh Spring Green */
+  /* Phase: Folicular - Fresh Leaf Green */
   .phase-folicular {
-    --phase-primary: 158 41% 53%;
-    --phase-secondary: 158 35% 90%;
-    --phase-accent: 158 50% 60%;
-    --phase-glow: 165 45% 45%;
+    --phase-primary: 145 45% 42%;
+    --phase-secondary: 145 35% 90%;
+    --phase-accent: 145 50% 50%;
+    --phase-glow: 145 50% 35%;
   }
 
-  /* Phase: Ovulatória - Vibrant Coral */
+  /* Phase: Ovulatória - Burnt Pink Coral */
   .phase-ovulatoria {
-    --phase-primary: 29 89% 67%;
-    --phase-secondary: 29 70% 92%;
-    --phase-accent: 29 95% 72%;
-    --phase-glow: 20 85% 58%;
+    --phase-primary: 350 50% 60%;
+    --phase-secondary: 350 45% 92%;
+    --phase-accent: 14 65% 58%;
+    --phase-glow: 350 55% 52%;
   }
 
-  /* Phase: Lútea - Serene Lavender */
+  /* Phase: Lútea - Soft Terracotta Lavender */
   .phase-lutea {
-    --phase-primary: 270 25% 62%;
-    --phase-secondary: 270 25% 92%;
-    --phase-accent: 270 35% 70%;
-    --phase-glow: 280 30% 52%;
+    --phase-primary: 20 45% 55%;
+    --phase-secondary: 20 35% 92%;
+    --phase-accent: 350 40% 65%;
+    --phase-glow: 20 50% 48%;
   }
 
   .dark {

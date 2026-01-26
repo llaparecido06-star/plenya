@@ -1,6 +1,8 @@
 import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
 import WorkoutCard from '@/components/workout/WorkoutCard';
+import GymLogFAB from '@/components/workout/GymLogFAB';
+import LastWorkoutCard from '@/components/workout/LastWorkoutCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { bodyTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
@@ -25,9 +27,15 @@ const Corpo: React.FC = () => {
         </p>
       </div>
 
+      {/* Last Workout Card */}
+      <LastWorkoutCard />
+
       <div className="mt-4">
         <WorkoutCard />
       </div>
+
+      {/* Gym Log FAB */}
+      <GymLogFAB />
 
       {/* Tutorial Overlay */}
       <TutorialOverlay tutorialKey="body" steps={bodyTutorialSteps} />

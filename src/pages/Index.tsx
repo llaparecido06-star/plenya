@@ -9,7 +9,8 @@ import QuickLog from '@/components/cycle/QuickLog';
 import ChefSuggestion from '@/components/cycle/ChefSuggestion';
 import HistoryCalendar from '@/components/history/HistoryCalendar';
 import DayDataSummary from '@/components/history/DayDataSummary';
-import StreakCounter from '@/components/home/StreakCounter';
+import GardenStreak from '@/components/home/GardenStreak';
+import AdaptiveHomeCard from '@/components/home/AdaptiveHomeCard';
 import SOSPartnerButton from '@/components/home/SOSPartnerButton';
 import WaterTracker from '@/components/home/WaterTracker';
 import IntimacyCard from '@/components/home/IntimacyCard';
@@ -43,7 +44,7 @@ const Index: React.FC = () => {
         >
           {/* Header with Streak and Calendar */}
           <div className="flex items-center justify-between mb-4">
-            <StreakCounter streak={3} />
+            <GardenStreak streak={3} />
             <Button
               variant="ghost"
               size="icon"
@@ -53,9 +54,9 @@ const Index: React.FC = () => {
             </Button>
           </div>
           
-          <h1 className="text-2xl font-bold text-foreground">Ciclos</h1>
+          <h1 className="text-2xl font-bold text-foreground">Plenya</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isToday ? 'Seu assistente de vida sincronizado' : 'Visualizando histórico'}
+            {isToday ? 'Sinta-se em casa no seu corpo' : 'Visualizando histórico'}
           </p>
         </motion.div>
 
@@ -79,10 +80,11 @@ const Index: React.FC = () => {
         {/* Show current day components when viewing today */}
         {isToday && (
           <>
+            {/* Adaptive Home Card - Shows based on contraceptive method */}
+            <AdaptiveHomeCard />
+            
             {/* Water Tracker */}
             <WaterTracker />
-
-            {/* Pill Tracker (only for pill users) */}
             {showPillTracker && (
               <div className="px-4">
                 <PillTracker />

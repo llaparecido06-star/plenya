@@ -8,6 +8,7 @@ interface ContraceptiveData {
   contraceptive_brand: string | null;
   contraceptive_start_date: string | null;
   pill_reminder_time: string | null;
+  contraceptive_details: Record<string, any> | null;
 }
 
 export const useContraceptive = () => {
@@ -18,6 +19,7 @@ export const useContraceptive = () => {
     contraceptive_brand: null,
     contraceptive_start_date: null,
     pill_reminder_time: null,
+    contraceptive_details: null,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -33,7 +35,7 @@ export const useContraceptive = () => {
       try {
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('contraceptive_type, contraceptive_brand, contraceptive_start_date, pill_reminder_time')
+          .select('contraceptive_type, contraceptive_brand, contraceptive_start_date, pill_reminder_time, contraceptive_details')
           .eq('user_id', user.id)
           .maybeSingle();
 
@@ -48,6 +50,7 @@ export const useContraceptive = () => {
             contraceptive_brand: profile.contraceptive_brand as string | null,
             contraceptive_start_date: profile.contraceptive_start_date as string | null,
             pill_reminder_time: profile.pill_reminder_time as string | null,
+            contraceptive_details: (profile as any).contraceptive_details || null,
           });
         }
       } catch (err) {
