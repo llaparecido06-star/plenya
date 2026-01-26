@@ -14,6 +14,7 @@ import { useCycle } from '@/contexts/CycleContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toLocalDateString, parseLocalDate } from '@/lib/dateUtils';
 
 const DUMPicker: React.FC = () => {
   const { user } = useAuth();
@@ -41,7 +42,8 @@ const DUMPicker: React.FC = () => {
         if (error) throw error;
 
         if (data?.last_period_start) {
-          const savedDate = new Date(data.last_period_start);
+          // Parse the date string safely to avoid timezone issues
+          const savedDate = parseLocalDate(data.last_period_start);
           setDate(savedDate);
           setLastPeriodStart(savedDate);
           
@@ -68,11 +70,12 @@ const DUMPicker: React.FC = () => {
     setSaving(true);
 
     try {
+      // Use toLocalDateString to prevent timezone bugs
       const { error } = await supabase
         .from('profiles')
         .upsert({
           user_id: user.id,
-          last_period_start: selectedDate.toISOString().split('T')[0],
+          last_period_start: toLocalDateString(selectedDate),
         }, {
           onConflict: 'user_id',
         });
@@ -150,13 +153,14 @@ const DUMPicker: React.FC = () => {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
           <Calendar
             mode="single"
             selected={date}
             onSelect={handleDateSelect}
             disabled={(d) => d > new Date()}
             initialFocus
+            className="p-3 pointer-events-auto"
           />
         </PopoverContent>
       </Popover>
