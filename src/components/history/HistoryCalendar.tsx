@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X, Droplets } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Droplets, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useCycle } from '@/contexts/CycleContext';
 import { format, isSameDay } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MONTHS = [
@@ -21,8 +23,36 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const { selectedDate, setSelectedDate, isToday, goToToday } = useSelectedDate();
   const { datesWithData } = useHistoricalData();
   const { getPredictedPeriodDates } = useCycle();
+  const { user } = useAuth();
   
   const [viewMonth, setViewMonth] = useState(new Date(selectedDate));
+  const [intimacyDates, setIntimacyDates] = useState<string[]>([]);
+
+  // Fetch intimacy log dates
+  React.useEffect(() => {
+    if (!user) return;
+    
+    const fetchIntimacyDates = async () => {
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+      
+      const { data, error } = await supabase
+        .from('intimacy_logs')
+        .select('log_date, sensation_physical')
+        .eq('user_id', user.id)
+        .gte('log_date', sixtyDaysAgo.toISOString().split('T')[0]);
+      
+      if (!error && data) {
+        // Only include dates that have actual intimacy activity
+        const datesWithActivity = data
+          .filter(log => log.sensation_physical && log.sensation_physical.length > 0)
+          .map(log => log.log_date);
+        setIntimacyDates(datesWithActivity);
+      }
+    };
+    
+    fetchIntimacyDates();
+  }, [user]);
 
   // Get predicted period dates for the current view
   const predictedPeriodDates = useMemo(() => {
@@ -71,6 +101,11 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const isDateWithData = (day: number): boolean => {
     const dateStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return datesWithData.includes(dateStr);
+  };
+
+  const hasIntimacyLog = (day: number): boolean => {
+    const dateStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return intimacyDates.includes(dateStr);
   };
 
   const isPredictedPeriod = (day: number): boolean => {
@@ -173,8 +208,14 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                 {isPredictedPeriod(day) && isFutureDay(day) && !isSelectedDay(day) && (
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500" />
                 )}
+                {/* Intimacy log indicator - purple heart */}
+                {hasIntimacyLog(day) && !isSelectedDay(day) && !isFutureDay(day) && (
+                  <span className="absolute -top-0.5 -right-0.5 text-purple-500">
+                    <Heart className="w-3 h-3" fill="currentColor" />
+                  </span>
+                )}
                 {/* Data indicator dot */}
-                {isDateWithData(day) && !isSelectedDay(day) && !isFutureDay(day) && (
+                {isDateWithData(day) && !isSelectedDay(day) && !isFutureDay(day) && !hasIntimacyLog(day) && (
                   <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
                 )}
               </button>
@@ -187,13 +228,17 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 pt-3 border-t border-border text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-          <span>Dias com registro</span>
+          <span>Registro</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Heart className="w-3 h-3 text-purple-500" fill="currentColor" />
+          <span>Intimidade</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-4 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
             <Droplets className="w-2.5 h-2.5 text-red-500" />
           </div>
-          <span>Previsão menstrual</span>
+          <span>Previsão</span>
         </div>
       </div>
     </motion.div>

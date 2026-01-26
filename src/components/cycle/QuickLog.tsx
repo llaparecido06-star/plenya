@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Smile, Scale, Loader2, Check } from 'lucide-react';
+import { Smile, Scale, Loader2, Check, Stethoscope } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -13,7 +13,7 @@ import { Slider } from '@/components/ui/slider';
 import { useDailyLog } from '@/hooks/useDailyLog';
 import { useMedication } from '@/hooks/useMedication';
 import MedicationEffectBadge from '@/components/profile/MedicationEffectBadge';
-
+import IntimacyLog from './IntimacyLog';
 interface LogType {
   id: string;
   icon: React.ElementType;
@@ -22,7 +22,7 @@ interface LogType {
 }
 
 const logTypes: LogType[] = [
-  { id: 'symptom', icon: Heart, label: 'Sintoma', color: 'bg-rose-100 text-rose-600' },
+  { id: 'symptom', icon: Stethoscope, label: 'Sintoma', color: 'bg-rose-100 text-rose-600' },
   { id: 'mood', icon: Smile, label: 'Humor', color: 'bg-amber-100 text-amber-600' },
   { id: 'weight', icon: Scale, label: 'Peso', color: 'bg-blue-100 text-blue-600' },
 ];
@@ -185,10 +185,13 @@ const QuickLog: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
     >
+      {/* Pregnancy risk alert */}
+      <IntimacyLog showAlert={true} />
+      
       <h3 className="text-sm font-semibold text-muted-foreground mb-3">
         REGISTRO RÁPIDO
       </h3>
-      <div className="flex gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {logTypes.map((log, index) => {
           const Icon = log.icon;
           return (
@@ -199,7 +202,7 @@ const QuickLog: React.FC = () => {
               <DrawerTrigger asChild>
                 <motion.button
                   onClick={() => setSelectedLog(log.id)}
-                  className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl glass-card hover:shadow-soft transition-all`}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl glass-card hover:shadow-soft transition-all`}
                   whileTap={{ scale: 0.95 }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -208,7 +211,7 @@ const QuickLog: React.FC = () => {
                   <div className={`p-3 rounded-xl ${log.color}`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-medium text-foreground">{log.label}</span>
+                  <span className="text-xs font-medium text-foreground text-center">{log.label}</span>
                 </motion.button>
               </DrawerTrigger>
               <DrawerContent>
@@ -248,6 +251,9 @@ const QuickLog: React.FC = () => {
             </Drawer>
           );
         })}
+        
+        {/* Intimacy Log Button - 4th column */}
+        <IntimacyLog />
       </div>
     </motion.div>
   );
