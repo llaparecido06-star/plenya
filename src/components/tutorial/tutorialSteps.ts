@@ -14,10 +14,9 @@ export const homeTutorialSteps: TutorialStep[] = [
     position: 'top',
   },
   {
-    targetId: 'intimacy-card',
     title: '🌸 Diário Sensorial',
-    description: 'Registre sintomas íntimos e descubra padrões do seu corpo. Tudo protegido e privado.',
-    position: 'top',
+    description: 'Registre sintomas íntimos e descubra padrões do seu corpo. Tudo protegido e privado. Explore o app para encontrar mais funcionalidades!',
+    position: 'center',
   },
 ];
 
