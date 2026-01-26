@@ -19,7 +19,9 @@ import {
   Dumbbell, 
   Heart, 
   Baby, 
-  Activity
+  Activity,
+  Utensils,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -31,6 +33,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCycle } from '@/contexts/CycleContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { toLocalDateString } from '@/lib/dateUtils';
 
 // Goal options
 const goals = [
@@ -39,6 +42,23 @@ const goals = [
   { id: 'pms_relief', label: 'Alívio de TPM', icon: Heart, color: 'text-burnt-pink' },
   { id: 'get_pregnant', label: 'Engravidar', icon: Baby, color: 'text-terracotta' },
   { id: 'health_monitor', label: 'Monitorar Saúde', icon: Activity, color: 'text-leaf-green' },
+];
+
+// Dietary preference options
+const dietaryOptions = [
+  { id: 'omnivore', label: 'Onívora', icon: '🍖', description: 'Come de tudo' },
+  { id: 'vegetarian', label: 'Vegetariana', icon: '🥗', description: 'Sem carnes' },
+  { id: 'vegan', label: 'Vegana', icon: '🌱', description: 'Sem produtos animais' },
+  { id: 'low_carb', label: 'Low Carb', icon: '🥑', description: 'Baixo carboidrato' },
+  { id: 'lactose_free', label: 'Sem Lactose', icon: '🥛', description: 'Evita laticínios' },
+];
+
+// Activity level options
+const activityOptions = [
+  { id: 'sedentary', label: 'Sedentária', icon: '🛋️', description: 'Pouca ou nenhuma atividade' },
+  { id: 'light', label: 'Leve', icon: '🚶‍♀️', description: '1-2 vezes por semana' },
+  { id: 'moderate', label: 'Moderada', icon: '🏃‍♀️', description: '3-4 vezes por semana' },
+  { id: 'intense', label: 'Intensa/Atleta', icon: '💪', description: '5+ vezes por semana' },
 ];
 
 // Contraceptive categories with methods
@@ -135,25 +155,31 @@ const Onboarding: React.FC = () => {
   const { user } = useAuth();
   const { refreshCycleData } = useCycle();
   
-  // Wizard state
+  // Wizard state - Now 5 steps total
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Step 1: Goals (multiple selection)
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   
-  // Step 2: Cycle data
+  // Step 2: Dietary Preferences (NEW)
+  const [selectedDiet, setSelectedDiet] = useState<string | null>(null);
+  
+  // Step 3: Activity Level (NEW)
+  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  
+  // Step 4: Cycle data
   const [lastPeriodDate, setLastPeriodDate] = useState<Date | undefined>(undefined);
   const [cycleLength, setCycleLength] = useState<number>(28);
   
-  // Step 3: Contraceptive
+  // Step 5: Contraceptive
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [contraceptiveDetails, setContraceptiveDetails] = useState<ContraceptiveDetails>({});
   const [brandSearch, setBrandSearch] = useState('');
   const [showBrandSuggestions, setShowBrandSuggestions] = useState(false);
 
-  const totalSteps = 3;
+  const totalSteps = 5;
   
   // Filter brands based on search
   const filteredBrands = contraceptiveBrands.filter(brand =>
@@ -173,11 +199,19 @@ const Onboarding: React.FC = () => {
       toast({ title: 'Selecione pelo menos um objetivo', variant: 'destructive' });
       return;
     }
-    if (currentStep === 2 && !lastPeriodDate) {
+    if (currentStep === 2 && !selectedDiet) {
+      toast({ title: 'Selecione seu estilo alimentar', variant: 'destructive' });
+      return;
+    }
+    if (currentStep === 3 && !selectedActivity) {
+      toast({ title: 'Selecione seu ritmo de movimento', variant: 'destructive' });
+      return;
+    }
+    if (currentStep === 4 && !lastPeriodDate) {
       toast({ title: 'Informe a data da última menstruação', variant: 'destructive' });
       return;
     }
-    if (currentStep === 3 && !selectedMethod) {
+    if (currentStep === 5 && !selectedMethod) {
       toast({ title: 'Selecione um método contraceptivo', variant: 'destructive' });
       return;
     }
@@ -201,11 +235,14 @@ const Onboarding: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      // Use toLocalDateString to prevent timezone bugs
       const { error } = await supabase
         .from('profiles')
         .update({
           goal: selectedGoals.join(','),
-          last_period_start: lastPeriodDate ? format(lastPeriodDate, 'yyyy-MM-dd') : null,
+          diet_type: selectedDiet,
+          fitness_level: selectedActivity,
+          last_period_start: lastPeriodDate ? toLocalDateString(lastPeriodDate) : null,
           cycle_length: cycleLength,
           contraceptive_type: selectedMethod,
           contraceptive_brand: contraceptiveDetails.brand || null,
@@ -255,6 +292,19 @@ const Onboarding: React.FC = () => {
     setSelectedMethod(methodId);
     setContraceptiveDetails({});
     setBrandSearch('');
+  };
+
+  // Helper to handle date selection with timezone fix
+  const handleDateSelect = (date: Date | undefined, setter: (date: Date | undefined) => void) => {
+    setter(date);
+  };
+
+  // Helper to handle contraceptive date selection with local string conversion
+  const handleContraceptiveDateSelect = (date: Date | undefined, field: 'lastApplicationDate' | 'insertionDate') => {
+    setContraceptiveDetails(prev => ({
+      ...prev,
+      [field]: date ? toLocalDateString(date) : undefined
+    }));
   };
 
   const renderStep = () => {
@@ -330,6 +380,110 @@ const Onboarding: React.FC = () => {
             className="space-y-6"
           >
             <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <Utensils className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Qual seu estilo alimentar?</h2>
+              <p className="text-muted-foreground">Para receitas e sugestões personalizadas</p>
+            </div>
+            
+            <div className="grid gap-3">
+              {dietaryOptions.map((diet) => {
+                const isSelected = selectedDiet === diet.id;
+                
+                return (
+                  <button
+                    key={diet.id}
+                    onClick={() => setSelectedDiet(diet.id)}
+                    className={cn(
+                      "flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200",
+                      isSelected
+                        ? "border-primary bg-primary/10 shadow-md"
+                        : "border-border bg-card hover:border-primary/50 hover:bg-accent/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center text-2xl",
+                      isSelected ? "bg-primary/20" : "bg-muted"
+                    )}>
+                      {diet.icon}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-medium text-foreground block">{diet.label}</span>
+                      <span className="text-sm text-muted-foreground">{diet.description}</span>
+                    </div>
+                    {isSelected && (
+                      <Check className="w-5 h-5 text-primary" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        );
+
+      case 3:
+        return (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <Zap className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Seu ritmo de movimento:</h2>
+              <p className="text-muted-foreground">Para treinos na medida certa</p>
+            </div>
+            
+            <div className="grid gap-3">
+              {activityOptions.map((activity) => {
+                const isSelected = selectedActivity === activity.id;
+                
+                return (
+                  <button
+                    key={activity.id}
+                    onClick={() => setSelectedActivity(activity.id)}
+                    className={cn(
+                      "flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200",
+                      isSelected
+                        ? "border-primary bg-primary/10 shadow-md"
+                        : "border-border bg-card hover:border-primary/50 hover:bg-accent/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center text-2xl",
+                      isSelected ? "bg-primary/20" : "bg-muted"
+                    )}>
+                      {activity.icon}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <span className="font-medium text-foreground block">{activity.label}</span>
+                      <span className="text-sm text-muted-foreground">{activity.description}</span>
+                    </div>
+                    {isSelected && (
+                      <Check className="w-5 h-5 text-primary" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        );
+
+      case 4:
+        return (
+          <motion.div
+            key="step4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">Dados do Ciclo</h2>
               <p className="text-muted-foreground">Para previsões mais precisas</p>
             </div>
@@ -358,7 +512,7 @@ const Onboarding: React.FC = () => {
                     <Calendar
                       mode="single"
                       selected={lastPeriodDate}
-                      onSelect={setLastPeriodDate}
+                      onSelect={(date) => handleDateSelect(date, setLastPeriodDate)}
                       disabled={(date) => date > new Date()}
                       initialFocus
                       className="p-3 pointer-events-auto"
@@ -399,10 +553,10 @@ const Onboarding: React.FC = () => {
           </motion.div>
         );
 
-      case 3:
+      case 5:
         return (
           <motion.div
-            key="step3"
+            key="step5"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -572,22 +726,20 @@ const Onboarding: React.FC = () => {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {contraceptiveDetails.lastApplicationDate
-                          ? format(new Date(contraceptiveDetails.lastApplicationDate), "dd/MM/yyyy")
+                          ? format(new Date(contraceptiveDetails.lastApplicationDate + 'T12:00:00'), "dd/MM/yyyy")
                           : "Selecione a data"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="center">
+                    <PopoverContent className="w-auto p-0 pointer-events-auto" align="center">
                       <Calendar
                         mode="single"
                         selected={contraceptiveDetails.lastApplicationDate 
-                          ? new Date(contraceptiveDetails.lastApplicationDate) 
+                          ? new Date(contraceptiveDetails.lastApplicationDate + 'T12:00:00') 
                           : undefined}
-                        onSelect={(date) => setContraceptiveDetails(prev => ({ 
-                          ...prev, 
-                          lastApplicationDate: date ? format(date, 'yyyy-MM-dd') : undefined 
-                        }))}
+                        onSelect={(date) => handleContraceptiveDateSelect(date, 'lastApplicationDate')}
                         disabled={(date) => date > new Date()}
                         initialFocus
+                        className="p-3 pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
@@ -649,22 +801,20 @@ const Onboarding: React.FC = () => {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {contraceptiveDetails.lastApplicationDate
-                          ? format(new Date(contraceptiveDetails.lastApplicationDate), "dd/MM/yyyy")
+                          ? format(new Date(contraceptiveDetails.lastApplicationDate + 'T12:00:00'), "dd/MM/yyyy")
                           : "Selecione a data"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="center">
+                    <PopoverContent className="w-auto p-0 pointer-events-auto" align="center">
                       <Calendar
                         mode="single"
                         selected={contraceptiveDetails.lastApplicationDate 
-                          ? new Date(contraceptiveDetails.lastApplicationDate) 
+                          ? new Date(contraceptiveDetails.lastApplicationDate + 'T12:00:00') 
                           : undefined}
-                        onSelect={(date) => setContraceptiveDetails(prev => ({ 
-                          ...prev, 
-                          lastApplicationDate: date ? format(date, 'yyyy-MM-dd') : undefined 
-                        }))}
+                        onSelect={(date) => handleContraceptiveDateSelect(date, 'lastApplicationDate')}
                         disabled={(date) => date > new Date()}
                         initialFocus
+                        className="p-3 pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
@@ -725,22 +875,20 @@ const Onboarding: React.FC = () => {
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {contraceptiveDetails.insertionDate
-                        ? format(new Date(contraceptiveDetails.insertionDate), "dd/MM/yyyy")
+                        ? format(new Date(contraceptiveDetails.insertionDate + 'T12:00:00'), "dd/MM/yyyy")
                         : "Selecione a data"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="center">
+                  <PopoverContent className="w-auto p-0 pointer-events-auto" align="center">
                     <Calendar
                       mode="single"
                       selected={contraceptiveDetails.insertionDate 
-                        ? new Date(contraceptiveDetails.insertionDate) 
+                        ? new Date(contraceptiveDetails.insertionDate + 'T12:00:00') 
                         : undefined}
-                      onSelect={(date) => setContraceptiveDetails(prev => ({ 
-                        ...prev, 
-                        insertionDate: date ? format(date, 'yyyy-MM-dd') : undefined 
-                      }))}
+                      onSelect={(date) => handleContraceptiveDateSelect(date, 'insertionDate')}
                       disabled={(date) => date > new Date()}
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>

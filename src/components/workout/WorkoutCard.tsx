@@ -100,8 +100,17 @@ const exerciseAlternatives: Record<string, string[]> = {
   'Supino': ['Crucifixo', 'Push-up com peso', 'Floor press'],
 };
 
+// Activity level intensity modifiers
+const activityIntensityLabel: Record<string, string> = {
+  sedentary: 'Comece devagar - seu corpo está se adaptando',
+  light: 'Ritmo leve - consistência é a chave',
+  moderate: 'Bom ritmo - continue assim!',
+  intense: 'Modo atleta - maximize seu potencial',
+};
+
 const WorkoutCard: React.FC = () => {
   const { workout: savedWorkout, loading, saving, saveExercises, completeExercise, workoutPhase, isToday } = useWorkouts();
+  const { fitness_level } = useProfile();
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
   const [exercises, setExercises] = useState(workoutPlans[workoutPhase].exercises);
@@ -111,6 +120,7 @@ const WorkoutCard: React.FC = () => {
 
   const defaultPlan = workoutPlans[workoutPhase];
   const Icon = defaultPlan.icon;
+  const intensityTip = fitness_level ? activityIntensityLabel[fitness_level] : null;
 
   // Load saved exercises or use defaults for the phase
   useEffect(() => {
@@ -278,6 +288,14 @@ const WorkoutCard: React.FC = () => {
             {defaultPlan.intensity}
           </div>
         </div>
+
+        {/* Activity level tip */}
+        {intensityTip && (
+          <div className="mb-4 p-2 rounded-lg bg-primary/5 border border-primary/10 flex items-center gap-2">
+            <Info className="w-4 h-4 text-primary flex-shrink-0" />
+            <p className="text-xs text-muted-foreground">{intensityTip}</p>
+          </div>
+        )}
 
         {/* Progress bar */}
         <div className="mb-4">

@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import ContraceptiveHistoryCard from './ContraceptiveHistoryCard';
+import { toLocalDateString, parseLocalDate } from '@/lib/dateUtils';
 
 const ContraceptiveConfig: React.FC = () => {
   const { 
@@ -42,7 +43,10 @@ const ContraceptiveConfig: React.FC = () => {
   useEffect(() => {
     if (contraceptive_type) setSelectedType(contraceptive_type);
     if (contraceptive_brand) setBrand(contraceptive_brand);
-    if (contraceptive_start_date) setStartDate(new Date(contraceptive_start_date));
+    if (contraceptive_start_date) {
+      // Parse the date string safely to avoid timezone issues
+      setStartDate(parseLocalDate(contraceptive_start_date));
+    }
     if (pill_reminder_time) setReminderTime(pill_reminder_time.slice(0, 5)); // Remove seconds
   }, [contraceptive_type, contraceptive_brand, contraceptive_start_date, pill_reminder_time]);
 
@@ -50,7 +54,9 @@ const ContraceptiveConfig: React.FC = () => {
   useEffect(() => {
     const typeChanged = selectedType !== contraceptive_type;
     const brandChanged = brand !== (contraceptive_brand || '');
-    const dateChanged = startDate?.toISOString().split('T')[0] !== contraceptive_start_date;
+    const dateChanged = startDate 
+      ? toLocalDateString(startDate) !== contraceptive_start_date 
+      : !!contraceptive_start_date;
     const timeChanged = reminderTime !== (pill_reminder_time?.slice(0, 5) || '08:00');
     
     setHasChanges(typeChanged || brandChanged || dateChanged || timeChanged);
@@ -63,7 +69,7 @@ const ContraceptiveConfig: React.FC = () => {
       contraceptive_type: selectedType,
       contraceptive_brand: selectedMethod?.requiresBrand ? brand : null,
       contraceptive_start_date: hasExpirationDate(selectedType) && startDate 
-        ? format(startDate, 'yyyy-MM-dd') 
+        ? toLocalDateString(startDate) 
         : null,
       pill_reminder_time: isPillMethod(selectedType) ? `${reminderTime}:00` : null,
     });
@@ -111,7 +117,7 @@ const ContraceptiveConfig: React.FC = () => {
               {contraceptive_start_date && hasExpirationDate(contraceptive_type) && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                   <Calendar className="w-3 h-3" />
-                  Desde {format(new Date(contraceptive_start_date), 'dd/MM/yyyy', { locale: ptBR })}
+                  Desde {format(parseLocalDate(contraceptive_start_date), 'dd/MM/yyyy', { locale: ptBR })}
                 </p>
               )}
             </div>
@@ -200,13 +206,14 @@ const ContraceptiveConfig: React.FC = () => {
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 z-50 bg-card" align="start">
+            <PopoverContent className="w-auto p-0 z-50 bg-card pointer-events-auto" align="start">
               <CalendarComponent
                 mode="single"
                 selected={startDate}
                 onSelect={setStartDate}
                 disabled={(date) => date > new Date()}
                 initialFocus
+                className="p-3 pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
