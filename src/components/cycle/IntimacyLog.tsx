@@ -51,9 +51,10 @@ const aftercareTags: TagOption[] = [
 
 interface IntimacyLogProps {
   showAlert?: boolean;
+  alertOnly?: boolean;
 }
 
-const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false }) => {
+const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly = false }) => {
   const { existingLog, loading, saving, saveLog, isAuthenticated, yesterdayRiskDetected } = useIntimacyLog();
   const { currentPhase } = useCycle();
   
@@ -174,14 +175,14 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false }) => {
     return null;
   }
 
-  return (
-    <>
-      {/* Alert for yesterday's risk */}
-      {showAlert && yesterdayRiskDetected && (
+  // If alertOnly, just render the alert without the button
+  if (alertOnly) {
+    if (showAlert && yesterdayRiskDetected) {
+      return (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="px-4 mb-4"
+          className="mb-4"
         >
           <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
@@ -190,73 +191,76 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false }) => {
             </AlertDescription>
           </Alert>
         </motion.div>
-      )}
+      );
+    }
+    return null;
+  }
 
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerTrigger asChild>
-          <motion.button
-            className="flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl glass-card hover:shadow-soft transition-all"
-            whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            <div className={`p-3 rounded-xl ${hasIntimacyData ? 'bg-purple-500 text-white' : 'bg-purple-100 text-purple-600'}`}>
-              <Heart className="w-5 h-5" fill={hasIntimacyData ? 'currentColor' : 'none'} />
-            </div>
-            <span className="text-sm font-medium text-foreground">Sexo & Libido</span>
-          </motion.button>
-        </DrawerTrigger>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader>
-            <DrawerTitle className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
-                <Heart className="w-4 h-4" />
-              </div>
-              Registrar Intimidade
-            </DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-8 overflow-y-auto space-y-6">
-            {/* Fertility Warning */}
-            {currentPhase === 'ovulatoria' && (
-              <Alert className="border-purple-500/50 bg-purple-50 dark:bg-purple-950/20">
-                <Heart className="h-4 w-4 text-purple-600" />
-                <AlertDescription className="text-purple-700 dark:text-purple-400 text-sm">
-                  Você está na <strong>janela fértil</strong>. Registre com atenção o método de proteção utilizado.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {renderTagGroup('Práticas', practicesTags, selectedPractices, setSelectedPractices)}
-            {renderTagGroup('Proteção', protectionTags, selectedProtection, setSelectedProtection, true)}
-            {renderTagGroup('Sensação', sensationTags, selectedSensations, setSelectedSensations)}
-            {renderTagGroup('After-Care', aftercareTags, selectedAftercare, setSelectedAftercare)}
-
-            <Button 
-              className="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white"
-              onClick={handleSave}
-              disabled={saving || saved || !isAuthenticated}
-            >
-              {saving ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Salvando...
-                </span>
-              ) : saved ? (
-                <span className="flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  Salvo!
-                </span>
-              ) : !isAuthenticated ? (
-                'Faça login para salvar'
-              ) : (
-                'Salvar Registro 💜'
-              )}
-            </Button>
+  return (
+    <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+      <DrawerTrigger asChild>
+        <motion.button
+          className="flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl glass-card hover:shadow-soft transition-all"
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <div className={`p-3 rounded-xl ${hasIntimacyData ? 'bg-purple-500 text-white' : 'bg-purple-100 text-purple-600'}`}>
+            <Heart className="w-5 h-5" fill={hasIntimacyData ? 'currentColor' : 'none'} />
           </div>
-        </DrawerContent>
-      </Drawer>
-    </>
+          <span className="text-xs font-medium text-foreground text-center">Sexo & Libido</span>
+        </motion.button>
+      </DrawerTrigger>
+      <DrawerContent className="max-h-[85vh]">
+        <DrawerHeader>
+          <DrawerTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+              <Heart className="w-4 h-4" />
+            </div>
+            Registrar Intimidade
+          </DrawerTitle>
+        </DrawerHeader>
+        <div className="px-4 pb-8 overflow-y-auto space-y-6">
+          {/* Fertility Warning */}
+          {currentPhase === 'ovulatoria' && (
+            <Alert className="border-purple-500/50 bg-purple-50 dark:bg-purple-950/20">
+              <Heart className="h-4 w-4 text-purple-600" />
+              <AlertDescription className="text-purple-700 dark:text-purple-400 text-sm">
+                Você está na <strong>janela fértil</strong>. Registre com atenção o método de proteção utilizado.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {renderTagGroup('Práticas', practicesTags, selectedPractices, setSelectedPractices)}
+          {renderTagGroup('Proteção', protectionTags, selectedProtection, setSelectedProtection, true)}
+          {renderTagGroup('Sensação', sensationTags, selectedSensations, setSelectedSensations)}
+          {renderTagGroup('After-Care', aftercareTags, selectedAftercare, setSelectedAftercare)}
+
+          <Button 
+            className="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={handleSave}
+            disabled={saving || saved || !isAuthenticated}
+          >
+            {saving ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Salvando...
+              </span>
+            ) : saved ? (
+              <span className="flex items-center gap-2">
+                <Check className="w-4 h-4" />
+                Salvo!
+              </span>
+            ) : !isAuthenticated ? (
+              'Faça login para salvar'
+            ) : (
+              'Salvar Registro 💜'
+            )}
+          </Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
