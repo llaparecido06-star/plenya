@@ -127,6 +127,8 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
     
     if (success) {
       setSaved(true);
+      // Dispatch custom event to trigger calendar refresh
+      window.dispatchEvent(new CustomEvent('intimacy-log-saved'));
       setTimeout(() => {
         setSaved(false);
         setDrawerOpen(false);

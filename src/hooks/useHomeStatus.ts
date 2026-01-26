@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { differenceInDays, addDays, parseISO, isValid } from 'date-fns';
+import { differenceInDays, addDays, isValid } from 'date-fns';
 import { useContraceptive } from './useContraceptive';
+import { parseLocalDate } from '@/lib/dateUtils';
 
 interface ContraceptiveDetails {
   brand?: string;
@@ -47,11 +48,13 @@ export const useHomeStatus = (): HomeStatus | null => {
     // INJECTION - Show countdown
     if (contraceptive_type === 'injection') {
       if (details.lastApplicationDate && details.frequency) {
-        const lastDate = parseISO(details.lastApplicationDate);
+        // Use parseLocalDate to avoid timezone issues (off-by-one bug)
+        const lastDate = parseLocalDate(details.lastApplicationDate);
         if (isValid(lastDate)) {
           const daysToAdd = details.frequency === 'monthly' ? 30 : 90;
           const nextDate = addDays(lastDate, daysToAdd);
           const today = new Date();
+          today.setHours(0, 0, 0, 0); // Normalize to start of day
           const daysUntil = differenceInDays(nextDate, today);
 
           return {
@@ -70,12 +73,14 @@ export const useHomeStatus = (): HomeStatus | null => {
     // RING/PATCH - Show countdown
     if (contraceptive_type === 'ring' || contraceptive_type === 'patch') {
       if (details.lastApplicationDate) {
-        const lastDate = parseISO(details.lastApplicationDate);
+        // Use parseLocalDate to avoid timezone issues
+        const lastDate = parseLocalDate(details.lastApplicationDate);
         if (isValid(lastDate)) {
           // Default to 21-day cycle if not specified
           const daysToAdd = details.usageCycle === 'continuous' ? 30 : 21;
           const nextDate = addDays(lastDate, daysToAdd);
           const today = new Date();
+          today.setHours(0, 0, 0, 0); // Normalize to start of day
           const daysUntil = differenceInDays(nextDate, today);
 
           return {
@@ -98,12 +103,14 @@ export const useHomeStatus = (): HomeStatus | null => {
     // DIU/IMPLANT - Show expiration
     if (contraceptive_type === 'iud' || contraceptive_type === 'implant') {
       if (details.insertionDate) {
-        const insertionDate = parseISO(details.insertionDate);
+        // Use parseLocalDate to avoid timezone issues
+        const insertionDate = parseLocalDate(details.insertionDate);
         if (isValid(insertionDate)) {
           // DIU = 5-10 years (use 5 for hormonal), Implant = 3 years
           const yearsValid = contraceptive_type === 'implant' ? 3 : 5;
           const expirationDate = addDays(insertionDate, yearsValid * 365);
           const today = new Date();
+          today.setHours(0, 0, 0, 0); // Normalize to start of day
           const daysRemaining = differenceInDays(expirationDate, today);
           const yearsRemaining = Math.max(0, daysRemaining / 365);
 
