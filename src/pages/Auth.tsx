@@ -89,13 +89,13 @@ const Auth: React.FC = () => {
         <div className="text-center mb-8">
           <motion.div
             className="w-20 h-20 mx-auto mb-4 rounded-full phase-gradient flex items-center justify-center shadow-glow"
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 4, repeat: Infinity }}
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 3, repeat: Infinity }}
           >
-            <Moon className="w-10 h-10 text-white" />
+            <span className="text-3xl">🌿</span>
           </motion.div>
-          <h1 className="text-3xl font-bold text-foreground">Ciclos</h1>
-          <p className="text-muted-foreground mt-1">Biohacking Feminino</p>
+          <h1 className="text-3xl font-bold text-foreground">Plenya</h1>
+          <p className="text-muted-foreground mt-1">Sinta-se em casa no seu corpo</p>
         </div>
 
         {/* Tabs */}

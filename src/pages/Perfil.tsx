@@ -8,6 +8,7 @@ import { LogOut } from 'lucide-react';
 import DUMPicker from '@/components/profile/DUMPicker';
 import PatternsCard from '@/components/history/PatternsCard';
 import ContraceptiveConfig from '@/components/profile/ContraceptiveConfig';
+import MedicalReportButton from '@/components/profile/MedicalReportButton';
 
 const Perfil: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -57,7 +58,7 @@ const Perfil: React.FC = () => {
             </div>
             <div>
               <h3 className="font-semibold text-foreground">{user.email}</h3>
-              <p className="text-sm text-muted-foreground">Membro Ciclos</p>
+              <p className="text-sm text-muted-foreground">Membro Plenya</p>
             </div>
           </div>
         </motion.div>
@@ -86,6 +87,9 @@ const Perfil: React.FC = () => {
         >
           <PatternsCard />
         </motion.div>
+
+        {/* Medical Report Button */}
+        <MedicalReportButton />
 
         <Button
           onClick={signOut}

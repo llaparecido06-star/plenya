@@ -234,6 +234,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           contraceptive_brand: string | null
+          contraceptive_details: Json | null
           contraceptive_start_date: string | null
           contraceptive_type: string | null
           created_at: string
@@ -255,6 +256,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           contraceptive_brand?: string | null
+          contraceptive_details?: Json | null
           contraceptive_start_date?: string | null
           contraceptive_type?: string | null
           created_at?: string
@@ -276,6 +278,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           contraceptive_brand?: string | null
+          contraceptive_details?: Json | null
           contraceptive_start_date?: string | null
           contraceptive_type?: string | null
           created_at?: string

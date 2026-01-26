@@ -2,6 +2,7 @@ import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
 import ChatInterface from '@/components/mind/ChatInterface';
 import EmotionalCheckin from '@/components/mind/EmotionalCheckin';
+import BreathingCard from '@/components/mind/BreathingCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { mindTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
@@ -19,6 +20,11 @@ const Mente: React.FC = () => {
           Mente
         </motion.h1>
         <p className="text-muted-foreground">Cuide do seu bem-estar emocional</p>
+      </div>
+
+      {/* Breathing Card */}
+      <div className="px-4 mb-4">
+        <BreathingCard />
       </div>
 
       <Tabs defaultValue="chat" className="px-4">
