@@ -37,30 +37,26 @@ export const nutritionTutorialSteps: TutorialStep[] = [
 
 export const bodyTutorialSteps: TutorialStep[] = [
   {
-    targetId: 'workout-card',
     title: '💪 Treino Sincronizado',
     description: 'A intensidade muda conforme sua energia hormonal. Respeite seu ritmo para melhores resultados.',
-    position: 'bottom',
+    position: 'center',
   },
   {
-    targetId: 'rest-timer-button',
     title: '⏱️ Descanse Corretamente',
     description: 'Use o timer entre séries para maximizar seu resultado e evitar overtraining.',
-    position: 'bottom',
+    position: 'center',
   },
 ];
 
 export const mindTutorialSteps: TutorialStep[] = [
   {
-    targetId: 'emotional-checkin',
     title: '📊 Rastreador de Humor',
     description: 'Monitore estresse e energia diariamente para prever sua TPM e entender seus padrões emocionais.',
-    position: 'bottom',
+    position: 'center',
   },
   {
-    targetId: 'chat-interface',
     title: '🤖 Sua Amiga Virtual',
     description: 'Desabafe ou peça conselhos a qualquer hora. A IA entende seu ciclo e oferece suporte personalizado.',
-    position: 'top',
+    position: 'center',
   },
 ];
