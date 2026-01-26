@@ -16,6 +16,7 @@ import WaterTracker from '@/components/home/WaterTracker';
 import IntimacyCard from '@/components/home/IntimacyCard';
 import PillTracker from '@/components/home/PillTracker';
 import DeviceExpirationCard from '@/components/home/DeviceExpirationCard';
+import NextPeriodCard from '@/components/home/NextPeriodCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
@@ -73,7 +74,9 @@ const Index: React.FC = () => {
         {isToday && <CycleWheel />}
       </div>
 
-      <div className="space-y-6 mt-6">
+      <div className="space-y-4 mt-4">
+        {/* Next Period Prediction Card */}
+        {isToday && <NextPeriodCard />}
         {/* Show historical data summary when viewing past dates */}
         {!isToday && <DayDataSummary />}
         

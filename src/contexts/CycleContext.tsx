@@ -2,7 +2,15 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+import { addDays, differenceInDays } from 'date-fns';
+
 export type CyclePhase = 'menstrual' | 'folicular' | 'ovulatoria' | 'lutea';
+
+interface PeriodPrediction {
+  nextPeriodDate: Date;
+  daysUntil: number;
+  predictedEndDate: Date;
+}
 
 interface CycleContextType {
   currentPhase: CyclePhase;
@@ -15,6 +23,8 @@ interface CycleContextType {
   setLastPeriodStart: (date: Date | null) => void;
   getPhaseInfo: () => PhaseInfo;
   getPhaseByDay: (day: number) => CyclePhase;
+  getPeriodPrediction: () => PeriodPrediction | null;
+  getPredictedPeriodDates: (monthsAhead?: number) => Date[];
   isLoading: boolean;
   refreshCycleData: () => Promise<void>;
 }
@@ -200,6 +210,46 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return phaseData[currentPhase];
   };
 
+  // Calculate next period prediction
+  const getPeriodPrediction = useCallback((): PeriodPrediction | null => {
+    if (!lastPeriodStart) return null;
+    
+    const today = new Date();
+    const daysSinceLastPeriod = differenceInDays(today, lastPeriodStart);
+    const cyclesPassed = Math.floor(daysSinceLastPeriod / cycleLength);
+    
+    const nextPeriodDate = addDays(lastPeriodStart, (cyclesPassed + 1) * cycleLength);
+    const daysUntil = differenceInDays(nextPeriodDate, today);
+    const predictedEndDate = addDays(nextPeriodDate, 4); // Assume 5 days period
+    
+    return { nextPeriodDate, daysUntil, predictedEndDate };
+  }, [lastPeriodStart, cycleLength]);
+
+  // Get predicted period dates for calendar marking (returns start dates of predicted periods)
+  const getPredictedPeriodDates = useCallback((monthsAhead: number = 3): Date[] => {
+    if (!lastPeriodStart) return [];
+    
+    const dates: Date[] = [];
+    const today = new Date();
+    const endDate = addDays(today, monthsAhead * 30);
+    
+    const daysSinceLastPeriod = differenceInDays(today, lastPeriodStart);
+    const cyclesPassed = Math.floor(daysSinceLastPeriod / cycleLength);
+    
+    // Get next few predicted periods
+    for (let i = 0; i <= Math.ceil(monthsAhead * 30 / cycleLength) + 1; i++) {
+      const periodDate = addDays(lastPeriodStart, (cyclesPassed + i) * cycleLength);
+      if (periodDate >= today && periodDate <= endDate) {
+        // Add all days of predicted period (5 days)
+        for (let day = 0; day < 5; day++) {
+          dates.push(addDays(periodDate, day));
+        }
+      }
+    }
+    
+    return dates;
+  }, [lastPeriodStart, cycleLength]);
+
   return (
     <CycleContext.Provider
       value={{
@@ -213,6 +263,8 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setLastPeriodStart,
         getPhaseInfo,
         getPhaseByDay,
+        getPeriodPrediction,
+        getPredictedPeriodDates,
         isLoading,
         refreshCycleData,
       }}
