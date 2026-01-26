@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type CyclePhase = 'menstrual' | 'folicular' | 'ovulatoria' | 'lutea';
 
@@ -13,6 +15,8 @@ interface CycleContextType {
   setLastPeriodStart: (date: Date | null) => void;
   getPhaseInfo: () => PhaseInfo;
   getPhaseByDay: (day: number) => CyclePhase;
+  isLoading: boolean;
+  refreshCycleData: () => Promise<void>;
 }
 
 interface PhaseInfo {
@@ -72,10 +76,12 @@ const phaseData: Record<CyclePhase, PhaseInfo> = {
 const CycleContext = createContext<CycleContextType | undefined>(undefined);
 
 export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [currentPhase, setCurrentPhase] = useState<CyclePhase>('folicular');
   const [cycleDay, setCycleDay] = useState(10);
   const [cycleLength, setCycleLength] = useState(28);
   const [lastPeriodStart, setLastPeriodStart] = useState<Date | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Calculate phase based on cycle day
   const getPhaseByDay = (day: number): CyclePhase => {
@@ -84,6 +90,96 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (day <= 17) return 'ovulatoria';
     return 'lutea';
   };
+
+  // Calculate cycle day from last period start date
+  const calculateCycleDay = useCallback((lastPeriod: Date | null, length: number): number => {
+    if (!lastPeriod) return 10; // Default
+
+    const today = new Date();
+    const diffTime = today.getTime() - lastPeriod.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    
+    // Handle cycles that have passed the cycle length
+    let dayInCycle = diffDays % length;
+    if (dayInCycle === 0) dayInCycle = length;
+    
+    return Math.max(1, Math.min(dayInCycle, length));
+  }, []);
+
+  // Fetch cycle data from profile
+  const refreshCycleData = useCallback(async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('last_period_start, cycle_length')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching cycle data:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (profile) {
+        const newCycleLength = profile.cycle_length || 28;
+        setCycleLength(newCycleLength);
+
+        if (profile.last_period_start) {
+          const periodDate = new Date(profile.last_period_start);
+          setLastPeriodStart(periodDate);
+          
+          const calculatedDay = calculateCycleDay(periodDate, newCycleLength);
+          setCycleDay(calculatedDay);
+          
+          const calculatedPhase = getPhaseByDay(calculatedDay);
+          setCurrentPhase(calculatedPhase);
+        }
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, calculateCycleDay]);
+
+  // Fetch data on mount and when user changes
+  useEffect(() => {
+    refreshCycleData();
+  }, [refreshCycleData]);
+
+  // Subscribe to profile changes for real-time updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('cycle-profile-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newData = payload.new as any;
+          if (newData.last_period_start || newData.cycle_length) {
+            refreshCycleData();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, refreshCycleData]);
 
   // Update phase when cycle day changes
   useEffect(() => {
@@ -117,6 +213,8 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setLastPeriodStart,
         getPhaseInfo,
         getPhaseByDay,
+        isLoading,
+        refreshCycleData,
       }}
     >
       {children}

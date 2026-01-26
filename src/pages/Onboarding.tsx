@@ -28,6 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCycle } from '@/contexts/CycleContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -132,6 +133,7 @@ const Onboarding: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { refreshCycleData } = useCycle();
   
   // Wizard state
   const [currentStep, setCurrentStep] = useState(1);
@@ -214,6 +216,9 @@ const Onboarding: React.FC = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
+
+      // Refresh cycle data immediately to sync the Today tab
+      await refreshCycleData();
 
       toast({
         title: '🌿 Bem-vinda ao Plenya!',
