@@ -239,16 +239,20 @@ export type Database = {
           contraceptive_type: string | null
           created_at: string
           cycle_length: number | null
+          date_of_birth: string | null
           diet_type: string | null
           fitness_level: string | null
           full_name: string | null
           goal: string | null
           id: string
+          is_trying_to_conceive: boolean | null
           last_period_start: string | null
+          life_phase: string | null
           medication_name: string | null
           medication_type: string | null
           onboarding_completed: boolean
           pill_reminder_time: string | null
+          pregnancy_start_date: string | null
           tutorial_progress: Json | null
           updated_at: string
           user_id: string
@@ -261,16 +265,20 @@ export type Database = {
           contraceptive_type?: string | null
           created_at?: string
           cycle_length?: number | null
+          date_of_birth?: string | null
           diet_type?: string | null
           fitness_level?: string | null
           full_name?: string | null
           goal?: string | null
           id?: string
+          is_trying_to_conceive?: boolean | null
           last_period_start?: string | null
+          life_phase?: string | null
           medication_name?: string | null
           medication_type?: string | null
           onboarding_completed?: boolean
           pill_reminder_time?: string | null
+          pregnancy_start_date?: string | null
           tutorial_progress?: Json | null
           updated_at?: string
           user_id: string
@@ -283,16 +291,20 @@ export type Database = {
           contraceptive_type?: string | null
           created_at?: string
           cycle_length?: number | null
+          date_of_birth?: string | null
           diet_type?: string | null
           fitness_level?: string | null
           full_name?: string | null
           goal?: string | null
           id?: string
+          is_trying_to_conceive?: boolean | null
           last_period_start?: string | null
+          life_phase?: string | null
           medication_name?: string | null
           medication_type?: string | null
           onboarding_completed?: boolean
           pill_reminder_time?: string | null
+          pregnancy_start_date?: string | null
           tutorial_progress?: Json | null
           updated_at?: string
           user_id?: string
