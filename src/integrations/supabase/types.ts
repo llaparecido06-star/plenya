@@ -164,6 +164,36 @@ export type Database = {
         }
         Relationships: []
       }
+      menstruation_logs: {
+        Row: {
+          created_at: string
+          emergency_contraception: boolean | null
+          id: string
+          is_menstruating: boolean
+          log_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emergency_contraception?: boolean | null
+          id?: string
+          is_menstruating?: boolean
+          log_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emergency_contraception?: boolean | null
+          id?: string
+          is_menstruating?: boolean
+          log_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       nutrition_intake: {
         Row: {
           calories: number | null

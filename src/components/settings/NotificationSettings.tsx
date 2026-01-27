@@ -1,0 +1,187 @@
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Bell, BellOff, Clock, Droplets, Syringe, Heart } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useContraceptive } from '@/hooks/useContraceptive';
+import { useLifePhase } from '@/hooks/useLifePhase';
+
+const NotificationSettings: React.FC = () => {
+  const {
+    supported,
+    permission,
+    settings,
+    requestPermission,
+    registerServiceWorker,
+    updateSettings,
+    schedulePillReminder,
+  } = useNotifications();
+  
+  const { contraceptive_type: contraceptiveType } = useContraceptive();
+  const { isTryingToConceive } = useLifePhase();
+
+  // Register service worker on mount
+  useEffect(() => {
+    if (supported) {
+      registerServiceWorker();
+    }
+  }, [supported, registerServiceWorker]);
+
+  // Schedule pill reminder when enabled
+  useEffect(() => {
+    if (settings.pillReminder && permission === 'granted') {
+      schedulePillReminder(settings.pillReminderTime);
+    }
+  }, [settings.pillReminder, settings.pillReminderTime, permission, schedulePillReminder]);
+
+  const showPillOption = contraceptiveType === 'Pílula';
+  const showInjectionOption = contraceptiveType === 'Injeção';
+  const showFertileOption = isTryingToConceive;
+
+  if (!supported) {
+    return (
+      <Card className="bg-muted/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-muted-foreground">
+            <BellOff className="w-5 h-5" />
+            Notificações não suportadas
+          </CardTitle>
+          <CardDescription>
+            Seu navegador não suporta notificações push.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-primary" />
+            Notificações
+          </CardTitle>
+          <CardDescription>
+            Receba lembretes personalizados
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Permission Request */}
+          {permission !== 'granted' && (
+            <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+              <p className="text-sm text-foreground mb-3">
+                Ative as notificações para receber lembretes importantes sobre seu ciclo.
+              </p>
+              <Button onClick={requestPermission} className="w-full">
+                <Bell className="w-4 h-4 mr-2" />
+                Ativar Notificações
+              </Button>
+            </div>
+          )}
+
+          {/* Pill Reminder */}
+          {showPillOption && (
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-rose-100 text-rose-600">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div>
+                  <Label className="text-base font-medium">Lembrete de Pílula</Label>
+                  <p className="text-sm text-muted-foreground">Diário</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Input
+                  type="time"
+                  value={settings.pillReminderTime}
+                  onChange={(e) => updateSettings({ pillReminderTime: e.target.value })}
+                  className="w-24"
+                  disabled={permission !== 'granted'}
+                />
+                <Switch
+                  checked={settings.pillReminder}
+                  onCheckedChange={(checked) => updateSettings({ pillReminder: checked })}
+                  disabled={permission !== 'granted'}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Injection Reminder */}
+          {showInjectionOption && (
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                  <Syringe className="w-4 h-4" />
+                </div>
+                <div>
+                  <Label className="text-base font-medium">Próxima Injeção</Label>
+                  <p className="text-sm text-muted-foreground">2 dias antes</p>
+                </div>
+              </div>
+              <Switch
+                checked={settings.nextInjection}
+                onCheckedChange={(checked) => updateSettings({ nextInjection: checked })}
+                disabled={permission !== 'granted'}
+              />
+            </div>
+          )}
+
+          {/* Fertile Window */}
+          {showFertileOption && (
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+                  <Heart className="w-4 h-4" />
+                </div>
+                <div>
+                  <Label className="text-base font-medium">Janela Fértil</Label>
+                  <p className="text-sm text-muted-foreground">Início da ovulação</p>
+                </div>
+              </div>
+              <Switch
+                checked={settings.fertileWindow}
+                onCheckedChange={(checked) => updateSettings({ fertileWindow: checked })}
+                disabled={permission !== 'granted'}
+              />
+            </div>
+          )}
+
+          {/* Period Prediction - always show */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-red-100 text-red-600">
+                <Droplets className="w-4 h-4" />
+              </div>
+              <div>
+                <Label className="text-base font-medium">Próxima Menstruação</Label>
+                <p className="text-sm text-muted-foreground">1 dia antes</p>
+              </div>
+            </div>
+            <Switch
+              checked={true}
+              disabled={permission !== 'granted'}
+            />
+          </div>
+
+          {permission === 'granted' && (
+            <p className="text-xs text-muted-foreground text-center pt-2">
+              ✓ Notificações ativas
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
+export default NotificationSettings;
