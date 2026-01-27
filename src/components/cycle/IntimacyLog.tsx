@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Heart, Loader2, Check, AlertTriangle } from 'lucide-react';
+import { Flame, Heart, Loader2, Check, AlertTriangle, Pill } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -11,7 +11,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { useIntimacyLog } from '@/hooks/useIntimacyLog';
 import { useCycle } from '@/contexts/CycleContext';
+import { useMenstruationLog } from '@/hooks/useMenstruationLog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 interface TagOption {
   id: string;
@@ -57,6 +60,7 @@ interface IntimacyLogProps {
 const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly = false }) => {
   const { existingLog, loading, saving, saveLog, isAuthenticated, yesterdayRiskDetected } = useIntimacyLog();
   const { currentPhase } = useCycle();
+  const { logEmergencyContraception } = useMenstruationLog();
   
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -65,6 +69,7 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
   const [selectedProtection, setSelectedProtection] = useState<string[]>([]);
   const [selectedSensations, setSelectedSensations] = useState<string[]>([]);
   const [selectedAftercare, setSelectedAftercare] = useState<string[]>([]);
+  const [logMorningAfterPill, setLogMorningAfterPill] = useState(false);
 
   // Load existing data
   useEffect(() => {
@@ -107,10 +112,10 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
     const allPhysical = [...selectedPractices, ...selectedProtection];
     const allEmotional = [...selectedSensations, ...selectedAftercare];
     
-    // Check if in fertile window with risky protection
-    const isRisky = selectedProtection.includes('unprotected') || 
-                    selectedProtection.includes('withdrawal');
-    const isFertile = currentPhase === 'ovulatoria';
+    // Check if morning after pill was selected
+    if (logMorningAfterPill || selectedProtection.includes('morning_after')) {
+      await logEmergencyContraception(new Date());
+    }
     
     const success = await saveLog({
       libido: existingLog?.libido || 3,
@@ -132,6 +137,7 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
       setTimeout(() => {
         setSaved(false);
         setDrawerOpen(false);
+        setLogMorningAfterPill(false);
       }, 1500);
     }
   };
@@ -236,6 +242,33 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
 
           {renderTagGroup('Práticas', practicesTags, selectedPractices, setSelectedPractices)}
           {renderTagGroup('Proteção', protectionTags, selectedProtection, setSelectedProtection, true)}
+          
+          {/* Morning After Pill Checkbox - Shows when unprotected is selected */}
+          {(selectedProtection.includes('unprotected') || selectedProtection.includes('withdrawal')) && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800"
+            >
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="morning-after"
+                  checked={logMorningAfterPill}
+                  onCheckedChange={(checked) => setLogMorningAfterPill(checked as boolean)}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="morning-after" className="text-amber-800 dark:text-amber-200 font-medium flex items-center gap-2">
+                    <Pill className="w-4 h-4" />
+                    Tomei Pílula do Dia Seguinte
+                  </Label>
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                    Isso ajustará a previsão da sua próxima menstruação em +7 dias
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+          
           {renderTagGroup('Sensação', sensationTags, selectedSensations, setSelectedSensations)}
           {renderTagGroup('After-Care', aftercareTags, selectedAftercare, setSelectedAftercare)}
 

@@ -6,9 +6,20 @@ import { useSelectedDate } from '@/contexts/SelectedDateContext';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { useCycle } from '@/contexts/CycleContext';
 import { useLifePhase } from '@/hooks/useLifePhase';
+import { useMenstruationLog } from '@/hooks/useMenstruationLog';
 import { format, isSameDay } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MONTHS = [
@@ -26,14 +37,16 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const { getPredictedPeriodDates, cycleLength, lastPeriodStart } = useCycle();
   const { isTryingToConceive, lifePhase } = useLifePhase();
   const { user } = useAuth();
+  const { menstruationDates, toggleMenstruation, isMenstruating, emergencyContraceptionDates } = useMenstruationLog();
   
   const [viewMonth, setViewMonth] = useState(new Date(selectedDate));
   const [intimacyDates, setIntimacyDates] = useState<string[]>([]);
   const [newlyAddedDates, setNewlyAddedDates] = useState<string[]>([]);
+  const [menstruationDialogOpen, setMenstruationDialogOpen] = useState(false);
+  const [selectedDayForMenstruation, setSelectedDayForMenstruation] = useState<Date | null>(null);
   
   // Use ref to track previous dates for comparison without causing re-renders
   const previousDatesRef = React.useRef<string[]>([]);
-
   // Fetch intimacy log dates
   const fetchIntimacyDates = React.useCallback(async (isRefresh = false) => {
     if (!user) return;
@@ -89,10 +102,33 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   }, [fetchIntimacyDates]);
 
   // Get predicted period dates for the current view (only for non-menopause users)
+  // Adjust for emergency contraception (+7 days)
   const predictedPeriodDates = useMemo(() => {
     if (lifePhase === 'menopause') return []; // No predictions for menopause
-    return getPredictedPeriodDates(6); // 6 months ahead
-  }, [getPredictedPeriodDates, lifePhase]);
+    
+    let dates = getPredictedPeriodDates(6); // 6 months ahead
+    
+    // If there's a recent emergency contraception, shift predictions by +7 days
+    if (emergencyContraceptionDates.length > 0) {
+      const sorted = [...emergencyContraceptionDates].sort((a, b) => 
+        new Date(b).getTime() - new Date(a).getTime()
+      );
+      const mostRecentEC = new Date(sorted[0]);
+      const today = new Date();
+      const daysSinceEC = Math.floor((today.getTime() - mostRecentEC.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Only apply adjustment if EC was within last 30 days
+      if (daysSinceEC <= 30) {
+        dates = dates.map(d => {
+          const newDate = new Date(d);
+          newDate.setDate(newDate.getDate() + 7);
+          return newDate;
+        });
+      }
+    }
+    
+    return dates;
+  }, [getPredictedPeriodDates, lifePhase, emergencyContraceptionDates]);
 
   // Calculate fertile window dates for trying to conceive users
   const fertileWindowDates = useMemo(() => {
@@ -151,8 +187,33 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     const newDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
     if (newDate <= new Date()) {
       setSelectedDate(newDate);
-      onClose?.();
     }
+  };
+
+  // Long press to toggle menstruation (for past days only)
+  const handleDayLongPress = (day: number) => {
+    const date = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Only allow past days
+    if (date < today) {
+      setSelectedDayForMenstruation(date);
+      setMenstruationDialogOpen(true);
+    }
+  };
+
+  const handleMenstruationConfirm = async () => {
+    if (selectedDayForMenstruation) {
+      await toggleMenstruation(selectedDayForMenstruation);
+    }
+    setMenstruationDialogOpen(false);
+    setSelectedDayForMenstruation(null);
+  };
+
+  const isManualMenstruation = (day: number): boolean => {
+    const dateStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return menstruationDates.includes(dateStr);
   };
 
   const isDateWithData = (day: number): boolean => {
@@ -250,68 +311,93 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
 
       {/* Days grid */}
       <div className="grid grid-cols-7 gap-1">
-        {days.map((day, index) => (
-          <div key={index} className="aspect-square flex items-center justify-center">
-            {day !== null && (
-              <button
-                onClick={() => !isFutureDay(day) && handleDayClick(day)}
-                disabled={false} // Allow clicking future days to see prediction
-                className={`
-                  relative w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium
-                  transition-all duration-200
-                  ${isSelectedDay(day) 
-                    ? 'bg-primary text-primary-foreground' 
-                    : isTodayDay(day)
-                      ? 'bg-primary/20 text-primary'
-                      : isFertileDay(day) && !isFutureDay(day)
-                        ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30'
-                        : isFertileDay(day) && isFutureDay(day)
-                          ? 'bg-amber-500/10 text-amber-500/70 border border-amber-500/20'
-                          : isPredictedPeriod(day) && isFutureDay(day)
-                            ? 'bg-red-500/20 text-red-500 border border-red-500/30'
-                            : isFutureDay(day)
-                              ? 'text-muted-foreground/40'
-                              : 'text-foreground hover:bg-muted'
-                  }
-                `}
-              >
-                {day}
-                {/* Fertile day indicator - golden star for trying to conceive */}
-                {isFertileDay(day) && !isSelectedDay(day) && (
-                  <Star 
-                    className="absolute -top-0.5 -right-0.5 w-3 h-3 text-amber-500" 
-                    fill="currentColor"
-                  />
-                )}
-                {/* Predicted period indicator */}
-                {isPredictedPeriod(day) && isFutureDay(day) && !isSelectedDay(day) && !isFertileDay(day) && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500" />
-                )}
-                {/* Intimacy log indicator - purple heart with animation */}
-                {hasIntimacyLog(day) && !isSelectedDay(day) && !isFutureDay(day) && !isFertileDay(day) && (
-                  <motion.span 
-                    className="absolute -top-0.5 -right-0.5 text-purple-500"
-                    initial={isNewlyAddedIntimacy(day) ? { scale: 0, opacity: 0 } : false}
-                    animate={isNewlyAddedIntimacy(day) ? { 
-                      scale: [0, 1.3, 1], 
-                      opacity: 1 
-                    } : {}}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                  >
-                    <Heart 
-                      className={`w-3 h-3 ${isNewlyAddedIntimacy(day) ? 'animate-pulse' : ''}`} 
-                      fill="currentColor" 
+        {days.map((day, index) => {
+          let pressTimer: NodeJS.Timeout | null = null;
+          
+          return (
+            <div key={index} className="aspect-square flex items-center justify-center">
+              {day !== null && (
+                <button
+                  onClick={() => !isFutureDay(day) && handleDayClick(day)}
+                  onMouseDown={() => {
+                    pressTimer = setTimeout(() => handleDayLongPress(day), 500);
+                  }}
+                  onMouseUp={() => {
+                    if (pressTimer) clearTimeout(pressTimer);
+                  }}
+                  onMouseLeave={() => {
+                    if (pressTimer) clearTimeout(pressTimer);
+                  }}
+                  onTouchStart={() => {
+                    pressTimer = setTimeout(() => handleDayLongPress(day), 500);
+                  }}
+                  onTouchEnd={() => {
+                    if (pressTimer) clearTimeout(pressTimer);
+                  }}
+                  disabled={false}
+                  className={`
+                    relative w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium
+                    transition-all duration-200
+                    ${isSelectedDay(day) 
+                      ? 'bg-primary text-primary-foreground' 
+                      : isManualMenstruation(day)
+                        ? 'bg-red-500 text-white'
+                        : isTodayDay(day)
+                          ? 'bg-primary/20 text-primary'
+                          : isFertileDay(day) && !isFutureDay(day)
+                            ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30'
+                            : isFertileDay(day) && isFutureDay(day)
+                              ? 'bg-amber-500/10 text-amber-500/70 border border-amber-500/20'
+                              : isPredictedPeriod(day) && isFutureDay(day)
+                                ? 'bg-red-500/20 text-red-500 border border-red-500/30'
+                                : isFutureDay(day)
+                                  ? 'text-muted-foreground/40'
+                                  : 'text-foreground hover:bg-muted'
+                    }
+                  `}
+                >
+                  {day}
+                  {/* Manual menstruation indicator */}
+                  {isManualMenstruation(day) && !isSelectedDay(day) && (
+                    <Droplets className="absolute -top-0.5 -right-0.5 w-3 h-3 text-white" />
+                  )}
+                  {/* Fertile day indicator - golden star for trying to conceive */}
+                  {isFertileDay(day) && !isSelectedDay(day) && !isManualMenstruation(day) && (
+                    <Star 
+                      className="absolute -top-0.5 -right-0.5 w-3 h-3 text-amber-500" 
+                      fill="currentColor"
                     />
-                  </motion.span>
-                )}
-                {/* Data indicator dot */}
-                {isDateWithData(day) && !isSelectedDay(day) && !isFutureDay(day) && !hasIntimacyLog(day) && !isFertileDay(day) && (
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
-                )}
-              </button>
-            )}
-          </div>
-        ))}
+                  )}
+                  {/* Predicted period indicator */}
+                  {isPredictedPeriod(day) && isFutureDay(day) && !isSelectedDay(day) && !isFertileDay(day) && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500" />
+                  )}
+                  {/* Intimacy log indicator - purple heart with animation */}
+                  {hasIntimacyLog(day) && !isSelectedDay(day) && !isFutureDay(day) && !isFertileDay(day) && !isManualMenstruation(day) && (
+                    <motion.span 
+                      className="absolute -top-0.5 -right-0.5 text-purple-500"
+                      initial={isNewlyAddedIntimacy(day) ? { scale: 0, opacity: 0 } : false}
+                      animate={isNewlyAddedIntimacy(day) ? { 
+                        scale: [0, 1.3, 1], 
+                        opacity: 1 
+                      } : {}}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                      <Heart 
+                        className={`w-3 h-3 ${isNewlyAddedIntimacy(day) ? 'animate-pulse' : ''}`} 
+                        fill="currentColor" 
+                      />
+                    </motion.span>
+                  )}
+                  {/* Data indicator dot */}
+                  {isDateWithData(day) && !isSelectedDay(day) && !isFutureDay(day) && !hasIntimacyLog(day) && !isFertileDay(day) && !isManualMenstruation(day) && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
+                  )}
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Legend */}
@@ -319,6 +405,12 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-primary" />
           <span>Registro</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+            <Droplets className="w-2.5 h-2.5 text-white" />
+          </div>
+          <span>Menstruação</span>
         </div>
         <div className="flex items-center gap-1.5">
           <Heart className="w-3 h-3 text-purple-500" fill="currentColor" />
@@ -339,6 +431,47 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
           </div>
         )}
       </div>
+      
+      {/* Tip for long press */}
+      <p className="text-xs text-center text-muted-foreground mt-2">
+        💡 Segure um dia passado para marcar menstruação
+      </p>
+
+      {/* Menstruation Toggle Dialog */}
+      <AlertDialog open={menstruationDialogOpen} onOpenChange={setMenstruationDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Droplets className="w-5 h-5 text-red-500" />
+              {selectedDayForMenstruation && isMenstruating(selectedDayForMenstruation) 
+                ? 'Remover Menstruação' 
+                : 'Registrar Menstruação'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedDayForMenstruation && (
+                <>
+                  Dia {selectedDayForMenstruation.getDate()} de {MONTHS[selectedDayForMenstruation.getMonth()]}
+                  <br />
+                  {isMenstruating(selectedDayForMenstruation)
+                    ? 'Deseja remover este dia como menstruação?'
+                    : 'Deseja marcar este dia como menstruação?'}
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleMenstruationConfirm}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {selectedDayForMenstruation && isMenstruating(selectedDayForMenstruation) 
+                ? 'Remover' 
+                : 'Marcar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 };
