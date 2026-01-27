@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { format, subDays, parseISO } from 'date-fns';
+import { format, subDays, parseISO, eachDayOfInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -47,6 +47,10 @@ interface ReportData {
     duration_minutes: number | null;
     completed: boolean | null;
   }>;
+  dateRange: {
+    start: Date;
+    end: Date;
+  };
 }
 
 const lifePhaseLabels: Record<string, string> = {
@@ -59,8 +63,10 @@ const moodEmojis = ['😢', '😔', '😐', '😊', '🤩'];
 const energyLabels = ['Muito baixa', 'Baixa', 'Moderada', 'Alta', 'Muito alta'];
 
 export async function fetchReportData(userId: string, days: number = 30): Promise<ReportData> {
-  const startDate = format(subDays(new Date(), days), 'yyyy-MM-dd');
-  const endDate = format(new Date(), 'yyyy-MM-dd');
+  const endDate = new Date();
+  const startDate = subDays(endDate, days);
+  const startDateStr = format(startDate, 'yyyy-MM-dd');
+  const endDateStr = format(endDate, 'yyyy-MM-dd');
 
   const [
     profileRes,
@@ -71,11 +77,11 @@ export async function fetchReportData(userId: string, days: number = 30): Promis
     workoutsRes,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('user_id', userId).single(),
-    supabase.from('daily_logs').select('*').eq('user_id', userId).gte('log_date', startDate).lte('log_date', endDate).order('log_date', { ascending: false }),
-    supabase.from('menstruation_logs').select('*').eq('user_id', userId).gte('log_date', startDate).lte('log_date', endDate).order('log_date', { ascending: false }),
-    supabase.from('intimacy_logs').select('*').eq('user_id', userId).gte('log_date', startDate).lte('log_date', endDate).order('log_date', { ascending: false }),
-    supabase.from('nutrition_intake').select('*').eq('user_id', userId).gte('intake_date', startDate).lte('intake_date', endDate).order('intake_date', { ascending: false }),
-    supabase.from('workouts').select('*').eq('user_id', userId).gte('workout_date', startDate).lte('workout_date', endDate).order('workout_date', { ascending: false }),
+    supabase.from('daily_logs').select('*').eq('user_id', userId).gte('log_date', startDateStr).lte('log_date', endDateStr).order('log_date', { ascending: true }),
+    supabase.from('menstruation_logs').select('*').eq('user_id', userId).gte('log_date', startDateStr).lte('log_date', endDateStr).order('log_date', { ascending: false }),
+    supabase.from('intimacy_logs').select('*').eq('user_id', userId).gte('log_date', startDateStr).lte('log_date', endDateStr).order('log_date', { ascending: false }),
+    supabase.from('nutrition_intake').select('*').eq('user_id', userId).gte('intake_date', startDateStr).lte('intake_date', endDateStr).order('intake_date', { ascending: false }),
+    supabase.from('workouts').select('*').eq('user_id', userId).gte('workout_date', startDateStr).lte('workout_date', endDateStr).order('workout_date', { ascending: false }),
   ]);
 
   return {
@@ -85,7 +91,100 @@ export async function fetchReportData(userId: string, days: number = 30): Promis
     intimacyLogs: intimacyRes.data || [],
     nutritionIntake: nutritionRes.data || [],
     workouts: workoutsRes.data || [],
+    dateRange: { start: startDate, end: endDate },
   };
+}
+
+// Draw a simple line chart in PDF
+function drawLineChart(
+  doc: jsPDF,
+  data: { date: string; mood: number | null; energy: number | null }[],
+  startX: number,
+  startY: number,
+  width: number,
+  height: number
+) {
+  const padding = 15;
+  const chartWidth = width - padding * 2;
+  const chartHeight = height - padding * 2;
+  
+  // Background
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(startX, startY, width, height, 3, 3, 'F');
+  
+  // Draw grid lines and Y-axis labels
+  doc.setDrawColor(220, 220, 220);
+  doc.setLineWidth(0.2);
+  doc.setFontSize(7);
+  doc.setTextColor(120, 120, 120);
+  
+  for (let i = 0; i <= 5; i++) {
+    const y = startY + padding + (chartHeight / 5) * (5 - i);
+    doc.line(startX + padding, y, startX + padding + chartWidth, y);
+    doc.text(`${i}`, startX + padding - 8, y + 2);
+  }
+  
+  // Filter out null values and prepare data points
+  const moodPoints = data.filter(d => d.mood !== null).map((d, idx, arr) => ({
+    x: startX + padding + (chartWidth / Math.max(arr.length - 1, 1)) * idx,
+    y: startY + padding + chartHeight - (chartHeight / 5) * (d.mood || 0),
+    label: d.date,
+  }));
+  
+  const energyPoints = data.filter(d => d.energy !== null).map((d, idx, arr) => ({
+    x: startX + padding + (chartWidth / Math.max(arr.length - 1, 1)) * idx,
+    y: startY + padding + chartHeight - (chartHeight / 5) * (d.energy || 0),
+  }));
+  
+  // Draw mood line (pink)
+  if (moodPoints.length > 1) {
+    doc.setDrawColor(236, 72, 153);
+    doc.setLineWidth(1.5);
+    for (let i = 1; i < moodPoints.length; i++) {
+      doc.line(moodPoints[i - 1].x, moodPoints[i - 1].y, moodPoints[i].x, moodPoints[i].y);
+    }
+    // Draw points
+    doc.setFillColor(236, 72, 153);
+    moodPoints.forEach(p => {
+      doc.circle(p.x, p.y, 1.5, 'F');
+    });
+  }
+  
+  // Draw energy line (amber)
+  if (energyPoints.length > 1) {
+    doc.setDrawColor(245, 158, 11);
+    doc.setLineWidth(1.5);
+    for (let i = 1; i < energyPoints.length; i++) {
+      doc.line(energyPoints[i - 1].x, energyPoints[i - 1].y, energyPoints[i].x, energyPoints[i].y);
+    }
+    // Draw points
+    doc.setFillColor(245, 158, 11);
+    energyPoints.forEach(p => {
+      doc.circle(p.x, p.y, 1.5, 'F');
+    });
+  }
+  
+  // X-axis labels (show only some)
+  doc.setFontSize(6);
+  doc.setTextColor(100, 100, 100);
+  const labelStep = Math.max(1, Math.floor(moodPoints.length / 7));
+  moodPoints.forEach((p, idx) => {
+    if (idx % labelStep === 0 || idx === moodPoints.length - 1) {
+      doc.text(p.label, p.x, startY + height - 3, { align: 'center' });
+    }
+  });
+  
+  // Legend
+  const legendY = startY + 8;
+  doc.setFillColor(236, 72, 153);
+  doc.circle(startX + padding + 5, legendY, 2, 'F');
+  doc.setTextColor(80, 80, 80);
+  doc.setFontSize(7);
+  doc.text('Humor', startX + padding + 10, legendY + 1.5);
+  
+  doc.setFillColor(245, 158, 11);
+  doc.circle(startX + padding + 35, legendY, 2, 'F');
+  doc.text('Energia', startX + padding + 40, legendY + 1.5);
 }
 
 export function generateHealthReportPDF(data: ReportData, userEmail: string): jsPDF {
@@ -260,6 +359,26 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
         doc.text(`• ${symptom}: ${count} ocorrência(s)`, 20, yPos);
         yPos += 5;
       });
+    }
+    // Add mood/energy chart if we have enough data
+    if (data.dailyLogs.length >= 3) {
+      yPos += 10;
+      checkPageBreak(75);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Evolução do Humor e Energia', 15, yPos);
+      yPos += 5;
+      
+      const chartData = data.dailyLogs.map(log => ({
+        date: format(parseISO(log.log_date), 'dd/MM'),
+        mood: log.mood,
+        energy: log.energy,
+      }));
+      
+      drawLineChart(doc, chartData, 15, yPos, pageWidth - 30, 55);
+      yPos += 60;
     }
   } else {
     doc.setFontSize(10);
