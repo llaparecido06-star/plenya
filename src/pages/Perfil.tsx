@@ -9,6 +9,8 @@ import DUMPicker from '@/components/profile/DUMPicker';
 import PatternsCard from '@/components/history/PatternsCard';
 import ContraceptiveConfig from '@/components/profile/ContraceptiveConfig';
 import MedicalReportButton from '@/components/profile/MedicalReportButton';
+import NotificationSettings from '@/components/settings/NotificationSettings';
+import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
 import { useProfile } from '@/hooks/useProfile';
 import { Badge } from '@/components/ui/badge';
 
@@ -178,13 +180,31 @@ const Perfil: React.FC = () => {
           <PatternsCard />
         </motion.div>
 
+        {/* Weekly Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <WeeklySummaryCard />
+        </motion.div>
+
+        {/* Notification Settings */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <NotificationSettings />
+        </motion.div>
+
         {/* Medical Report Button */}
         <MedicalReportButton />
 
         <Button
           onClick={signOut}
           variant="outline"
-          className="w-full mt-6"
+          className="w-full mt-6 mb-24"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Sair
