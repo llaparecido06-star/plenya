@@ -144,15 +144,20 @@ const Onboarding: React.FC = () => {
   const { user } = useAuth();
   const { refreshCycleData } = useCycle();
   
-  // Wizard state
+  // Wizard state - Start at step 1 (Birth Date, since name is auto-fetched)
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showBuildingProfile, setShowBuildingProfile] = useState(false);
   const [buildingStep, setBuildingStep] = useState(0);
   
-  // CHAPTER 1: Identity
+  // CHAPTER 1: Identity - Auto-fetched from auth
   const [fullName, setFullName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
+  
+  // Birth date picker state
+  const [birthYear, setBirthYear] = useState<number | null>(null);
+  const [birthMonth, setBirthMonth] = useState<number | null>(null);
+  const [birthDay, setBirthDay] = useState<number | null>(null);
   
   // CHAPTER 2: Life Phase (The Big Filter)
   const [lifePhase, setLifePhase] = useState<string | null>(null);
@@ -175,11 +180,65 @@ const Onboarding: React.FC = () => {
   const [brandSearch, setBrandSearch] = useState('');
   const [showBrandSuggestions, setShowBrandSuggestions] = useState(false);
 
-  // Calculate total steps based on life phase
+  // Auto-fetch name from auth metadata on mount
+  useEffect(() => {
+    if (user) {
+      const authName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+      if (authName) {
+        // Extract first name
+        const firstName = authName.split(' ')[0];
+        setFullName(firstName);
+      }
+    }
+  }, [user]);
+
+  // Update dateOfBirth when year/month/day are selected
+  useEffect(() => {
+    if (birthYear && birthMonth !== null && birthDay) {
+      const date = new Date(birthYear, birthMonth, birthDay);
+      if (!isNaN(date.getTime())) {
+        setDateOfBirth(date);
+      }
+    }
+  }, [birthYear, birthMonth, birthDay]);
+
+  // Generate year options (1940 to current year - 10)
+  const yearOptions = Array.from(
+    { length: new Date().getFullYear() - 10 - 1940 + 1 },
+    (_, i) => 1940 + i
+  ).reverse();
+
+  // Generate month options
+  const monthOptions = [
+    { value: 0, label: 'Janeiro' },
+    { value: 1, label: 'Fevereiro' },
+    { value: 2, label: 'Março' },
+    { value: 3, label: 'Abril' },
+    { value: 4, label: 'Maio' },
+    { value: 5, label: 'Junho' },
+    { value: 6, label: 'Julho' },
+    { value: 7, label: 'Agosto' },
+    { value: 8, label: 'Setembro' },
+    { value: 9, label: 'Outubro' },
+    { value: 10, label: 'Novembro' },
+    { value: 11, label: 'Dezembro' },
+  ];
+
+  // Generate day options based on selected year and month
+  const getDaysInMonth = (year: number | null, month: number | null) => {
+    if (year === null || month === null) return 31;
+    return new Date(year, month + 1, 0).getDate();
+  };
+  const dayOptions = Array.from(
+    { length: getDaysInMonth(birthYear, birthMonth) },
+    (_, i) => i + 1
+  );
+
+  // Calculate total steps based on life phase (reduced by 1 since name step removed)
   const getTotalSteps = () => {
-    if (lifePhase === 'menopause') return 6; // Identity (2) + Phase (1) + Style (2) + Skip sync = 6 sub-steps
-    if (lifePhase === 'pregnant') return 7; // Identity + Phase + Style + Pregnancy date
-    return 9; // Full flow with contraceptive
+    if (lifePhase === 'menopause') return 5; // Birth (1) + Phase (1) + Style (3) = 5 sub-steps
+    if (lifePhase === 'pregnant') return 6; // Birth + Phase + Style + Pregnancy date
+    return 8; // Full flow with contraceptive
   };
 
   const totalSteps = getTotalSteps();
@@ -222,67 +281,63 @@ const Onboarding: React.FC = () => {
   }, [showBuildingProfile, buildingStep, navigate]);
 
   const handleNext = () => {
-    // Validation per step
-    if (currentStep === 1 && !fullName.trim()) {
-      toast({ title: 'Como quer ser chamada?', variant: 'destructive' });
-      return;
-    }
-    if (currentStep === 2 && !dateOfBirth) {
+    // Validation per step (shifted by 1 since name step removed)
+    if (currentStep === 1 && !dateOfBirth) {
       toast({ title: 'Informe sua data de nascimento', variant: 'destructive' });
       return;
     }
-    if (currentStep === 3 && !lifePhase) {
+    if (currentStep === 2 && !lifePhase) {
       toast({ title: 'Selecione sua fase biológica', variant: 'destructive' });
       return;
     }
-    if (currentStep === 4 && selectedGoals.length === 0) {
+    if (currentStep === 3 && selectedGoals.length === 0) {
       toast({ title: 'Selecione pelo menos um objetivo', variant: 'destructive' });
       return;
     }
-    if (currentStep === 5 && !selectedDiet) {
+    if (currentStep === 4 && !selectedDiet) {
       toast({ title: 'Selecione seu estilo alimentar', variant: 'destructive' });
       return;
     }
-    if (currentStep === 6 && !selectedActivity) {
+    if (currentStep === 5 && !selectedActivity) {
       toast({ title: 'Selecione seu ritmo de movimento', variant: 'destructive' });
       return;
     }
     
     // For menstruating: validate cycle step
     if (lifePhase === 'menstruating') {
-      if (currentStep === 7 && !lastPeriodDate) {
+      if (currentStep === 6 && !lastPeriodDate) {
         toast({ title: 'Informe a data da última menstruação', variant: 'destructive' });
         return;
       }
-      if (currentStep === 8 && !selectedCategory) {
+      if (currentStep === 7 && !selectedCategory) {
         toast({ title: 'Selecione uma categoria', variant: 'destructive' });
         return;
       }
-      if (currentStep === 9 && !selectedMethod) {
+      if (currentStep === 8 && !selectedMethod) {
         toast({ title: 'Selecione um método', variant: 'destructive' });
         return;
       }
     }
     
     // For pregnant: validate pregnancy date
-    if (lifePhase === 'pregnant' && currentStep === 7 && !pregnancyStartDate) {
+    if (lifePhase === 'pregnant' && currentStep === 6 && !pregnancyStartDate) {
       toast({ title: 'Informe a data da última menstruação', variant: 'destructive' });
       return;
     }
     
     // Determine next step based on life phase
-    if (currentStep === 6 && lifePhase === 'menopause') {
+    if (currentStep === 5 && lifePhase === 'menopause') {
       // Menopause skips cycle config
       handleComplete();
       return;
     }
     
-    if (lifePhase === 'pregnant' && currentStep === 7) {
+    if (lifePhase === 'pregnant' && currentStep === 6) {
       handleComplete();
       return;
     }
     
-    if (lifePhase === 'menstruating' && currentStep === 9) {
+    if (lifePhase === 'menstruating' && currentStep === 8) {
       handleComplete();
       return;
     }
@@ -376,12 +431,12 @@ const Onboarding: React.FC = () => {
     }));
   };
 
-  // Calculate current chapter
+  // Calculate current chapter (adjusted for removed name step)
   const getCurrentChapter = () => {
-    if (currentStep <= 2) return 1;
-    if (currentStep === 3) return 2;
-    if (currentStep <= 6) return 3;
-    return 4;
+    if (currentStep === 1) return 1; // Birth date only
+    if (currentStep === 2) return 2; // Life phase
+    if (currentStep <= 5) return 3; // Goals, Diet, Activity
+    return 4; // Sync
   };
 
   // Building Profile Screen
@@ -444,7 +499,7 @@ const Onboarding: React.FC = () => {
 
   const renderStep = () => {
     switch (currentStep) {
-      // CHAPTER 1: Identity - Name
+      // CHAPTER 1: Identity - Birth Date (Name removed, auto-fetched)
       case 1:
         return (
           <motion.div
@@ -456,79 +511,85 @@ const Onboarding: React.FC = () => {
           >
             <div className="text-center mb-8">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-terracotta/20 flex items-center justify-center">
-                <User className="w-10 h-10 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Como quer ser chamada?</h2>
-              <p className="text-muted-foreground">Este é o começo da sua jornada</p>
-            </div>
-            
-            <div className="space-y-4">
-              <Input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Seu nome ou apelido"
-                className="h-14 text-lg text-center"
-                autoFocus
-              />
-            </div>
-          </motion.div>
-        );
-
-      // CHAPTER 1: Identity - Birth Date
-      case 2:
-        return (
-          <motion.div
-            key="step2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-terracotta/20 flex items-center justify-center">
                 <Cake className="w-10 h-10 text-primary" />
               </div>
+              {fullName && (
+                <p className="text-lg text-primary font-medium mb-2">Olá, {fullName}! 👋</p>
+              )}
               <h2 className="text-2xl font-bold text-foreground mb-2">Quando iniciou sua jornada?</h2>
               <p className="text-muted-foreground">Para calcular sua idade metabólica</p>
             </div>
             
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-center text-left font-normal h-14 text-lg",
-                    !dateOfBirth && "text-muted-foreground"
-                  )}
+            {/* Improved Date Picker with Year/Month/Day dropdowns */}
+            <div className="space-y-4">
+              {/* Year Selector */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Ano</label>
+                <select
+                  value={birthYear || ''}
+                  onChange={(e) => setBirthYear(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full h-14 px-4 text-lg rounded-xl border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                 >
-                  <CalendarIcon className="mr-3 h-5 w-5" />
-                  {dateOfBirth
-                    ? format(dateOfBirth, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                    : "Selecione sua data de nascimento"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 pointer-events-auto" align="center">
-                <Calendar
-                  mode="single"
-                  selected={dateOfBirth}
-                  onSelect={setDateOfBirth}
-                  disabled={(date) => date > new Date() || date < new Date('1940-01-01')}
-                  initialFocus
-                  captionLayout="dropdown-buttons"
-                  fromYear={1940}
-                  toYear={new Date().getFullYear()}
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
+                  <option value="">Selecione o ano</option>
+                  {yearOptions.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Month Selector */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Mês</label>
+                <select
+                  value={birthMonth !== null ? birthMonth : ''}
+                  onChange={(e) => setBirthMonth(e.target.value !== '' ? Number(e.target.value) : null)}
+                  className="w-full h-14 px-4 text-lg rounded-xl border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+                  disabled={!birthYear}
+                >
+                  <option value="">Selecione o mês</option>
+                  {monthOptions.map((month) => (
+                    <option key={month.value} value={month.value}>{month.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Day Selector */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Dia</label>
+                <select
+                  value={birthDay || ''}
+                  onChange={(e) => setBirthDay(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full h-14 px-4 text-lg rounded-xl border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+                  disabled={birthMonth === null}
+                >
+                  <option value="">Selecione o dia</option>
+                  {dayOptions.map((day) => (
+                    <option key={day} value={day}>{day}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Display selected date */}
+              {dateOfBirth && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center p-3 bg-primary/10 rounded-xl"
+                >
+                  <p className="text-primary font-medium">
+                    📅 {format(dateOfBirth, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  </p>
+                </motion.div>
+              )}
+            </div>
           </motion.div>
         );
 
       // CHAPTER 2: Life Phase (The Big Filter)
-      case 3:
+      case 2:
         return (
           <motion.div
-            key="step3"
+            key="step2"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -575,7 +636,7 @@ const Onboarding: React.FC = () => {
         );
 
       // CHAPTER 3: Goals
-      case 4:
+      case 3:
         return (
           <motion.div
             key="step4"
@@ -645,7 +706,7 @@ const Onboarding: React.FC = () => {
         );
 
       // CHAPTER 3: Dietary Style
-      case 5:
+      case 4:
         return (
           <motion.div
             key="step5"
@@ -698,7 +759,7 @@ const Onboarding: React.FC = () => {
         );
 
       // CHAPTER 3: Activity Level
-      case 6:
+      case 5:
         return (
           <motion.div
             key="step6"
@@ -757,7 +818,7 @@ const Onboarding: React.FC = () => {
         );
 
       // CHAPTER 4: Cycle Sync - DUM (for menstruating) OR Pregnancy Date (for pregnant)
-      case 7:
+      case 6:
         if (lifePhase === 'pregnant') {
           return (
             <motion.div
@@ -891,7 +952,7 @@ const Onboarding: React.FC = () => {
         );
 
       // CHAPTER 4: Contraceptive Category
-      case 8:
+      case 7:
         return (
           <motion.div
             key="step8"
@@ -964,7 +1025,7 @@ const Onboarding: React.FC = () => {
         );
 
       // CHAPTER 4: Contraceptive Details
-      case 9:
+      case 8:
         return (
           <motion.div
             key="step9"
