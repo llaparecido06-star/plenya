@@ -1,19 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Thermometer, Moon, Brain, Heart, Leaf } from 'lucide-react';
+import { Thermometer, Moon, Brain, Heart, Leaf, Check } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MenopauseCardProps {
   age?: number | null;
 }
 
 const MenopauseCard: React.FC<MenopauseCardProps> = ({ age }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+
   // Common menopause symptoms to track
   const quickSymptoms = [
-    { id: 'hot_flash', label: 'Calor', icon: Thermometer, color: 'text-red-500' },
-    { id: 'insomnia', label: 'Insônia', icon: Moon, color: 'text-indigo-500' },
-    { id: 'brain_fog', label: 'Névoa Mental', icon: Brain, color: 'text-purple-500' },
-    { id: 'mood_swing', label: 'Humor', icon: Heart, color: 'text-pink-500' },
+    { id: 'hot_flash', label: 'Calor', icon: Thermometer, color: 'text-red-500', bgColor: 'bg-red-100 dark:bg-red-900/30' },
+    { id: 'insomnia', label: 'Insônia', icon: Moon, color: 'text-indigo-500', bgColor: 'bg-indigo-100 dark:bg-indigo-900/30' },
+    { id: 'brain_fog', label: 'Névoa Mental', icon: Brain, color: 'text-purple-500', bgColor: 'bg-purple-100 dark:bg-purple-900/30' },
+    { id: 'mood_swing', label: 'Humor', icon: Heart, color: 'text-pink-500', bgColor: 'bg-pink-100 dark:bg-pink-900/30' },
   ];
+
+  const toggleSymptom = async (symptomId: string) => {
+    if (!user) return;
+    
+    const newSelected = selectedSymptoms.includes(symptomId)
+      ? selectedSymptoms.filter(s => s !== symptomId)
+      : [...selectedSymptoms, symptomId];
+    
+    setSelectedSymptoms(newSelected);
+    
+    // Save to database
+    setSaving(true);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { error } = await supabase
+        .from('daily_logs')
+        .upsert({
+          user_id: user.id,
+          log_date: today,
+          symptoms: newSelected,
+        }, {
+          onConflict: 'user_id,log_date'
+        });
+
+      if (error) throw error;
+      
+      toast({
+        title: newSelected.includes(symptomId) ? 'Sintoma registrado 💜' : 'Sintoma removido',
+        description: `${quickSymptoms.find(s => s.id === symptomId)?.label}`,
+      });
+    } catch (error) {
+      console.error('Error saving symptom:', error);
+      // Revert on error
+      setSelectedSymptoms(selectedSymptoms);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <motion.div
@@ -42,14 +89,33 @@ const MenopauseCard: React.FC<MenopauseCardProps> = ({ age }) => {
           <div className="grid grid-cols-4 gap-2">
             {quickSymptoms.map((symptom) => {
               const Icon = symptom.icon;
+              const isSelected = selectedSymptoms.includes(symptom.id);
               return (
-                <button
+                <motion.button
                   key={symptom.id}
-                  className="flex flex-col items-center gap-1 p-3 rounded-xl bg-background/50 hover:bg-background transition-colors"
+                  onClick={() => toggleSymptom(symptom.id)}
+                  disabled={saving}
+                  whileTap={{ scale: 0.95 }}
+                  className={`relative flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
+                    isSelected 
+                      ? `${symptom.bgColor} border-2 border-current ${symptom.color}` 
+                      : 'bg-card hover:bg-muted border-2 border-transparent'
+                  }`}
                 >
-                  <Icon className={`w-5 h-5 ${symptom.color}`} />
-                  <span className="text-xs text-muted-foreground">{symptom.label}</span>
-                </button>
+                  <Icon className={`w-5 h-5 ${isSelected ? symptom.color : 'text-muted-foreground'}`} />
+                  <span className={`text-xs font-medium ${isSelected ? symptom.color : 'text-muted-foreground'}`}>
+                    {symptom.label}
+                  </span>
+                  {isSelected && (
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-leaf-green rounded-full flex items-center justify-center"
+                    >
+                      <Check className="w-3 h-3 text-white" />
+                    </motion.div>
+                  )}
+                </motion.button>
               );
             })}
           </div>

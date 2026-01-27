@@ -30,6 +30,9 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const [viewMonth, setViewMonth] = useState(new Date(selectedDate));
   const [intimacyDates, setIntimacyDates] = useState<string[]>([]);
   const [newlyAddedDates, setNewlyAddedDates] = useState<string[]>([]);
+  
+  // Use ref to track previous dates for comparison without causing re-renders
+  const previousDatesRef = React.useRef<string[]>([]);
 
   // Fetch intimacy log dates
   const fetchIntimacyDates = React.useCallback(async (isRefresh = false) => {
@@ -52,7 +55,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
       
       // Track newly added dates for animation
       if (isRefresh) {
-        const newDates = datesWithActivity.filter(d => !intimacyDates.includes(d));
+        const newDates = datesWithActivity.filter(d => !previousDatesRef.current.includes(d));
         if (newDates.length > 0) {
           setNewlyAddedDates(newDates);
           // Clear animation after 2 seconds
@@ -60,18 +63,23 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
         }
       }
       
+      previousDatesRef.current = datesWithActivity;
       setIntimacyDates(datesWithActivity);
     }
-  }, [user, intimacyDates]);
+  }, [user]);
 
+  // Initial fetch
   React.useEffect(() => {
     fetchIntimacyDates();
-  }, [fetchIntimacyDates]);
+  }, [user]); // Only depend on user, not fetchIntimacyDates
 
   // Listen for intimacy log saves to refresh calendar
   React.useEffect(() => {
     const handleIntimacySaved = () => {
-      fetchIntimacyDates(true); // Pass true to indicate this is a refresh
+      // Small delay to ensure DB has saved
+      setTimeout(() => {
+        fetchIntimacyDates(true);
+      }, 100);
     };
     
     window.addEventListener('intimacy-log-saved', handleIntimacySaved);
@@ -80,10 +88,11 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     };
   }, [fetchIntimacyDates]);
 
-  // Get predicted period dates for the current view
+  // Get predicted period dates for the current view (only for non-menopause users)
   const predictedPeriodDates = useMemo(() => {
+    if (lifePhase === 'menopause') return []; // No predictions for menopause
     return getPredictedPeriodDates(6); // 6 months ahead
-  }, [getPredictedPeriodDates]);
+  }, [getPredictedPeriodDates, lifePhase]);
 
   // Calculate fertile window dates for trying to conceive users
   const fertileWindowDates = useMemo(() => {
@@ -321,12 +330,14 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
             <span>Fértil</span>
           </div>
         )}
-        <div className="flex items-center gap-1.5">
-          <div className="w-4 h-4 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-            <Droplets className="w-2.5 h-2.5 text-red-500" />
+        {lifePhase !== 'menopause' && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-4 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+              <Droplets className="w-2.5 h-2.5 text-red-500" />
+            </div>
+            <span>Previsão</span>
           </div>
-          <span>Previsão</span>
-        </div>
+        )}
       </div>
     </motion.div>
   );
