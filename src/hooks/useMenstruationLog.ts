@@ -58,7 +58,56 @@ export const useMenstruationLog = () => {
     fetchLogs();
   }, [fetchLogs]);
 
-  // Toggle menstruation for a specific date
+  // Sync DUM based on manual menstruation logs
+  // Finds the first day of the most recent menstruation period
+  const syncDUMFromManualLogs = useCallback(async (newDateStr?: string) => {
+    if (!user) return;
+
+    try {
+      // Get all menstruation dates including the new one
+      const allDates = newDateStr 
+        ? [...menstruationDates, newDateStr].sort()
+        : [...menstruationDates].sort();
+
+      if (allDates.length === 0) return;
+
+      // Find the most recent continuous period (group consecutive days)
+      const sortedDatesDesc = allDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+      
+      // Start from the most recent date and find the first day of that period
+      let currentPeriodStart = sortedDatesDesc[0];
+      let currentDate = new Date(sortedDatesDesc[0]);
+
+      for (let i = 1; i < sortedDatesDesc.length; i++) {
+        const prevDate = new Date(sortedDatesDesc[i]);
+        const diffDays = Math.round((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // If consecutive (within 1 day), update the period start
+        if (diffDays <= 1) {
+          currentPeriodStart = sortedDatesDesc[i];
+          currentDate = prevDate;
+        } else {
+          // Gap found, stop looking
+          break;
+        }
+      }
+
+      // Update profile with new DUM
+      const { error } = await supabase
+        .from('profiles')
+        .update({ last_period_start: currentPeriodStart })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Dispatch event to refresh cycle context
+      window.dispatchEvent(new CustomEvent('dum-synced', { detail: { date: currentPeriodStart } }));
+      
+      console.log('[MenstruationLog] DUM synced to:', currentPeriodStart);
+    } catch (error) {
+      console.error('Error syncing DUM:', error);
+    }
+  }, [user, menstruationDates]);
   const toggleMenstruation = useCallback(async (date: Date): Promise<boolean> => {
     if (!user) {
       toast({
@@ -104,9 +153,13 @@ export const useMenstruationLog = () => {
         if (error) throw error;
 
         setMenstruationDates(prev => [...prev, dateStr]);
+        
+        // Sync DUM - update profile with the earliest menstruation date in current period
+        await syncDUMFromManualLogs(dateStr);
+        
         toast({
           title: 'Menstruação registrada 🩸',
-          description: `Dia ${date.getDate()} marcado como menstruação.`,
+          description: `Dia ${date.getDate()} marcado. DUM sincronizada automaticamente.`,
         });
       }
 
