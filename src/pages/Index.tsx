@@ -107,8 +107,8 @@ const Index: React.FC = () => {
             {/* Trying to Conceive Card - Golden Fertile Window */}
             {isTryingToConceive && <TryingToConceiveCard />}
 
-            {/* Next Period Prediction Card */}
-            <NextPeriodCard />
+            {/* Next Period Prediction Card - HIDDEN for pregnant users */}
+            {!isPregnant && <NextPeriodCard />}
           </>
         )}
 
@@ -118,21 +118,21 @@ const Index: React.FC = () => {
         {/* Show current day components when viewing today */}
         {isToday && (
           <>
-            {/* Adaptive Home Card - Shows based on contraceptive method (menstruating only) */}
-            {isMenstruating && <AdaptiveHomeCard />}
+            {/* Adaptive Home Card - Shows based on contraceptive method (menstruating only, NOT pregnant) */}
+            {isMenstruating && !isPregnant && <AdaptiveHomeCard />}
             
             {/* Water Tracker - All modes */}
             <WaterTracker />
 
-            {/* Pill Tracker - Menstruating only */}
-            {isMenstruating && showPillTracker && (
+            {/* Pill Tracker - Menstruating only, NOT pregnant */}
+            {isMenstruating && !isPregnant && showPillTracker && (
               <div className="px-4">
                 <PillTracker />
               </div>
             )}
 
-            {/* Device Expiration Card (DIU/Implant) - Menstruating only */}
-            {isMenstruating && showDeviceExpiration && (
+            {/* Device Expiration Card (DIU/Implant) - Menstruating only, NOT pregnant */}
+            {isMenstruating && !isPregnant && showDeviceExpiration && (
               <div className="px-4">
                 <DeviceExpirationCard />
               </div>

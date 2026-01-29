@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Thermometer, Moon, Brain, Heart, Leaf, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,30 @@ const MenopauseCard: React.FC<MenopauseCardProps> = ({ age }) => {
     { id: 'mood_swing', label: 'Humor', icon: Heart, color: 'text-pink-500', bgColor: 'bg-pink-100 dark:bg-pink-900/30' },
   ];
 
+  // Load existing symptoms on mount
+  useEffect(() => {
+    const loadTodaySymptoms = async () => {
+      if (!user) return;
+      
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('daily_logs')
+        .select('symptoms')
+        .eq('user_id', user.id)
+        .eq('log_date', today)
+        .maybeSingle();
+      
+      if (!error && data?.symptoms) {
+        // Filter only menopause-specific symptoms
+        const menopauseSymptomIds = quickSymptoms.map(s => s.id);
+        const todaySymptoms = (data.symptoms as string[]).filter(s => menopauseSymptomIds.includes(s));
+        setSelectedSymptoms(todaySymptoms);
+      }
+    };
+    
+    loadTodaySymptoms();
+  }, [user]);
+
   const toggleSymptom = async (symptomId: string) => {
     if (!user) return;
     
@@ -30,6 +54,7 @@ const MenopauseCard: React.FC<MenopauseCardProps> = ({ age }) => {
       ? selectedSymptoms.filter(s => s !== symptomId)
       : [...selectedSymptoms, symptomId];
     
+    // Optimistically update UI
     setSelectedSymptoms(newSelected);
     
     // Save to database
@@ -37,12 +62,25 @@ const MenopauseCard: React.FC<MenopauseCardProps> = ({ age }) => {
     try {
       const today = new Date().toISOString().split('T')[0];
       
+      // First, get existing symptoms to merge (preserve non-menopause symptoms)
+      const { data: existingData } = await supabase
+        .from('daily_logs')
+        .select('symptoms')
+        .eq('user_id', user.id)
+        .eq('log_date', today)
+        .maybeSingle();
+      
+      const existingSymptoms = (existingData?.symptoms as string[]) || [];
+      const menopauseSymptomIds = quickSymptoms.map(s => s.id);
+      const otherSymptoms = existingSymptoms.filter(s => !menopauseSymptomIds.includes(s));
+      const mergedSymptoms = [...otherSymptoms, ...newSelected];
+      
       const { error } = await supabase
         .from('daily_logs')
         .upsert({
           user_id: user.id,
           log_date: today,
-          symptoms: newSelected,
+          symptoms: mergedSymptoms,
         }, {
           onConflict: 'user_id,log_date'
         });
@@ -57,6 +95,11 @@ const MenopauseCard: React.FC<MenopauseCardProps> = ({ age }) => {
       console.error('Error saving symptom:', error);
       // Revert on error
       setSelectedSymptoms(selectedSymptoms);
+      toast({
+        title: 'Erro ao salvar',
+        description: 'Tente novamente.',
+        variant: 'destructive',
+      });
     } finally {
       setSaving(false);
     }
