@@ -3,6 +3,14 @@ import autoTable from 'jspdf-autotable';
 import { format, subDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  translateSymptom, 
+  cyclePhaseTranslations, 
+  lifePhaseLabels,
+  moodLabels,
+  energyLabels,
+  stressLabels 
+} from '@/lib/symptomTranslations';
 
 // ============================================
 // TYPES
@@ -60,114 +68,48 @@ interface ReportData {
 }
 
 // ============================================
-// TRANSLATION DICTIONARIES (UTF-8 Safe - No Emojis)
-// ============================================
-
-const symptomTranslations: Record<string, string> = {
-  // Menstrual symptoms
-  cramps: 'Colicas',
-  bleeding_heavy: 'Fluxo Intenso',
-  bleeding_light: 'Fluxo Leve',
-  spotting: 'Spotting',
-  bloating: 'Inchaco',
-  breast_tenderness: 'Sensibilidade nos Seios',
-  headache: 'Dor de Cabeca',
-  migraine: 'Enxaqueca',
-  backache: 'Dor nas Costas',
-  acne: 'Acne',
-  
-  // Emotional
-  mood_swings: 'Oscilacao de Humor',
-  irritability: 'Irritabilidade',
-  anxiety: 'Ansiedade',
-  depression: 'Tristeza/Depressao',
-  crying: 'Choro Facil',
-  
-  // Energy
-  fatigue: 'Fadiga',
-  insomnia: 'Insonia',
-  low_energy: 'Baixa Energia',
-  brain_fog: 'Nevoa Mental',
-  
-  // Menopause specific
-  hot_flash: 'Ondas de Calor',
-  night_sweats: 'Suores Noturnos',
-  vaginal_dryness: 'Ressecamento Vaginal',
-  
-  // Digestive
-  nausea: 'Nausea',
-  constipation: 'Constipacao',
-  diarrhea: 'Diarreia',
-  cravings: 'Desejos Alimentares',
-  
-  // Other
-  dizziness: 'Tontura',
-  joint_pain: 'Dor Articular',
-  muscle_aches: 'Dores Musculares',
-};
-
-const cyclePhaseTranslations: Record<string, string> = {
-  menstrual: 'Menstrual',
-  folicular: 'Folicular',
-  ovulatoria: 'Ovulatoria',
-  lutea: 'Lutea',
-};
-
-const lifePhaseLabels: Record<string, string> = {
-  menstruating: 'Ciclo Menstrual Regular',
-  pregnant: 'Gestante',
-  menopause: 'Menopausa/Climaterio',
-};
-
-const moodLabels: Record<number, string> = {
-  1: 'Muito Triste',
-  2: 'Triste',
-  3: 'Neutro',
-  4: 'Feliz',
-  5: 'Radiante',
-};
-
-const energyLabels: Record<number, string> = {
-  1: 'Muito Baixa',
-  2: 'Baixa',
-  3: 'Moderada',
-  4: 'Alta',
-  5: 'Muito Alta',
-};
-
-const stressLabels: Record<number, string> = {
-  1: 'Muito Calma',
-  2: 'Calma',
-  3: 'Moderado',
-  4: 'Estressada',
-  5: 'Muito Estressada',
-};
-
-// ============================================
 // UTILITY FUNCTIONS
 // ============================================
 
 /**
- * Translates symptom keys to Portuguese.
- * Falls back to formatting the original key if no translation exists.
- */
-function translateSymptom(key: string): string {
-  if (symptomTranslations[key]) {
-    return symptomTranslations[key];
-  }
-  // Format unknown keys: "brain_fog" -> "Brain Fog"
-  return key
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
-
-/**
- * Translates cycle phase to Portuguese
+ * Translates cycle phase to Portuguese (PDF-safe version without accents)
  */
 function translatePhase(phase: string | null): string {
   if (!phase) return '-';
-  return cyclePhaseTranslations[phase] || phase;
+  // Use accent-free versions for PDF
+  const pdfSafePhases: Record<string, string> = {
+    menstrual: 'Menstrual',
+    folicular: 'Folicular',
+    ovulatoria: 'Ovulatoria',
+    lutea: 'Lutea',
+  };
+  return pdfSafePhases[phase] || cyclePhaseTranslations[phase] || phase;
+}
+
+/**
+ * Removes accents from string for PDF safety
+ */
+function removeAccents(str: string): string {
+  return str
+    .replace(/[áàâã]/g, 'a')
+    .replace(/[éèê]/g, 'e')
+    .replace(/[íìî]/g, 'i')
+    .replace(/[óòôõ]/g, 'o')
+    .replace(/[úùû]/g, 'u')
+    .replace(/[ç]/g, 'c')
+    .replace(/[ÁÀÂÃ]/g, 'A')
+    .replace(/[ÉÈÊ]/g, 'E')
+    .replace(/[ÍÌÎ]/g, 'I')
+    .replace(/[ÓÒÔÕ]/g, 'O')
+    .replace(/[ÚÙÛ]/g, 'U')
+    .replace(/[Ç]/g, 'C');
+}
+
+/**
+ * Translates symptom and removes accents for PDF
+ */
+function translateSymptomForPDF(key: string): string {
+  return removeAccents(translateSymptom(key));
 }
 
 /**
@@ -602,7 +544,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     
     // Symptoms table
     const symptomTableData = topSymptoms.map(([symptom, count]) => [
-      translateSymptom(symptom),
+      translateSymptomForPDF(symptom),
       `${count}x`,
       `${((count / data.dailyLogs.length) * 100).toFixed(0)}%`
     ]);
@@ -676,7 +618,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     const tableData = data.dailyLogs.slice(0, 20).map(log => {
       const translatedSymptoms = (log.symptoms || [])
         .slice(0, 3)
-        .map(s => translateSymptom(s))
+        .map(s => translateSymptomForPDF(s))
         .join(', ');
       
       return [
