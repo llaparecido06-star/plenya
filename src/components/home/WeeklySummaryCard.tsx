@@ -231,9 +231,17 @@ const WeeklySummaryCard: React.FC = () => {
                 <TrendIcon trend={stats.moodTrend} />
               </div>
               <p className="text-2xl">{stats.avgMood ? getMoodEmoji(stats.avgMood) : '—'}</p>
-              <p className="text-xs text-muted-foreground">Humor</p>
+              <p className="text-xs font-semibold text-foreground">
+                {stats.avgMood 
+                  ? stats.avgMood >= 4.5 ? 'Radiante' 
+                    : stats.avgMood >= 3.5 ? 'Feliz' 
+                    : stats.avgMood >= 2.5 ? 'Neutra' 
+                    : stats.avgMood >= 1.5 ? 'Triste' 
+                    : 'Difícil'
+                  : 'Humor'}
+              </p>
               {stats.avgMood && (
-                <p className="text-xs font-medium text-foreground">{stats.avgMood.toFixed(1)}/5</p>
+                <p className="text-xs text-muted-foreground">{stats.avgMood.toFixed(1)}/5</p>
               )}
             </div>
 
@@ -244,9 +252,15 @@ const WeeklySummaryCard: React.FC = () => {
                 <TrendIcon trend={stats.energyTrend} />
               </div>
               <p className="text-2xl">{stats.avgEnergy ? '⚡' : '—'}</p>
-              <p className="text-xs text-muted-foreground">Energia</p>
+              <p className="text-xs font-semibold text-foreground">
+                {stats.avgEnergy 
+                  ? stats.avgEnergy >= 4 ? 'Alta' 
+                    : stats.avgEnergy >= 3 ? 'Média' 
+                    : 'Baixa'
+                  : 'Energia'}
+              </p>
               {stats.avgEnergy && (
-                <p className="text-xs font-medium text-foreground">{stats.avgEnergy.toFixed(1)}/5</p>
+                <p className="text-xs text-muted-foreground">{stats.avgEnergy.toFixed(1)}/5</p>
               )}
             </div>
 
@@ -256,9 +270,15 @@ const WeeklySummaryCard: React.FC = () => {
                 <Brain className="w-3.5 h-3.5 text-purple-500" />
               </div>
               <p className="text-2xl">{stats.avgStress ? '🧠' : '—'}</p>
-              <p className="text-xs text-muted-foreground">Estresse</p>
+              <p className="text-xs font-semibold text-foreground">
+                {stats.avgStress 
+                  ? stats.avgStress >= 4 ? 'Estressada' 
+                    : stats.avgStress >= 3 ? 'Moderado' 
+                    : 'Tranquila'
+                  : 'Estresse'}
+              </p>
               {stats.avgStress && (
-                <p className="text-xs font-medium text-foreground">{stats.avgStress.toFixed(1)}/5</p>
+                <p className="text-xs text-muted-foreground">{stats.avgStress.toFixed(1)}/5</p>
               )}
             </div>
           </div>
@@ -266,15 +286,15 @@ const WeeklySummaryCard: React.FC = () => {
           {/* Top symptoms */}
           {stats.topSymptoms.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                <Droplets className="w-3 h-3" />
-                Sintomas mais frequentes
+              <p className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1">
+                <Droplets className="w-3.5 h-3.5 text-primary" />
+                Sintomas da Semana ({stats.topSymptoms.length})
               </p>
               <div className="space-y-2">
                 {stats.topSymptoms.map(({ symptom, count }) => (
-                  <div key={symptom} className="flex items-center gap-2">
-                    <span className="text-sm flex-1">{symptom}</span>
-                    <span className="text-xs text-muted-foreground">{count}x</span>
+                  <div key={symptom} className="flex items-center gap-2 p-2 rounded-lg bg-background/50">
+                    <span className="text-sm font-medium flex-1">{symptom}</span>
+                    <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{count}x esta semana</span>
                     <Progress 
                       value={(count / stats.daysLogged) * 100} 
                       className="w-16 h-1.5" 

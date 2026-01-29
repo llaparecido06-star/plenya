@@ -180,7 +180,7 @@ const Onboarding: React.FC = () => {
   const [brandSearch, setBrandSearch] = useState('');
   const [showBrandSuggestions, setShowBrandSuggestions] = useState(false);
 
-  // Auto-fetch name from auth metadata on mount
+  // Auto-fetch name from auth metadata on mount and skip name step if exists
   useEffect(() => {
     if (user) {
       const authName = user.user_metadata?.full_name || user.user_metadata?.name || '';

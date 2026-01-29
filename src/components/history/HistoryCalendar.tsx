@@ -190,8 +190,13 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     }
   };
 
-  // Long press to toggle menstruation (for past days only)
+  // Long press to toggle menstruation (for past days only) - BLOCKED for pregnant users
   const handleDayLongPress = (day: number) => {
+    // Block menstruation logging for pregnant users
+    if (lifePhase === 'pregnant') {
+      return;
+    }
+    
     const date = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -432,10 +437,12 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
         )}
       </div>
       
-      {/* Tip for long press */}
-      <p className="text-xs text-center text-muted-foreground mt-2">
-        💡 Segure um dia passado para marcar menstruação
-      </p>
+      {/* Tip for long press - hide for pregnant users */}
+      {lifePhase !== 'pregnant' && (
+        <p className="text-xs text-center text-muted-foreground mt-2">
+          💡 Segure um dia passado para marcar menstruação
+        </p>
+      )}
 
       {/* Menstruation Toggle Dialog */}
       <AlertDialog open={menstruationDialogOpen} onOpenChange={setMenstruationDialogOpen}>

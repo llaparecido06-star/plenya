@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useCycle } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { useChatMessages } from '@/hooks/useChatMessages';
 
 const ChatInterface: React.FC = () => {
@@ -11,6 +12,7 @@ const ChatInterface: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { getPhaseInfo } = useCycle();
+  const { lifePhase, pregnancyWeeks } = useLifePhase();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -22,6 +24,30 @@ const ChatInterface: React.FC = () => {
 
   const generateResponse = (userMessage: string): string => {
     const phaseInfo = getPhaseInfo();
+    
+    // PREGNANT MODE - No cycle talk, focus on baby safety
+    if (lifePhase === 'pregnant') {
+      const pregnantResponses = [
+        `Entendo como você se sente. Na semana ${pregnancyWeeks || ''} da gestação, essas sensações são muito comuns. Lembre-se de descansar e se hidratar! 🤰`,
+        `Obrigada por compartilhar. Durante a gravidez, seu corpo passa por muitas transformações. Seja gentil consigo mesma e consulte seu médico se tiver dúvidas. 💜`,
+        `Isso faz sentido! Uma dica para esse momento: técnicas de respiração podem ajudar muito. Inspire contando até 4, segure por 2, e expire em 6. Quer tentar?`,
+        `Você está fazendo um trabalho incrível cuidando de você e do bebê. Priorize o descanso e alimentos nutritivos. 💕`,
+      ];
+      return pregnantResponses[Math.floor(Math.random() * pregnantResponses.length)];
+    }
+    
+    // MENOPAUSE MODE - No cycle phases, focus on symptom relief
+    if (lifePhase === 'menopause') {
+      const menopauseResponses = [
+        `Entendo perfeitamente. Essas sensações são comuns nessa fase da vida. Você já experimentou técnicas de respiração para aliviar os calores?`,
+        `Obrigada por compartilhar. O climatério traz desafios únicos, mas você não está sozinha. Que tal um chá de ervas calmante como camomila ou erva-cidreira?`,
+        `Isso faz muito sentido. Para melhorar o sono, evite cafeína após as 14h e mantenha o quarto fresco. Pequenas mudanças fazem grande diferença! 🧘`,
+        `Você está cuidando muito bem de si mesma ao reconhecer essas emoções. Fitoestrógenos (soja, linhaça) podem ajudar no equilíbrio hormonal. 💜`,
+      ];
+      return menopauseResponses[Math.floor(Math.random() * menopauseResponses.length)];
+    }
+    
+    // MENSTRUATING MODE - Normal cycle-aware responses
     const responses = [
       `Entendo como você se sente. Na fase ${phaseInfo.name}, é natural experimentar essas emoções. ${phaseInfo.insight}`,
       `Obrigada por compartilhar isso comigo. Lembre-se: você está na fase ${phaseInfo.name}, e seu corpo está passando por mudanças naturais. Seja gentil consigo mesma. 💜`,

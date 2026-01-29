@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { useCycle } from '@/contexts/CycleContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useLifePhase } from '@/hooks/useLifePhase';
 
 // Diet-specific restrictions
 const dietRestrictions: Record<string, string[]> = {
@@ -218,11 +219,14 @@ const getRecipeForDiet = (phase: string, dietType: string | null) => {
 const ChefIACard: React.FC = () => {
   const { currentPhase } = useCycle();
   const { diet_type } = useProfile();
+  const { lifePhase, pregnancyWeeks } = useLifePhase();
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showRecipe, setShowRecipe] = useState(false);
 
-  const recipe = getRecipeForDiet(currentPhase, diet_type);
+  // For pregnant users, use a safe phase instead of cycle phase
+  const recipePhase = lifePhase === 'pregnant' ? 'folicular' : currentPhase;
+  const recipe = getRecipeForDiet(recipePhase, diet_type);
 
   // Get diet label for display
   const getDietLabel = (dietType: string | null): string | null => {
@@ -295,9 +299,11 @@ const ChefIACard: React.FC = () => {
               )}
             </DialogTitle>
             <DialogDescription>
-              {diet_type 
-                ? `Receitas personalizadas para sua dieta ${getDietLabel(diet_type)?.toLowerCase()} e fase do ciclo!`
-                : 'Me conte o que você tem na geladeira e vou criar uma receita personalizada para sua fase!'}
+              {lifePhase === 'pregnant'
+                ? `Receitas seguras para gestantes na semana ${pregnancyWeeks || ''}! Foco em nutrientes para você e seu bebê.`
+                : diet_type 
+                  ? `Receitas personalizadas para sua dieta ${getDietLabel(diet_type)?.toLowerCase()} e fase do ciclo!`
+                  : 'Me conte o que você tem na geladeira e vou criar uma receita personalizada para sua fase!'}
             </DialogDescription>
           </DialogHeader>
 
