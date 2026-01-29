@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
@@ -16,7 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCycle } from '@/contexts/CycleContext';
 import { format, subDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { translateSymptom } from '@/lib/symptomTranslations';
 
 interface WeeklyStats {
   avgMood: number | null;
@@ -293,9 +293,9 @@ const WeeklySummaryCard: React.FC = () => {
               <div className="space-y-2">
                 {stats.topSymptoms.map(({ symptom, count }) => (
                   <div key={symptom} className="flex items-center gap-2 p-2 rounded-lg bg-background/50">
-                    <span className="text-sm font-medium flex-1">{symptom}</span>
-                    <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{count}x esta semana</span>
-                    <Progress 
+                    <span className="text-sm font-medium flex-1">{translateSymptom(symptom)}</span>
+                    <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{count}x</span>
+                    <Progress
                       value={(count / stats.daysLogged) * 100} 
                       className="w-16 h-1.5" 
                     />
