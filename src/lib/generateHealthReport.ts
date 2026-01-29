@@ -1,8 +1,12 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { format, subDays, parseISO, eachDayOfInterval } from 'date-fns';
+import { format, subDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
+
+// ============================================
+// TYPES
+// ============================================
 
 interface ReportData {
   profile: {
@@ -13,10 +17,12 @@ interface ReportData {
     last_period_start: string | null;
     contraceptive_type: string | null;
     contraceptive_brand: string | null;
+    pregnancy_start_date: string | null;
     goal: string | null;
   };
   dailyLogs: Array<{
     log_date: string;
+    cycle_phase: string | null;
     mood: number | null;
     energy: number | null;
     stress: number | null;
@@ -53,14 +59,160 @@ interface ReportData {
   };
 }
 
-const lifePhaseLabels: Record<string, string> = {
-  menstruating: 'Menstruando regularmente',
-  pregnant: 'Gestante',
-  menopause: 'Menopausa/Climatério',
+// ============================================
+// TRANSLATION DICTIONARIES (UTF-8 Safe - No Emojis)
+// ============================================
+
+const symptomTranslations: Record<string, string> = {
+  // Menstrual symptoms
+  cramps: 'Colicas',
+  bleeding_heavy: 'Fluxo Intenso',
+  bleeding_light: 'Fluxo Leve',
+  spotting: 'Spotting',
+  bloating: 'Inchaco',
+  breast_tenderness: 'Sensibilidade nos Seios',
+  headache: 'Dor de Cabeca',
+  migraine: 'Enxaqueca',
+  backache: 'Dor nas Costas',
+  acne: 'Acne',
+  
+  // Emotional
+  mood_swings: 'Oscilacao de Humor',
+  irritability: 'Irritabilidade',
+  anxiety: 'Ansiedade',
+  depression: 'Tristeza/Depressao',
+  crying: 'Choro Facil',
+  
+  // Energy
+  fatigue: 'Fadiga',
+  insomnia: 'Insonia',
+  low_energy: 'Baixa Energia',
+  brain_fog: 'Nevoa Mental',
+  
+  // Menopause specific
+  hot_flash: 'Ondas de Calor',
+  night_sweats: 'Suores Noturnos',
+  vaginal_dryness: 'Ressecamento Vaginal',
+  
+  // Digestive
+  nausea: 'Nausea',
+  constipation: 'Constipacao',
+  diarrhea: 'Diarreia',
+  cravings: 'Desejos Alimentares',
+  
+  // Other
+  dizziness: 'Tontura',
+  joint_pain: 'Dor Articular',
+  muscle_aches: 'Dores Musculares',
 };
 
-const moodEmojis = ['😢', '😔', '😐', '😊', '🤩'];
-const energyLabels = ['Muito baixa', 'Baixa', 'Moderada', 'Alta', 'Muito alta'];
+const cyclePhaseTranslations: Record<string, string> = {
+  menstrual: 'Menstrual',
+  folicular: 'Folicular',
+  ovulatoria: 'Ovulatoria',
+  lutea: 'Lutea',
+};
+
+const lifePhaseLabels: Record<string, string> = {
+  menstruating: 'Ciclo Menstrual Regular',
+  pregnant: 'Gestante',
+  menopause: 'Menopausa/Climaterio',
+};
+
+const moodLabels: Record<number, string> = {
+  1: 'Muito Triste',
+  2: 'Triste',
+  3: 'Neutro',
+  4: 'Feliz',
+  5: 'Radiante',
+};
+
+const energyLabels: Record<number, string> = {
+  1: 'Muito Baixa',
+  2: 'Baixa',
+  3: 'Moderada',
+  4: 'Alta',
+  5: 'Muito Alta',
+};
+
+const stressLabels: Record<number, string> = {
+  1: 'Muito Calma',
+  2: 'Calma',
+  3: 'Moderado',
+  4: 'Estressada',
+  5: 'Muito Estressada',
+};
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+/**
+ * Translates symptom keys to Portuguese.
+ * Falls back to formatting the original key if no translation exists.
+ */
+function translateSymptom(key: string): string {
+  if (symptomTranslations[key]) {
+    return symptomTranslations[key];
+  }
+  // Format unknown keys: "brain_fog" -> "Brain Fog"
+  return key
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+/**
+ * Translates cycle phase to Portuguese
+ */
+function translatePhase(phase: string | null): string {
+  if (!phase) return '-';
+  return cyclePhaseTranslations[phase] || phase;
+}
+
+/**
+ * Calculates age from birth date
+ */
+function calculateAge(birthDate: string): number {
+  const birth = parseISO(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+/**
+ * Calculates pregnancy weeks from start date
+ */
+function calculatePregnancyWeeks(startDate: string): number {
+  const start = parseISO(startDate);
+  const today = new Date();
+  const diffDays = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.floor(diffDays / 7);
+}
+
+// ============================================
+// BRAND COLORS (RGB values for jsPDF)
+// ============================================
+
+const COLORS = {
+  sageGreen: { r: 139, g: 157, b: 130 },      // Verde Salvia
+  terracotta: { r: 180, g: 103, b: 77 },       // Terracota  
+  burntPink: { r: 199, g: 112, b: 134 },       // Rosa Queimado
+  leafGreen: { r: 107, g: 142, b: 95 },        // Verde Folha
+  cream: { r: 254, g: 250, b: 240 },           // Creme
+  darkText: { r: 45, g: 45, b: 45 },           // Texto escuro
+  lightText: { r: 120, g: 120, b: 120 },       // Texto claro
+  white: { r: 255, g: 255, b: 255 },
+  tableStripe: { r: 248, g: 250, b: 247 },     // Fundo alternado tabela
+};
+
+// ============================================
+// DATA FETCHING
+// ============================================
 
 export async function fetchReportData(userId: string, days: number = 30): Promise<ReportData> {
   const endDate = new Date();
@@ -95,7 +247,10 @@ export async function fetchReportData(userId: string, days: number = 30): Promis
   };
 }
 
-// Draw a simple line chart in PDF
+// ============================================
+// CHART DRAWING
+// ============================================
+
 function drawLineChart(
   doc: jsPDF,
   data: { date: string; mood: number | null; energy: number | null }[],
@@ -104,27 +259,32 @@ function drawLineChart(
   width: number,
   height: number
 ) {
-  const padding = 15;
+  const padding = 20;
   const chartWidth = width - padding * 2;
   const chartHeight = height - padding * 2;
   
   // Background
-  doc.setFillColor(248, 250, 252);
-  doc.roundedRect(startX, startY, width, height, 3, 3, 'F');
+  doc.setFillColor(COLORS.tableStripe.r, COLORS.tableStripe.g, COLORS.tableStripe.b);
+  doc.roundedRect(startX, startY, width, height, 4, 4, 'F');
   
-  // Draw grid lines and Y-axis labels
+  // Border
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(startX, startY, width, height, 4, 4, 'S');
+  
+  // Draw grid lines
   doc.setDrawColor(220, 220, 220);
   doc.setLineWidth(0.2);
   doc.setFontSize(7);
-  doc.setTextColor(120, 120, 120);
+  doc.setTextColor(COLORS.lightText.r, COLORS.lightText.g, COLORS.lightText.b);
   
   for (let i = 0; i <= 5; i++) {
     const y = startY + padding + (chartHeight / 5) * (5 - i);
     doc.line(startX + padding, y, startX + padding + chartWidth, y);
-    doc.text(`${i}`, startX + padding - 8, y + 2);
+    doc.text(`${i}`, startX + padding - 10, y + 2);
   }
   
-  // Filter out null values and prepare data points
+  // Filter and prepare data points
   const moodPoints = data.filter(d => d.mood !== null).map((d, idx, arr) => ({
     x: startX + padding + (chartWidth / Math.max(arr.length - 1, 1)) * idx,
     y: startY + padding + chartHeight - (chartHeight / 5) * (d.mood || 0),
@@ -136,385 +296,542 @@ function drawLineChart(
     y: startY + padding + chartHeight - (chartHeight / 5) * (d.energy || 0),
   }));
   
-  // Draw mood line (pink)
-  if (moodPoints.length > 1) {
-    doc.setDrawColor(236, 72, 153);
-    doc.setLineWidth(1.5);
-    for (let i = 1; i < moodPoints.length; i++) {
-      doc.line(moodPoints[i - 1].x, moodPoints[i - 1].y, moodPoints[i].x, moodPoints[i].y);
-    }
-    // Draw points
-    doc.setFillColor(236, 72, 153);
-    moodPoints.forEach(p => {
-      doc.circle(p.x, p.y, 1.5, 'F');
-    });
-  }
-  
-  // Draw energy line (amber)
+  // Draw energy line (amber/terracotta)
   if (energyPoints.length > 1) {
-    doc.setDrawColor(245, 158, 11);
-    doc.setLineWidth(1.5);
+    doc.setDrawColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+    doc.setLineWidth(1.8);
     for (let i = 1; i < energyPoints.length; i++) {
       doc.line(energyPoints[i - 1].x, energyPoints[i - 1].y, energyPoints[i].x, energyPoints[i].y);
     }
-    // Draw points
-    doc.setFillColor(245, 158, 11);
-    energyPoints.forEach(p => {
-      doc.circle(p.x, p.y, 1.5, 'F');
-    });
+    doc.setFillColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+    energyPoints.forEach(p => doc.circle(p.x, p.y, 2, 'F'));
   }
   
-  // X-axis labels (show only some)
+  // Draw mood line (pink)
+  if (moodPoints.length > 1) {
+    doc.setDrawColor(COLORS.burntPink.r, COLORS.burntPink.g, COLORS.burntPink.b);
+    doc.setLineWidth(1.8);
+    for (let i = 1; i < moodPoints.length; i++) {
+      doc.line(moodPoints[i - 1].x, moodPoints[i - 1].y, moodPoints[i].x, moodPoints[i].y);
+    }
+    doc.setFillColor(COLORS.burntPink.r, COLORS.burntPink.g, COLORS.burntPink.b);
+    moodPoints.forEach(p => doc.circle(p.x, p.y, 2, 'F'));
+  }
+  
+  // X-axis labels
   doc.setFontSize(6);
-  doc.setTextColor(100, 100, 100);
-  const labelStep = Math.max(1, Math.floor(moodPoints.length / 7));
+  doc.setTextColor(COLORS.lightText.r, COLORS.lightText.g, COLORS.lightText.b);
+  const labelStep = Math.max(1, Math.floor(moodPoints.length / 8));
   moodPoints.forEach((p, idx) => {
     if (idx % labelStep === 0 || idx === moodPoints.length - 1) {
-      doc.text(p.label, p.x, startY + height - 3, { align: 'center' });
+      doc.text(p.label, p.x, startY + height - 5, { align: 'center' });
     }
   });
   
   // Legend
-  const legendY = startY + 8;
-  doc.setFillColor(236, 72, 153);
-  doc.circle(startX + padding + 5, legendY, 2, 'F');
-  doc.setTextColor(80, 80, 80);
-  doc.setFontSize(7);
-  doc.text('Humor', startX + padding + 10, legendY + 1.5);
+  const legendY = startY + 10;
+  doc.setFillColor(COLORS.burntPink.r, COLORS.burntPink.g, COLORS.burntPink.b);
+  doc.circle(startX + padding + 5, legendY, 2.5, 'F');
+  doc.setTextColor(COLORS.darkText.r, COLORS.darkText.g, COLORS.darkText.b);
+  doc.setFontSize(8);
+  doc.text('Humor', startX + padding + 10, legendY + 2);
   
-  doc.setFillColor(245, 158, 11);
-  doc.circle(startX + padding + 35, legendY, 2, 'F');
-  doc.text('Energia', startX + padding + 40, legendY + 1.5);
+  doc.setFillColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+  doc.circle(startX + padding + 45, legendY, 2.5, 'F');
+  doc.text('Energia', startX + padding + 50, legendY + 2);
 }
 
-export function generateHealthReportPDF(data: ReportData, userEmail: string): jsPDF {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  let yPos = 20;
+// ============================================
+// PDF GENERATION
+// ============================================
 
-  // Helper to add new page if needed
+export function generateHealthReportPDF(data: ReportData, userEmail: string): jsPDF {
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = doc.internal.pageSize.getWidth(); // 210mm
+  const pageHeight = doc.internal.pageSize.getHeight(); // 297mm
+  const margin = 15;
+  let yPos = 0;
+
+  // Helper to check page break
   const checkPageBreak = (requiredSpace: number = 30) => {
-    if (yPos + requiredSpace > 270) {
+    if (yPos + requiredSpace > pageHeight - 25) {
       doc.addPage();
-      yPos = 20;
+      yPos = 25;
     }
   };
 
-  // Header
-  doc.setFillColor(236, 72, 153); // Primary pink
-  doc.rect(0, 0, pageWidth, 35, 'F');
+  // ============================================
+  // 1. BRANDED HEADER
+  // ============================================
   
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
+  // Header background - Sage Green
+  doc.setFillColor(COLORS.sageGreen.r, COLORS.sageGreen.g, COLORS.sageGreen.b);
+  doc.rect(0, 0, pageWidth, 42, 'F');
+  
+  // Decorative accent line
+  doc.setFillColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+  doc.rect(0, 42, pageWidth, 3, 'F');
+  
+  // Logo/Brand text
+  doc.setTextColor(COLORS.white.r, COLORS.white.g, COLORS.white.b);
+  doc.setFontSize(28);
   doc.setFont('helvetica', 'bold');
-  doc.text('Relatório de Saúde Feminina', pageWidth / 2, 15, { align: 'center' });
+  doc.text('Plenya', margin, 18);
   
+  // Subtitle
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Gerado em: ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}`, pageWidth / 2, 25, { align: 'center' });
-  doc.text('Plenya - Seu Aplicativo de Saúde', pageWidth / 2, 31, { align: 'center' });
-
-  yPos = 45;
-  doc.setTextColor(0, 0, 0);
-
-  // Patient Info Section
-  doc.setFillColor(252, 231, 243); // Light pink
-  doc.rect(10, yPos - 5, pageWidth - 20, 35, 'F');
+  doc.text('Sinta-se em casa no seu corpo', margin, 26);
   
-  doc.setFontSize(14);
+  // Main title - right aligned
+  doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('Informações da Paciente', 15, yPos + 3);
+  doc.text('Dossie de Saude da Mulher', pageWidth - margin, 16, { align: 'right' });
   
+  // Generation date
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  const generationDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  // Remove accents for PDF safety
+  const safeDate = generationDate
+    .replace(/ã/g, 'a')
+    .replace(/ç/g, 'c')
+    .replace(/é/g, 'e')
+    .replace(/ê/g, 'e')
+    .replace(/í/g, 'i')
+    .replace(/ó/g, 'o')
+    .replace(/ô/g, 'o')
+    .replace(/ú/g, 'u');
+  doc.text(`Gerado em: ${safeDate}`, pageWidth - margin, 24, { align: 'right' });
+  
+  // Period covered
+  const periodStart = format(data.dateRange.start, 'dd/MM/yyyy');
+  const periodEnd = format(data.dateRange.end, 'dd/MM/yyyy');
+  doc.text(`Periodo: ${periodStart} a ${periodEnd}`, pageWidth - margin, 32, { align: 'right' });
+
+  yPos = 55;
+
+  // ============================================
+  // 2. PATIENT INFO BOX
+  // ============================================
+  
+  const patientBoxHeight = 45;
+  
+  // Box background
+  doc.setFillColor(COLORS.cream.r, COLORS.cream.g, COLORS.cream.b);
+  doc.roundedRect(margin, yPos, pageWidth - margin * 2, patientBoxHeight, 4, 4, 'F');
+  
+  // Box border
+  doc.setDrawColor(COLORS.sageGreen.r, COLORS.sageGreen.g, COLORS.sageGreen.b);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(margin, yPos, pageWidth - margin * 2, patientBoxHeight, 4, 4, 'S');
+  
+  // Section title
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(COLORS.sageGreen.r, COLORS.sageGreen.g, COLORS.sageGreen.b);
+  doc.text('DADOS DA PACIENTE', margin + 5, yPos + 8);
+  
+  // Horizontal divider
+  doc.setDrawColor(COLORS.sageGreen.r, COLORS.sageGreen.g, COLORS.sageGreen.b);
+  doc.setLineWidth(0.3);
+  doc.line(margin + 5, yPos + 12, pageWidth - margin - 5, yPos + 12);
+  
+  // Patient data
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  yPos += 12;
+  doc.setTextColor(COLORS.darkText.r, COLORS.darkText.g, COLORS.darkText.b);
   
   const name = data.profile.full_name || userEmail.split('@')[0];
-  doc.text(`Nome: ${name}`, 15, yPos);
+  let patientInfoY = yPos + 20;
+  
+  // Left column
+  doc.setFont('helvetica', 'bold');
+  doc.text('Nome:', margin + 5, patientInfoY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(name, margin + 25, patientInfoY);
   
   if (data.profile.date_of_birth) {
-    const birthDate = parseISO(data.profile.date_of_birth);
-    const age = new Date().getFullYear() - birthDate.getFullYear();
-    doc.text(`Data de Nascimento: ${format(birthDate, 'dd/MM/yyyy')} (${age} anos)`, 100, yPos);
-  }
-  
-  yPos += 7;
-  const lifePhase = data.profile.life_phase ? lifePhaseLabels[data.profile.life_phase] || data.profile.life_phase : 'Não informado';
-  doc.text(`Fase de Vida: ${lifePhase}`, 15, yPos);
-  
-  if (data.profile.cycle_length) {
-    doc.text(`Ciclo Médio: ${data.profile.cycle_length} dias`, 100, yPos);
-  }
-  
-  yPos += 7;
-  if (data.profile.contraceptive_type) {
-    doc.text(`Método Contraceptivo: ${data.profile.contraceptive_brand || data.profile.contraceptive_type}`, 15, yPos);
-  }
-
-  yPos += 20;
-
-  // Menstrual Cycle Section
-  checkPageBreak(50);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(190, 24, 93);
-  doc.text('📅 Ciclo Menstrual (Últimos 30 dias)', 15, yPos);
-  yPos += 8;
-  doc.setTextColor(0, 0, 0);
-
-  if (data.menstruationLogs.length > 0) {
-    const menstruatingDays = data.menstruationLogs.filter(l => l.is_menstruating).map(l => 
-      format(parseISO(l.log_date), 'dd/MM')
-    );
-    
-    doc.setFontSize(10);
+    const age = calculateAge(data.profile.date_of_birth);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Idade:', margin + 5, patientInfoY + 7);
     doc.setFont('helvetica', 'normal');
-    if (menstruatingDays.length > 0) {
-      doc.text(`Dias de menstruação: ${menstruatingDays.join(', ')}`, 15, yPos);
-      yPos += 6;
-      doc.text(`Total de dias menstruando: ${menstruatingDays.length}`, 15, yPos);
-    } else {
-      doc.text('Nenhum dia de menstruação registrado no período.', 15, yPos);
-    }
-    
-    if (data.profile.last_period_start) {
-      yPos += 6;
-      doc.text(`Última menstruação iniciou em: ${format(parseISO(data.profile.last_period_start), 'dd/MM/yyyy')}`, 15, yPos);
-    }
-  } else {
-    doc.setFontSize(10);
-    doc.text('Nenhum registro de menstruação no período.', 15, yPos);
+    doc.text(`${age} anos`, margin + 25, patientInfoY + 7);
+  }
+  
+  // Right column
+  const rightColX = pageWidth / 2 + 10;
+  
+  // Life phase with pregnancy weeks if applicable
+  let phaseText = lifePhaseLabels[data.profile.life_phase || ''] || 'Nao informado';
+  if (data.profile.life_phase === 'pregnant' && data.profile.pregnancy_start_date) {
+    const weeks = calculatePregnancyWeeks(data.profile.pregnancy_start_date);
+    phaseText = `Gestante (${weeks} semanas)`;
+  }
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Fase Atual:', rightColX, patientInfoY);
+  doc.setFont('helvetica', 'normal');
+  doc.text(phaseText, rightColX + 30, patientInfoY);
+  
+  if (data.profile.cycle_length && data.profile.life_phase !== 'pregnant') {
+    doc.setFont('helvetica', 'bold');
+    doc.text('Ciclo Medio:', rightColX, patientInfoY + 7);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${data.profile.cycle_length} dias`, rightColX + 30, patientInfoY + 7);
+  }
+  
+  // Contraceptive info (third row)
+  if (data.profile.contraceptive_type && data.profile.life_phase !== 'pregnant') {
+    const contraceptiveText = data.profile.contraceptive_brand || data.profile.contraceptive_type;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Contraceptivo:', margin + 5, patientInfoY + 14);
+    doc.setFont('helvetica', 'normal');
+    doc.text(contraceptiveText, margin + 40, patientInfoY + 14);
   }
 
-  yPos += 15;
+  yPos += patientBoxHeight + 15;
 
-  // Daily Logs Summary
+  // ============================================
+  // 3. SUMMARY STATISTICS
+  // ============================================
+  
   checkPageBreak(60);
-  doc.setFontSize(14);
+  
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(190, 24, 93);
-  doc.text('💭 Bem-estar Diário', 15, yPos);
+  doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+  doc.text('RESUMO DO PERIODO', margin, yPos);
   yPos += 8;
-  doc.setTextColor(0, 0, 0);
-
-  if (data.dailyLogs.length > 0) {
-    // Calculate averages
-    const moodLogs = data.dailyLogs.filter(l => l.mood !== null);
-    const energyLogs = data.dailyLogs.filter(l => l.energy !== null);
-    const stressLogs = data.dailyLogs.filter(l => l.stress !== null);
-    const weightLogs = data.dailyLogs.filter(l => l.weight !== null);
-
-    const avgMood = moodLogs.length > 0 ? moodLogs.reduce((a, b) => a + (b.mood || 0), 0) / moodLogs.length : null;
-    const avgEnergy = energyLogs.length > 0 ? energyLogs.reduce((a, b) => a + (b.energy || 0), 0) / energyLogs.length : null;
-    const avgStress = stressLogs.length > 0 ? stressLogs.reduce((a, b) => a + (b.stress || 0), 0) / stressLogs.length : null;
-
-    doc.setFontSize(10);
+  
+  // Stats boxes
+  const boxWidth = (pageWidth - margin * 2 - 15) / 4;
+  const boxHeight = 25;
+  const statsBoxY = yPos;
+  
+  // Calculate statistics
+  const moodLogs = data.dailyLogs.filter(l => l.mood !== null);
+  const energyLogs = data.dailyLogs.filter(l => l.energy !== null);
+  const stressLogs = data.dailyLogs.filter(l => l.stress !== null);
+  const menstruatingDays = data.menstruationLogs.filter(l => l.is_menstruating).length;
+  
+  const avgMood = moodLogs.length > 0 
+    ? moodLogs.reduce((a, b) => a + (b.mood || 0), 0) / moodLogs.length 
+    : null;
+  const avgEnergy = energyLogs.length > 0 
+    ? energyLogs.reduce((a, b) => a + (b.energy || 0), 0) / energyLogs.length 
+    : null;
+  const avgStress = stressLogs.length > 0 
+    ? stressLogs.reduce((a, b) => a + (b.stress || 0), 0) / stressLogs.length 
+    : null;
+  
+  const stats = [
+    { 
+      label: 'Humor Medio', 
+      value: avgMood ? `${avgMood.toFixed(1)}/5` : '-',
+      subtext: avgMood ? moodLabels[Math.round(avgMood)] : ''
+    },
+    { 
+      label: 'Energia Media', 
+      value: avgEnergy ? `${avgEnergy.toFixed(1)}/5` : '-',
+      subtext: avgEnergy ? energyLabels[Math.round(avgEnergy)] : ''
+    },
+    { 
+      label: 'Estresse Medio', 
+      value: avgStress ? `${avgStress.toFixed(1)}/5` : '-',
+      subtext: avgStress ? stressLabels[Math.round(avgStress)] : ''
+    },
+    { 
+      label: 'Dias Registrados', 
+      value: `${data.dailyLogs.length}`,
+      subtext: menstruatingDays > 0 ? `${menstruatingDays} em menstruacao` : ''
+    },
+  ];
+  
+  stats.forEach((stat, idx) => {
+    const boxX = margin + idx * (boxWidth + 5);
+    
+    // Box background
+    doc.setFillColor(COLORS.tableStripe.r, COLORS.tableStripe.g, COLORS.tableStripe.b);
+    doc.roundedRect(boxX, statsBoxY, boxWidth, boxHeight, 3, 3, 'F');
+    
+    // Value
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.sageGreen.r, COLORS.sageGreen.g, COLORS.sageGreen.b);
+    doc.text(stat.value, boxX + boxWidth / 2, statsBoxY + 10, { align: 'center' });
+    
+    // Label
+    doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Registros no período: ${data.dailyLogs.length} dias`, 15, yPos);
-    yPos += 7;
+    doc.setTextColor(COLORS.lightText.r, COLORS.lightText.g, COLORS.lightText.b);
+    doc.text(stat.label, boxX + boxWidth / 2, statsBoxY + 16, { align: 'center' });
+    
+    // Subtext
+    if (stat.subtext) {
+      doc.setFontSize(6);
+      doc.text(stat.subtext, boxX + boxWidth / 2, statsBoxY + 21, { align: 'center' });
+    }
+  });
+  
+  yPos = statsBoxY + boxHeight + 15;
 
-    if (avgMood !== null) {
-      doc.text(`Humor médio: ${avgMood.toFixed(1)}/5 ${moodEmojis[Math.round(avgMood) - 1] || ''}`, 15, yPos);
-      yPos += 6;
-    }
-    if (avgEnergy !== null) {
-      doc.text(`Energia média: ${avgEnergy.toFixed(1)}/5 (${energyLabels[Math.round(avgEnergy) - 1] || ''})`, 15, yPos);
-      yPos += 6;
-    }
-    if (avgStress !== null) {
-      doc.text(`Nível de estresse médio: ${avgStress.toFixed(1)}/5`, 15, yPos);
-      yPos += 6;
-    }
-
-    // Weight tracking
-    if (weightLogs.length > 0) {
-      const weights = weightLogs.map(l => l.weight!);
-      const minWeight = Math.min(...weights);
-      const maxWeight = Math.max(...weights);
-      const lastWeight = weights[0];
-      doc.text(`Peso: ${lastWeight.toFixed(1)} kg (variação: ${minWeight.toFixed(1)} - ${maxWeight.toFixed(1)} kg)`, 15, yPos);
-      yPos += 6;
-    }
-
-    // Symptom frequency
-    const symptomCounts: Record<string, number> = {};
-    data.dailyLogs.forEach(log => {
-      (log.symptoms || []).forEach(s => {
-        symptomCounts[s] = (symptomCounts[s] || 0) + 1;
-      });
+  // ============================================
+  // 4. SYMPTOMS ANALYSIS
+  // ============================================
+  
+  const symptomCounts: Record<string, number> = {};
+  data.dailyLogs.forEach(log => {
+    (log.symptoms || []).forEach(s => {
+      symptomCounts[s] = (symptomCounts[s] || 0) + 1;
     });
-
-    const topSymptoms = Object.entries(symptomCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    if (topSymptoms.length > 0) {
-      yPos += 5;
-      doc.setFont('helvetica', 'bold');
-      doc.text('Sintomas mais frequentes:', 15, yPos);
-      yPos += 6;
-      doc.setFont('helvetica', 'normal');
-      
-      topSymptoms.forEach(([symptom, count]) => {
-        doc.text(`• ${symptom}: ${count} ocorrência(s)`, 20, yPos);
-        yPos += 5;
-      });
-    }
-    // Add mood/energy chart if we have enough data
-    if (data.dailyLogs.length >= 3) {
-      yPos += 10;
-      checkPageBreak(75);
-      
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(100, 100, 100);
-      doc.text('Evolução do Humor e Energia', 15, yPos);
-      yPos += 5;
-      
-      const chartData = data.dailyLogs.map(log => ({
-        date: format(parseISO(log.log_date), 'dd/MM'),
-        mood: log.mood,
-        energy: log.energy,
-      }));
-      
-      drawLineChart(doc, chartData, 15, yPos, pageWidth - 30, 55);
-      yPos += 60;
-    }
-  } else {
-    doc.setFontSize(10);
-    doc.text('Nenhum registro de bem-estar no período.', 15, yPos);
+  });
+  
+  const topSymptoms = Object.entries(symptomCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  
+  if (topSymptoms.length > 0) {
+    checkPageBreak(45);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+    doc.text('SINTOMAS MAIS FREQUENTES', margin, yPos);
+    yPos += 8;
+    
+    // Symptoms table
+    const symptomTableData = topSymptoms.map(([symptom, count]) => [
+      translateSymptom(symptom),
+      `${count}x`,
+      `${((count / data.dailyLogs.length) * 100).toFixed(0)}%`
+    ]);
+    
+    autoTable(doc, {
+      startY: yPos,
+      head: [['Sintoma', 'Ocorrencias', 'Frequencia']],
+      body: symptomTableData,
+      theme: 'grid',
+      headStyles: { 
+        fillColor: [COLORS.sageGreen.r, COLORS.sageGreen.g, COLORS.sageGreen.b],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9,
+      },
+      bodyStyles: {
+        fontSize: 9,
+        textColor: [COLORS.darkText.r, COLORS.darkText.g, COLORS.darkText.b],
+      },
+      alternateRowStyles: {
+        fillColor: [COLORS.tableStripe.r, COLORS.tableStripe.g, COLORS.tableStripe.b],
+      },
+      columnStyles: {
+        0: { cellWidth: 80 },
+        1: { cellWidth: 35, halign: 'center' },
+        2: { cellWidth: 35, halign: 'center' },
+      },
+      margin: { left: margin, right: margin },
+    });
+    
+    yPos = (doc as any).lastAutoTable.finalY + 15;
   }
 
-  yPos += 15;
+  // ============================================
+  // 5. MOOD/ENERGY CHART
+  // ============================================
+  
+  if (data.dailyLogs.length >= 3) {
+    checkPageBreak(75);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+    doc.text('EVOLUCAO DO HUMOR E ENERGIA', margin, yPos);
+    yPos += 8;
+    
+    const chartData = data.dailyLogs.map(log => ({
+      date: format(parseISO(log.log_date), 'dd/MM'),
+      mood: log.mood,
+      energy: log.energy,
+    }));
+    
+    drawLineChart(doc, chartData, margin, yPos, pageWidth - margin * 2, 60);
+    yPos += 70;
+  }
 
-  // Nutrition Summary
-  checkPageBreak(50);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(190, 24, 93);
-  doc.text('🥗 Nutrição', 15, yPos);
-  yPos += 8;
-  doc.setTextColor(0, 0, 0);
+  // ============================================
+  // 6. DETAILED DAILY LOGS TABLE
+  // ============================================
+  
+  if (data.dailyLogs.length > 0) {
+    checkPageBreak(80);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+    doc.text('HISTORICO DETALHADO', margin, yPos);
+    yPos += 8;
+    
+    // Prepare table data with translations
+    const tableData = data.dailyLogs.slice(0, 20).map(log => {
+      const translatedSymptoms = (log.symptoms || [])
+        .slice(0, 3)
+        .map(s => translateSymptom(s))
+        .join(', ');
+      
+      return [
+        format(parseISO(log.log_date), 'dd/MM'),
+        translatePhase(log.cycle_phase),
+        log.mood ? `${log.mood}/5` : '-',
+        log.energy ? `${log.energy}/5` : '-',
+        log.stress ? `${log.stress}/5` : '-',
+        translatedSymptoms || '-',
+      ];
+    });
+    
+    autoTable(doc, {
+      startY: yPos,
+      head: [['Data', 'Fase', 'Humor', 'Energia', 'Estresse', 'Sintomas']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { 
+        fillColor: [COLORS.sageGreen.r, COLORS.sageGreen.g, COLORS.sageGreen.b],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 8,
+      },
+      bodyStyles: {
+        fontSize: 8,
+        textColor: [COLORS.darkText.r, COLORS.darkText.g, COLORS.darkText.b],
+      },
+      alternateRowStyles: {
+        fillColor: [COLORS.tableStripe.r, COLORS.tableStripe.g, COLORS.tableStripe.b],
+      },
+      columnStyles: {
+        0: { cellWidth: 18 },
+        1: { cellWidth: 22 },
+        2: { cellWidth: 18, halign: 'center' },
+        3: { cellWidth: 18, halign: 'center' },
+        4: { cellWidth: 18, halign: 'center' },
+        5: { cellWidth: 'auto' },
+      },
+      margin: { left: margin, right: margin },
+    });
+    
+    yPos = (doc as any).lastAutoTable.finalY + 15;
+  }
 
+  // ============================================
+  // 7. NUTRITION SUMMARY
+  // ============================================
+  
   if (data.nutritionIntake.length > 0) {
+    checkPageBreak(50);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+    doc.text('NUTRICAO', margin, yPos);
+    yPos += 8;
+    
     const totalCalories = data.nutritionIntake.reduce((a, b) => a + (b.calories || 0), 0);
     const totalProtein = data.nutritionIntake.reduce((a, b) => a + (b.protein || 0), 0);
     const totalCarbs = data.nutritionIntake.reduce((a, b) => a + (b.carbs || 0), 0);
     const totalFat = data.nutritionIntake.reduce((a, b) => a + (b.fat || 0), 0);
-
     const uniqueDays = new Set(data.nutritionIntake.map(n => n.intake_date)).size;
-    const avgCalories = totalCalories / uniqueDays;
-
+    
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Total de refeições registradas: ${data.nutritionIntake.length}`, 15, yPos);
+    doc.setTextColor(COLORS.darkText.r, COLORS.darkText.g, COLORS.darkText.b);
+    
+    doc.text(`Total de refeicoes registradas: ${data.nutritionIntake.length}`, margin, yPos);
     yPos += 6;
-    doc.text(`Média de calorias diárias: ${avgCalories.toFixed(0)} kcal`, 15, yPos);
+    doc.text(`Media de calorias diarias: ${(totalCalories / uniqueDays).toFixed(0)} kcal`, margin, yPos);
     yPos += 6;
-    doc.text(`Macros totais: Proteína ${totalProtein.toFixed(0)}g | Carboidratos ${totalCarbs.toFixed(0)}g | Gordura ${totalFat.toFixed(0)}g`, 15, yPos);
-  } else {
-    doc.setFontSize(10);
-    doc.text('Nenhum registro nutricional no período.', 15, yPos);
+    doc.text(`Macros totais: Proteina ${totalProtein.toFixed(0)}g | Carboidratos ${totalCarbs.toFixed(0)}g | Gordura ${totalFat.toFixed(0)}g`, margin, yPos);
+    yPos += 15;
   }
 
-  yPos += 15;
-
-  // Workouts Summary
-  checkPageBreak(50);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(190, 24, 93);
-  doc.text('💪 Atividade Física', 15, yPos);
-  yPos += 8;
-  doc.setTextColor(0, 0, 0);
-
+  // ============================================
+  // 8. WORKOUTS SUMMARY
+  // ============================================
+  
   if (data.workouts.length > 0) {
+    checkPageBreak(50);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
+    doc.text('ATIVIDADE FISICA', margin, yPos);
+    yPos += 8;
+    
     const completedWorkouts = data.workouts.filter(w => w.completed);
     const totalMinutes = completedWorkouts.reduce((a, b) => a + (b.duration_minutes || 0), 0);
-
+    
     const workoutTypes: Record<string, number> = {};
     completedWorkouts.forEach(w => {
       workoutTypes[w.workout_type] = (workoutTypes[w.workout_type] || 0) + 1;
     });
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Treinos realizados: ${completedWorkouts.length}`, 15, yPos);
-    yPos += 6;
-    doc.text(`Tempo total de exercício: ${totalMinutes} minutos`, 15, yPos);
-    yPos += 6;
-
+    
     const typeLabels: Record<string, string> = {
       hiit: 'HIIT',
-      forca: 'Força',
+      forca: 'Forca',
       yoga: 'Yoga',
       mobilidade: 'Mobilidade',
       cardio: 'Cardio',
     };
-
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(COLORS.darkText.r, COLORS.darkText.g, COLORS.darkText.b);
+    
+    doc.text(`Treinos realizados: ${completedWorkouts.length}`, margin, yPos);
+    yPos += 6;
+    doc.text(`Tempo total: ${totalMinutes} minutos`, margin, yPos);
+    yPos += 6;
+    
     const typeBreakdown = Object.entries(workoutTypes)
       .map(([type, count]) => `${typeLabels[type] || type}: ${count}`)
-      .join(', ');
+      .join(' | ');
     
     if (typeBreakdown) {
-      doc.text(`Por tipo: ${typeBreakdown}`, 15, yPos);
+      doc.text(`Por tipo: ${typeBreakdown}`, margin, yPos);
     }
-  } else {
-    doc.setFontSize(10);
-    doc.text('Nenhum treino registrado no período.', 15, yPos);
+    
+    yPos += 15;
   }
 
-  yPos += 15;
-
-  // Daily Logs Table (if space allows)
-  if (data.dailyLogs.length > 0) {
-    checkPageBreak(80);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(190, 24, 93);
-    doc.text('📊 Histórico Detalhado', 15, yPos);
-    yPos += 10;
-
-    const tableData = data.dailyLogs.slice(0, 14).map(log => [
-      format(parseISO(log.log_date), 'dd/MM'),
-      log.mood ? `${log.mood}/5` : '-',
-      log.energy ? `${log.energy}/5` : '-',
-      log.stress ? `${log.stress}/5` : '-',
-      log.weight ? `${log.weight}kg` : '-',
-      (log.symptoms || []).slice(0, 2).join(', ') || '-',
-    ]);
-
-    autoTable(doc, {
-      startY: yPos,
-      head: [['Data', 'Humor', 'Energia', 'Estresse', 'Peso', 'Sintomas']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [236, 72, 153] },
-      styles: { fontSize: 8, cellPadding: 2 },
-      columnStyles: {
-        0: { cellWidth: 20 },
-        1: { cellWidth: 20 },
-        2: { cellWidth: 20 },
-        3: { cellWidth: 20 },
-        4: { cellWidth: 20 },
-        5: { cellWidth: 'auto' },
-      },
-    });
-  }
-
-  // Footer on all pages
+  // ============================================
+  // 9. FOOTER ON ALL PAGES
+  // ============================================
+  
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
+    
+    // Footer line
+    doc.setDrawColor(COLORS.sageGreen.r, COLORS.sageGreen.g, COLORS.sageGreen.b);
+    doc.setLineWidth(0.5);
+    doc.line(margin, pageHeight - 18, pageWidth - margin, pageHeight - 18);
+    
+    // Footer text
     doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
+    doc.setTextColor(COLORS.lightText.r, COLORS.lightText.g, COLORS.lightText.b);
     doc.text(
-      'Este relatório foi gerado automaticamente pelo app Plenya. Compartilhe com seu profissional de saúde.',
+      'Este relatorio foi gerado automaticamente pelo aplicativo Plenya.',
       pageWidth / 2,
-      285,
+      pageHeight - 12,
       { align: 'center' }
     );
-    doc.text(`Página ${i} de ${totalPages}`, pageWidth - 15, 285, { align: 'right' });
+    doc.text(
+      'Compartilhe com seu profissional de saude para um acompanhamento personalizado.',
+      pageWidth / 2,
+      pageHeight - 7,
+      { align: 'center' }
+    );
+    
+    // Page number
+    doc.text(`Pagina ${i} de ${totalPages}`, pageWidth - margin, pageHeight - 12, { align: 'right' });
   }
 
   return doc;
