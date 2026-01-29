@@ -72,44 +72,33 @@ interface ReportData {
 // ============================================
 
 /**
- * Translates cycle phase to Portuguese (PDF-safe version without accents)
+ * Translates cycle phase to Portuguese with proper accents
+ * jsPDF helvetica font supports Latin-1 characters including Portuguese accents
  */
-function translatePhase(phase: string | null): string {
+function translatePhaseForPDF(phase: string | null): string {
   if (!phase) return '-';
-  // Use accent-free versions for PDF
-  const pdfSafePhases: Record<string, string> = {
+  const phases: Record<string, string> = {
     menstrual: 'Menstrual',
     folicular: 'Folicular',
-    ovulatoria: 'Ovulatoria',
-    lutea: 'Lutea',
+    ovulatoria: 'Ovulatória',
+    lutea: 'Lútea',
   };
-  return pdfSafePhases[phase] || cyclePhaseTranslations[phase] || phase;
+  return phases[phase] || cyclePhaseTranslations[phase] || phase;
 }
 
 /**
- * Removes accents from string for PDF safety
+ * Removes emojis from string for PDF compatibility
+ * Keeps accents since jsPDF helvetica supports them
  */
-function removeAccents(str: string): string {
-  return str
-    .replace(/[áàâã]/g, 'a')
-    .replace(/[éèê]/g, 'e')
-    .replace(/[íìî]/g, 'i')
-    .replace(/[óòôõ]/g, 'o')
-    .replace(/[úùû]/g, 'u')
-    .replace(/[ç]/g, 'c')
-    .replace(/[ÁÀÂÃ]/g, 'A')
-    .replace(/[ÉÈÊ]/g, 'E')
-    .replace(/[ÍÌÎ]/g, 'I')
-    .replace(/[ÓÒÔÕ]/g, 'O')
-    .replace(/[ÚÙÛ]/g, 'U')
-    .replace(/[Ç]/g, 'C');
+function removeEmojis(str: string): string {
+  return str.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '').trim();
 }
 
 /**
- * Translates symptom and removes accents for PDF
+ * Translates symptom for PDF - keeps accents, removes emojis
  */
 function translateSymptomForPDF(key: string): string {
-  return removeAccents(translateSymptom(key));
+  return removeEmojis(translateSymptom(key));
 }
 
 /**
@@ -328,28 +317,18 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
   // Main title - right aligned
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('Dossie de Saude da Mulher', pageWidth - margin, 16, { align: 'right' });
+  doc.text('Dossiê de Saúde da Mulher', pageWidth - margin, 16, { align: 'right' });
   
-  // Generation date
+  // Generation date - jsPDF helvetica supports Portuguese accents
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   const generationDate = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  // Remove accents for PDF safety
-  const safeDate = generationDate
-    .replace(/ã/g, 'a')
-    .replace(/ç/g, 'c')
-    .replace(/é/g, 'e')
-    .replace(/ê/g, 'e')
-    .replace(/í/g, 'i')
-    .replace(/ó/g, 'o')
-    .replace(/ô/g, 'o')
-    .replace(/ú/g, 'u');
-  doc.text(`Gerado em: ${safeDate}`, pageWidth - margin, 24, { align: 'right' });
+  doc.text(`Gerado em: ${generationDate}`, pageWidth - margin, 24, { align: 'right' });
   
   // Period covered
   const periodStart = format(data.dateRange.start, 'dd/MM/yyyy');
   const periodEnd = format(data.dateRange.end, 'dd/MM/yyyy');
-  doc.text(`Periodo: ${periodStart} a ${periodEnd}`, pageWidth - margin, 32, { align: 'right' });
+  doc.text(`Período: ${periodStart} a ${periodEnd}`, pageWidth - margin, 32, { align: 'right' });
 
   yPos = 55;
 
@@ -405,7 +384,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
   const rightColX = pageWidth / 2 + 10;
   
   // Life phase with pregnancy weeks if applicable
-  let phaseText = lifePhaseLabels[data.profile.life_phase || ''] || 'Nao informado';
+  let phaseText = lifePhaseLabels[data.profile.life_phase || ''] || 'Não informado';
   if (data.profile.life_phase === 'pregnant' && data.profile.pregnancy_start_date) {
     const weeks = calculatePregnancyWeeks(data.profile.pregnancy_start_date);
     phaseText = `Gestante (${weeks} semanas)`;
@@ -418,7 +397,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
   
   if (data.profile.cycle_length && data.profile.life_phase !== 'pregnant') {
     doc.setFont('helvetica', 'bold');
-    doc.text('Ciclo Medio:', rightColX, patientInfoY + 7);
+    doc.text('Ciclo Médio:', rightColX, patientInfoY + 7);
     doc.setFont('helvetica', 'normal');
     doc.text(`${data.profile.cycle_length} dias`, rightColX + 30, patientInfoY + 7);
   }
@@ -486,7 +465,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     { 
       label: 'Dias Registrados', 
       value: `${data.dailyLogs.length}`,
-      subtext: menstruatingDays > 0 ? `${menstruatingDays} em menstruacao` : ''
+      subtext: menstruatingDays > 0 ? `${menstruatingDays} em menstruação` : ''
     },
   ];
   
@@ -551,7 +530,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     
     autoTable(doc, {
       startY: yPos,
-      head: [['Sintoma', 'Ocorrencias', 'Frequencia']],
+      head: [['Sintoma', 'Ocorrências', 'Frequência']],
       body: symptomTableData,
       theme: 'grid',
       headStyles: { 
@@ -588,7 +567,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
-    doc.text('EVOLUCAO DO HUMOR E ENERGIA', margin, yPos);
+    doc.text('EVOLUÇÃO DO HUMOR E ENERGIA', margin, yPos);
     yPos += 8;
     
     const chartData = data.dailyLogs.map(log => ({
@@ -611,7 +590,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
-    doc.text('HISTORICO DETALHADO', margin, yPos);
+    doc.text('HISTÓRICO DETALHADO', margin, yPos);
     yPos += 8;
     
     // Prepare table data with translations
@@ -623,7 +602,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
       
       return [
         format(parseISO(log.log_date), 'dd/MM'),
-        translatePhase(log.cycle_phase),
+        translatePhaseForPDF(log.cycle_phase),
         log.mood ? `${log.mood}/5` : '-',
         log.energy ? `${log.energy}/5` : '-',
         log.stress ? `${log.stress}/5` : '-',
@@ -673,7 +652,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
-    doc.text('NUTRICAO', margin, yPos);
+    doc.text('NUTRIÇÃO', margin, yPos);
     yPos += 8;
     
     const totalCalories = data.nutritionIntake.reduce((a, b) => a + (b.calories || 0), 0);
@@ -686,11 +665,11 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(COLORS.darkText.r, COLORS.darkText.g, COLORS.darkText.b);
     
-    doc.text(`Total de refeicoes registradas: ${data.nutritionIntake.length}`, margin, yPos);
+    doc.text(`Total de refeições registradas: ${data.nutritionIntake.length}`, margin, yPos);
     yPos += 6;
-    doc.text(`Media de calorias diarias: ${(totalCalories / uniqueDays).toFixed(0)} kcal`, margin, yPos);
+    doc.text(`Média de calorias diárias: ${(totalCalories / uniqueDays).toFixed(0)} kcal`, margin, yPos);
     yPos += 6;
-    doc.text(`Macros totais: Proteina ${totalProtein.toFixed(0)}g | Carboidratos ${totalCarbs.toFixed(0)}g | Gordura ${totalFat.toFixed(0)}g`, margin, yPos);
+    doc.text(`Macros totais: Proteína ${totalProtein.toFixed(0)}g | Carboidratos ${totalCarbs.toFixed(0)}g | Gordura ${totalFat.toFixed(0)}g`, margin, yPos);
     yPos += 15;
   }
 
@@ -704,7 +683,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(COLORS.terracotta.r, COLORS.terracotta.g, COLORS.terracotta.b);
-    doc.text('ATIVIDADE FISICA', margin, yPos);
+    doc.text('ATIVIDADE FÍSICA', margin, yPos);
     yPos += 8;
     
     const completedWorkouts = data.workouts.filter(w => w.completed);
@@ -717,7 +696,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     
     const typeLabels: Record<string, string> = {
       hiit: 'HIIT',
-      forca: 'Forca',
+      forca: 'Força',
       yoga: 'Yoga',
       mobilidade: 'Mobilidade',
       cardio: 'Cardio',
@@ -760,7 +739,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     doc.setFontSize(8);
     doc.setTextColor(COLORS.lightText.r, COLORS.lightText.g, COLORS.lightText.b);
     doc.text(
-      'Este relatorio foi gerado automaticamente pelo aplicativo Plenya.',
+      'Este relatório foi gerado automaticamente pelo aplicativo Plenya.',
       pageWidth / 2,
       pageHeight - 12,
       { align: 'center' }
@@ -773,7 +752,7 @@ export function generateHealthReportPDF(data: ReportData, userEmail: string): js
     );
     
     // Page number
-    doc.text(`Pagina ${i} de ${totalPages}`, pageWidth - margin, pageHeight - 12, { align: 'right' });
+    doc.text(`Página ${i} de ${totalPages}`, pageWidth - margin, pageHeight - 12, { align: 'right' });
   }
 
   return doc;
