@@ -5,20 +5,20 @@
 
 export const symptomTranslations: Record<string, string> = {
   // Menstrual symptoms
-  cramps: 'Cólicas',
-  bleeding_heavy: 'Fluxo Intenso',
+  cramps: 'Cólicas ⚡',
+  bleeding_heavy: 'Fluxo Intenso 🩸',
   bleeding_light: 'Fluxo Leve',
-  spotting: 'Spotting',
+  spotting: 'Sangramento de Escape',
   bloating: 'Inchaço',
   breast_tenderness: 'Sensibilidade nos Seios',
-  headache: 'Dor de Cabeça',
+  headache: 'Dor de Cabeça 🤕',
   migraine: 'Enxaqueca',
   backache: 'Dor nas Costas',
   acne: 'Acne',
   
   // Emotional
-  mood_swings: 'Oscilação de Humor',
-  mood_swing: 'Oscilação de Humor',
+  mood_swings: 'Oscilação de Humor 🎭',
+  mood_swing: 'Oscilação de Humor 🎭',
   irritability: 'Irritabilidade',
   anxiety: 'Ansiedade',
   depression: 'Tristeza',
@@ -31,14 +31,14 @@ export const symptomTranslations: Record<string, string> = {
   
   // Energy
   fatigue: 'Fadiga',
-  insomnia: 'Insônia',
+  insomnia: 'Insônia 🌙',
   low_energy: 'Baixa Energia',
-  brain_fog: 'Névoa Mental',
+  brain_fog: 'Névoa Mental 🧠',
   tiredness: 'Cansaço',
   
   // Menopause specific
-  hot_flash: 'Ondas de Calor',
-  hot_flashes: 'Ondas de Calor',
+  hot_flash: 'Ondas de Calor 🔥',
+  hot_flashes: 'Ondas de Calor 🔥',
   night_sweats: 'Suores Noturnos',
   vaginal_dryness: 'Ressecamento Vaginal',
   
@@ -66,8 +66,8 @@ export const symptomTranslations: Record<string, string> = {
   vivid_dreams: 'Sonhos Vívidos',
   
   // Intimacy related
-  low_libido: 'Baixa Libido',
-  high_libido: 'Alta Libido',
+  low_libido: 'Libido Baixa 💤',
+  high_libido: 'Libido Alta 🔥',
 };
 
 /**

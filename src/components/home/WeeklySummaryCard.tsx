@@ -8,13 +8,15 @@ import {
   Zap, 
   Brain,
   Droplets,
-  Calendar
+  Calendar,
+  Flame
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCycle } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { format, subDays } from 'date-fns';
 import { translateSymptom } from '@/lib/symptomTranslations';
 
@@ -31,6 +33,7 @@ interface WeeklyStats {
 const WeeklySummaryCard: React.FC = () => {
   const { user } = useAuth();
   const { currentPhase, getPhaseInfo } = useCycle();
+  const { lifePhase } = useLifePhase();
   const [stats, setStats] = useState<WeeklyStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -213,14 +216,27 @@ const WeeklySummaryCard: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Phase indicator */}
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10">
-            <span className="text-lg">{phaseInfo.icon}</span>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">Fase {phaseInfo.name}</p>
-              <p className="text-xs text-muted-foreground">Energia {phaseInfo.energyLevel}</p>
+          {/* Phase indicator - only show for menstruating users, not menopause */}
+          {lifePhase !== 'menopause' && (
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10">
+              <span className="text-lg">{phaseInfo.icon}</span>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">Fase {phaseInfo.name}</p>
+                <p className="text-xs text-muted-foreground">Energia {phaseInfo.energyLevel}</p>
+              </div>
             </div>
-          </div>
+          )}
+          
+          {/* Menopause indicator */}
+          {lifePhase === 'menopause' && (
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-100/50 dark:bg-amber-900/20">
+              <Flame className="w-5 h-5 text-amber-600" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">Menopausa</p>
+                <p className="text-xs text-muted-foreground">Acompanhamento de sintomas</p>
+              </div>
+            </div>
+          )}
 
           {/* Stats grid */}
           <div className="grid grid-cols-3 gap-3">
