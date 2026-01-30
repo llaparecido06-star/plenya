@@ -1,1 +1,4 @@
 project_id = "ifagjydlsqcmetnddulb"
+
+[functions.plenya-ai-brain]
+verify_jwt = false

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Wind, Clock, ChevronDown, Check, Loader2, Timer, Shuffle, Moon, Info } from 'lucide-react';
+import { Flame, Wind, Clock, ChevronDown, Check, Loader2, Timer, Shuffle, Moon, Info, Sparkles, Zap } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import ExerciseDetailDrawer from './ExerciseDetailDrawer';
 import RestTimerModal from './RestTimerModal';
 import { useProfile } from '@/hooks/useProfile';
+import { useAIBrain } from '@/hooks/useAIBrain';
 
 interface Exercise {
   id: string;
@@ -17,6 +18,7 @@ interface Exercise {
   completed: boolean[];
   weight?: number;
   actualReps?: number;
+  observation?: string;
 }
 
 interface WorkoutPlan {
@@ -111,26 +113,78 @@ const activityIntensityLabel: Record<string, string> = {
 
 const WorkoutCard: React.FC = () => {
   const { workout: savedWorkout, loading, saving, saveExercises, completeExercise, workoutPhase, isToday } = useWorkouts();
-  const { fitness_level } = useProfile();
+  const { fitness_level, goals } = useProfile();
   const { toast } = useToast();
+  const { generateWorkout, loading: aiLoading } = useAIBrain();
   const [isExpanded, setIsExpanded] = useState(false);
   const [exercises, setExercises] = useState(workoutPlans[workoutPhase].exercises);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showRestTimer, setShowRestTimer] = useState(false);
+  const [aiWorkout, setAiWorkout] = useState<{ title: string; duration: string; intensity: string } | null>(null);
+  const [energyLevel, setEnergyLevel] = useState(3);
 
   const defaultPlan = workoutPlans[workoutPhase];
-  const Icon = defaultPlan.icon;
+  const Icon = aiWorkout ? Sparkles : defaultPlan.icon;
   const intensityTip = fitness_level ? activityIntensityLabel[fitness_level] : null;
 
   // Load saved exercises or use defaults for the phase
   useEffect(() => {
     if (savedWorkout?.exercises && savedWorkout.exercises.length > 0) {
       setExercises(savedWorkout.exercises);
+      // Check if it was an AI workout
+      if (savedWorkout.workout_name?.includes('IA')) {
+        setAiWorkout({
+          title: savedWorkout.workout_name,
+          duration: `${savedWorkout.duration_minutes || 30} min`,
+          intensity: 'Personalizado',
+        });
+      }
     } else {
       setExercises(workoutPlans[workoutPhase].exercises);
+      setAiWorkout(null);
     }
   }, [savedWorkout, workoutPhase]);
+
+  const handleGenerateAIWorkout = async () => {
+    const goalText = goals.length > 0 ? goals.join(', ') : null;
+    
+    const result = await generateWorkout({
+      energy_level: energyLevel,
+      phase: workoutPhase,
+      goal: goalText,
+      fitness_level: fitness_level || 'moderate',
+    });
+
+    if (result) {
+      const aiExercises: Exercise[] = result.exercises.map((ex, idx) => ({
+        id: `ai-${idx + 1}`,
+        name: ex.name,
+        sets: ex.sets,
+        reps: ex.reps,
+        completed: Array(ex.sets).fill(false),
+        observation: ex.observation,
+      }));
+
+      setExercises(aiExercises);
+      setAiWorkout({
+        title: result.title,
+        duration: result.duration,
+        intensity: result.intensity,
+      });
+      setIsExpanded(true);
+
+      // Auto-save AI workout
+      if (isToday) {
+        await saveExercises(`${result.title} (IA)`, aiExercises);
+      }
+
+      toast({
+        title: 'Treino Gerado! ⚡',
+        description: `${result.title} - ${result.duration}`,
+      });
+    }
+  };
 
   const toggleSet = async (exerciseId: string, setIndex: number) => {
     if (!isToday) return;
@@ -249,23 +303,27 @@ const WorkoutCard: React.FC = () => {
     <>
       <motion.div
         id="workout-card"
-        className={`rounded-3xl p-5 mx-4 ${defaultPlan.style} transition-all`}
+        className={`rounded-3xl p-5 mx-4 ${aiWorkout ? 'glass-card border-2 border-primary/30' : defaultPlan.style} transition-all`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         layout
       >
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl phase-gradient shadow-glow">
+            <div className={`p-3 rounded-2xl ${aiWorkout ? 'bg-gradient-to-br from-primary to-terracotta' : 'phase-gradient'} shadow-glow`}>
               <Icon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-foreground">{defaultPlan.title}</h3>
-              <p className="text-sm text-muted-foreground">{defaultPlan.subtitle}</p>
+              <h3 className="text-xl font-bold text-foreground">
+                {aiWorkout ? aiWorkout.title : defaultPlan.title}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {aiWorkout ? 'Treino personalizado pela IA' : defaultPlan.subtitle}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {saving && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+            {(saving || aiLoading) && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
             {/* Rest Timer Button */}
             <Button
               id="rest-timer-button"
@@ -282,13 +340,58 @@ const WorkoutCard: React.FC = () => {
         <div className="flex gap-4 mb-4">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
-            {defaultPlan.duration}
+            {aiWorkout ? aiWorkout.duration : defaultPlan.duration}
           </div>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Flame className="w-4 h-4" />
-            {defaultPlan.intensity}
+            {aiWorkout ? aiWorkout.intensity : defaultPlan.intensity}
           </div>
         </div>
+
+        {/* AI Workout Generator */}
+        {isToday && !aiWorkout && (
+          <motion.div 
+            className="mb-4 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-terracotta/10 border border-primary/20"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Energia hoje:</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setEnergyLevel(level)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      energyLevel >= level
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground'
+                    }`}
+                  >
+                    <Zap className="w-4 h-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Button
+              onClick={handleGenerateAIWorkout}
+              disabled={aiLoading}
+              className="w-full bg-gradient-to-r from-primary to-terracotta text-white hover:opacity-90"
+            >
+              {aiLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Gerando treino...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Gerar Treino do Dia ⚡
+                </>
+              )}
+            </Button>
+          </motion.div>
+        )}
 
         {/* Activity level tip */}
         {intensityTip && (
