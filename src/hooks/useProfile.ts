@@ -28,47 +28,52 @@ export const useProfile = () => {
     is_trying_to_conceive: false,
   });
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) {
-        setLoading(false);
+  const fetchProfile = useCallback(async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('goal, diet_type, fitness_level, full_name, date_of_birth, life_phase, pregnancy_start_date, is_trying_to_conceive')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
         return;
       }
 
-      try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('goal, diet_type, fitness_level, full_name, date_of_birth, life_phase, pregnancy_start_date, is_trying_to_conceive')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          return;
-        }
-
-        if (profile) {
-          setData({
-            goal: profile.goal,
-            diet_type: profile.diet_type,
-            fitness_level: profile.fitness_level,
-            full_name: profile.full_name,
-            date_of_birth: profile.date_of_birth,
-            life_phase: profile.life_phase,
-            pregnancy_start_date: profile.pregnancy_start_date,
-            is_trying_to_conceive: profile.is_trying_to_conceive ?? false,
-          });
-        }
-      } catch (err) {
-        console.error('Error:', err);
-      } finally {
-        setLoading(false);
+      if (profile) {
+        setData({
+          goal: profile.goal,
+          diet_type: profile.diet_type,
+          fitness_level: profile.fitness_level,
+          full_name: profile.full_name,
+          date_of_birth: profile.date_of_birth,
+          life_phase: profile.life_phase,
+          pregnancy_start_date: profile.pregnancy_start_date,
+          is_trying_to_conceive: profile.is_trying_to_conceive ?? false,
+        });
       }
-    };
-
-    fetchProfile();
+    } catch (err) {
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile, refreshKey]);
+
+  const refetch = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
   // Parse goals from comma-separated string to array
   const goals = data.goal ? data.goal.split(',').filter(Boolean) : [];
@@ -77,5 +82,6 @@ export const useProfile = () => {
     ...data,
     goals,
     loading,
+    refetch,
   };
 };
