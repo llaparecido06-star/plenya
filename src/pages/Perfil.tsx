@@ -13,6 +13,7 @@ import NotificationSettings from '@/components/settings/NotificationSettings';
 import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
 import { useProfile } from '@/hooks/useProfile';
 import { Badge } from '@/components/ui/badge';
+import ProfileSettingsEditor from '@/components/profile/ProfileSettingsEditor';
 
 // Goal configuration for badges
 const goalConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -42,7 +43,7 @@ const activityConfig: Record<string, { label: string; icon: string }> = {
 
 const Perfil: React.FC = () => {
   const { user, signOut } = useAuth();
-  const { goals, diet_type, fitness_level, loading } = useProfile();
+  const { goals, diet_type, fitness_level, loading, refetch } = useProfile();
 
   if (!user) {
     return (
@@ -154,6 +155,14 @@ const Perfil: React.FC = () => {
             </motion.div>
           )}
         </motion.div>
+
+        {/* Profile Settings Editor */}
+        <ProfileSettingsEditor
+          currentGoals={goals}
+          currentDiet={diet_type}
+          currentFitness={fitness_level}
+          onUpdate={refetch}
+        />
 
         {/* DUM Calendar Picker */}
         <DUMPicker />
