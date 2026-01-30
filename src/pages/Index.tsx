@@ -20,6 +20,7 @@ import NextPeriodCard from '@/components/home/NextPeriodCard';
 import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
 import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
 import MenopauseCard from '@/components/home/MenopauseCard';
+import QuickMenstruationButton from '@/components/home/QuickMenstruationButton';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
@@ -88,6 +89,11 @@ const Index: React.FC = () => {
 
         {/* Show CycleWheel only for menstruating users viewing today */}
         {isToday && isMenstruating && <CycleWheel />}
+        
+        {/* Quick Menstruation Button - for menstruating users only */}
+        {isToday && isMenstruating && !isPregnant && (
+          <QuickMenstruationButton />
+        )}
       </div>
 
       <div className="space-y-4 mt-4">
