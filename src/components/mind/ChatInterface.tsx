@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, Sparkles } from 'lucide-react';
+import { Send, Bot, Sparkles, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useCycle } from '@/contexts/CycleContext';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useChatMessages } from '@/hooks/useChatMessages';
+import { useAIBrain } from '@/hooks/useAIBrain';
 
 const ChatInterface: React.FC = () => {
   const { messages, loading, addMessage } = useChatMessages();
+  const { chat, loading: aiLoading } = useAIBrain();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -20,57 +22,43 @@ const ChatInterface: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
-  const generateResponse = (userMessage: string): string => {
-    const phaseInfo = getPhaseInfo();
-    
-    // PREGNANT MODE - No cycle talk, focus on baby safety
-    if (lifePhase === 'pregnant') {
-      const pregnantResponses = [
-        `Entendo como você se sente. Na semana ${pregnancyWeeks || ''} da gestação, essas sensações são muito comuns. Lembre-se de descansar e se hidratar! 🤰`,
-        `Obrigada por compartilhar. Durante a gravidez, seu corpo passa por muitas transformações. Seja gentil consigo mesma e consulte seu médico se tiver dúvidas. 💜`,
-        `Isso faz sentido! Uma dica para esse momento: técnicas de respiração podem ajudar muito. Inspire contando até 4, segure por 2, e expire em 6. Quer tentar?`,
-        `Você está fazendo um trabalho incrível cuidando de você e do bebê. Priorize o descanso e alimentos nutritivos. 💕`,
-      ];
-      return pregnantResponses[Math.floor(Math.random() * pregnantResponses.length)];
-    }
-    
-    // MENOPAUSE MODE - No cycle phases, focus on symptom relief
-    if (lifePhase === 'menopause') {
-      const menopauseResponses = [
-        `Entendo perfeitamente. Essas sensações são comuns nessa fase da vida. Você já experimentou técnicas de respiração para aliviar os calores?`,
-        `Obrigada por compartilhar. O climatério traz desafios únicos, mas você não está sozinha. Que tal um chá de ervas calmante como camomila ou erva-cidreira?`,
-        `Isso faz muito sentido. Para melhorar o sono, evite cafeína após as 14h e mantenha o quarto fresco. Pequenas mudanças fazem grande diferença! 🧘`,
-        `Você está cuidando muito bem de si mesma ao reconhecer essas emoções. Fitoestrógenos (soja, linhaça) podem ajudar no equilíbrio hormonal. 💜`,
-      ];
-      return menopauseResponses[Math.floor(Math.random() * menopauseResponses.length)];
-    }
-    
-    // MENSTRUATING MODE - Normal cycle-aware responses
-    const responses = [
-      `Entendo como você se sente. Na fase ${phaseInfo.name}, é natural experimentar essas emoções. ${phaseInfo.insight}`,
-      `Obrigada por compartilhar isso comigo. Lembre-se: você está na fase ${phaseInfo.name}, e seu corpo está passando por mudanças naturais. Seja gentil consigo mesma. 💜`,
-      `Isso faz muito sentido. Uma técnica que pode ajudar agora é a respiração 4-7-8: inspire por 4 segundos, segure por 7 e expire por 8. Quer tentar juntas?`,
-      `Você está fazendo um ótimo trabalho ao reconhecer e expressar seus sentimentos. Na fase ${phaseInfo.name}, pratique o autocuidado sem culpa.`,
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
+  }, [messages, isTyping]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || aiLoading) return;
 
-    // Save user message
-    await addMessage('user', input);
+    const userMessage = input.trim();
     setInput('');
+    
+    // Save user message
+    await addMessage('user', userMessage);
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(async () => {
-      const response = generateResponse(input);
+    // Build conversation history for context
+    const history = messages.slice(-10).map(msg => ({
+      role: msg.role as 'user' | 'assistant',
+      content: msg.content,
+    }));
+
+    const phaseInfo = getPhaseInfo();
+
+    // Call AI Brain
+    const response = await chat({
+      message: userMessage,
+      history,
+      life_phase: lifePhase,
+      pregnancy_weeks: pregnancyWeeks,
+      phase_name: phaseInfo.name,
+    });
+
+    setIsTyping(false);
+
+    if (response) {
       await addMessage('assistant', response);
-      setIsTyping(false);
-    }, 1500);
+    } else {
+      // Fallback response if AI fails
+      await addMessage('assistant', 'Desculpe, estou tendo dificuldades para responder agora. Pode tentar novamente? 💜');
+    }
   };
 
   if (loading) {
@@ -95,8 +83,14 @@ const ChatInterface: React.FC = () => {
           <Sparkles className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Assistente de Bem-estar</h3>
-          <p className="text-xs text-muted-foreground">Sempre aqui para você</p>
+          <h3 className="font-semibold text-foreground">Plenya - Assistente de Bem-estar</h3>
+          <p className="text-xs text-muted-foreground">
+            {lifePhase === 'pregnant' 
+              ? `Cuidando de você e do bebê 🤰`
+              : lifePhase === 'menopause'
+              ? 'Apoio no climatério 🌸'
+              : 'Sempre aqui para você 💜'}
+          </p>
         </div>
       </div>
 
@@ -124,7 +118,7 @@ const ChatInterface: React.FC = () => {
                       : 'chat-bubble-assistant'
                   }
                 >
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                 </div>
               </div>
             </motion.div>
@@ -141,22 +135,25 @@ const ChatInterface: React.FC = () => {
               <Bot className="w-4 h-4 text-primary" />
             </div>
             <div className="chat-bubble-assistant">
-              <div className="flex gap-1">
-                <motion.div
-                  className="w-2 h-2 rounded-full bg-muted-foreground"
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: 0 }}
-                />
-                <motion.div
-                  className="w-2 h-2 rounded-full bg-muted-foreground"
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-                />
-                <motion.div
-                  className="w-2 h-2 rounded-full bg-muted-foreground"
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-                />
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Plenya está digitando</span>
+                <div className="flex gap-1">
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-primary"
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+                  />
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-primary"
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                  />
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-primary"
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                  />
+                </div>
               </div>
             </div>
           </motion.div>
@@ -174,14 +171,19 @@ const ChatInterface: React.FC = () => {
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Digite sua mensagem..."
             className="flex-1 rounded-full bg-secondary border-none"
+            disabled={aiLoading}
           />
           <motion.button
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || aiLoading}
             className="p-3 rounded-full phase-gradient text-white disabled:opacity-50"
             whileTap={{ scale: 0.95 }}
           >
-            <Send className="w-5 h-5" />
+            {aiLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
           </motion.button>
         </div>
       </div>

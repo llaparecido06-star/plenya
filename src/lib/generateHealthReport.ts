@@ -151,6 +151,10 @@ export async function fetchReportData(userId: string, days: number = 30): Promis
   const startDateStr = format(startDate, 'yyyy-MM-dd');
   const endDateStr = format(endDate, 'yyyy-MM-dd');
 
+  // Also try to get user metadata for full_name
+  const { data: { user } } = await supabase.auth.getUser();
+  const userFullName = user?.user_metadata?.full_name || null;
+
   const [
     profileRes,
     dailyLogsRes,
@@ -167,8 +171,14 @@ export async function fetchReportData(userId: string, days: number = 30): Promis
     supabase.from('workouts').select('*').eq('user_id', userId).gte('workout_date', startDateStr).lte('workout_date', endDateStr).order('workout_date', { ascending: false }),
   ]);
 
+  // Merge profile full_name with user_metadata fallback
+  const profile = profileRes.data || {} as ReportData['profile'];
+  if (!profile.full_name && userFullName) {
+    profile.full_name = userFullName;
+  }
+
   return {
-    profile: profileRes.data || {} as ReportData['profile'],
+    profile,
     dailyLogs: dailyLogsRes.data || [],
     menstruationLogs: menstruationRes.data || [],
     intimacyLogs: intimacyRes.data || [],

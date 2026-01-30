@@ -10,62 +10,74 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useNutrition } from '@/hooks/useNutrition';
+import { useAIBrain } from '@/hooks/useAIBrain';
+import { useCycle } from '@/contexts/CycleContext';
+import { useProfile } from '@/hooks/useProfile';
 
 interface ScanResult {
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
+  meal_name: string;
+  macros: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  advice: string;
 }
 
 const MealScanner: React.FC = () => {
   const { addMeal, saving, isAuthenticated } = useNutrition();
+  const { scanMeal, loading: aiLoading } = useAIBrain();
+  const { getPhaseInfo, currentPhase } = useCycle();
+  const { diet_type } = useProfile();
+  
   const [isOpen, setIsOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  const mockResults: ScanResult[] = [
-    { name: 'Frango Grelhado com Salada', calories: 350, protein: 30, carbs: 15, fat: 12 },
-    { name: 'Bowl de Açaí com Granola', calories: 420, protein: 8, carbs: 65, fat: 14 },
-    { name: 'Omelete com Legumes', calories: 280, protein: 22, carbs: 8, fat: 18 },
-    { name: 'Salmão com Batata Doce', calories: 450, protein: 35, carbs: 30, fat: 20 },
-  ];
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-        startScanning();
+        const base64Image = reader.result as string;
+        setImagePreview(base64Image);
+        startScanning(base64Image);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const startScanning = () => {
+  const startScanning = async (imageBase64: string) => {
     setIsScanning(true);
     setScanResult(null);
     
-    // Simulate AI analysis
-    setTimeout(() => {
-      const randomResult = mockResults[Math.floor(Math.random() * mockResults.length)];
-      setScanResult(randomResult);
-      setIsScanning(false);
-    }, 2500);
+    const result = await scanMeal({
+      image: imageBase64,
+      phase: currentPhase,
+      diet_type: diet_type || undefined,
+    });
+
+    setIsScanning(false);
+
+    if (result) {
+      setScanResult(result);
+    } else {
+      // Reset if AI failed
+      setImagePreview(null);
+    }
   };
 
   const handleConfirm = async () => {
     if (!scanResult) return;
 
-    const success = await addMeal('lanche', scanResult.name, {
-      calories: scanResult.calories,
-      protein: scanResult.protein,
-      carbs: scanResult.carbs,
-      fat: scanResult.fat,
+    const success = await addMeal('lanche', scanResult.meal_name, {
+      calories: scanResult.macros.calories,
+      protein: scanResult.macros.protein,
+      carbs: scanResult.macros.carbs,
+      fat: scanResult.macros.fat,
     });
 
     if (success) {
@@ -106,7 +118,7 @@ const MealScanner: React.FC = () => {
             <div className="p-2 rounded-xl phase-gradient">
               <Camera className="w-4 h-4 text-white" />
             </div>
-            Scan de Refeição
+            Scan de Refeição com IA
           </DialogTitle>
         </DialogHeader>
 
@@ -127,7 +139,7 @@ const MealScanner: React.FC = () => {
                   <div>
                     <p className="font-medium text-foreground">Tire uma foto da refeição</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Nossa IA vai identificar os alimentos
+                      Nossa IA vai identificar os alimentos e calcular os macros
                     </p>
                   </div>
                   <label className="cursor-pointer">
@@ -182,8 +194,9 @@ const MealScanner: React.FC = () => {
                 >
                   Analisando com IA...
                 </motion.p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground text-center">
                   Identificando alimentos e calculando macros
+                  {diet_type && <span className="block mt-1">Considerando sua dieta: {diet_type}</span>}
                 </p>
               </div>
             </motion.div>
@@ -216,27 +229,36 @@ const MealScanner: React.FC = () => {
                 </div>
                 
                 <h3 className="text-lg font-bold text-foreground mb-3">
-                  {scanResult.name}
+                  {scanResult.meal_name}
                 </h3>
                 
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-2 mb-3">
                   <div className="text-center p-2 rounded-xl bg-secondary">
-                    <p className="text-lg font-bold text-primary">{scanResult.calories}</p>
+                    <p className="text-lg font-bold text-primary">{scanResult.macros.calories}</p>
                     <p className="text-xs text-muted-foreground">kcal</p>
                   </div>
                   <div className="text-center p-2 rounded-xl bg-secondary">
-                    <p className="text-lg font-bold text-menstrual">{scanResult.protein}g</p>
+                    <p className="text-lg font-bold text-menstrual">{scanResult.macros.protein}g</p>
                     <p className="text-xs text-muted-foreground">Proteína</p>
                   </div>
                   <div className="text-center p-2 rounded-xl bg-secondary">
-                    <p className="text-lg font-bold text-folicular">{scanResult.carbs}g</p>
+                    <p className="text-lg font-bold text-folicular">{scanResult.macros.carbs}g</p>
                     <p className="text-xs text-muted-foreground">Carbs</p>
                   </div>
                   <div className="text-center p-2 rounded-xl bg-secondary">
-                    <p className="text-lg font-bold text-ovulatoria">{scanResult.fat}g</p>
+                    <p className="text-lg font-bold text-ovulatoria">{scanResult.macros.fat}g</p>
                     <p className="text-xs text-muted-foreground">Gordura</p>
                   </div>
                 </div>
+
+                {/* AI Advice */}
+                {scanResult.advice && (
+                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium text-primary">💡 Dica:</span> {scanResult.advice}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2">
