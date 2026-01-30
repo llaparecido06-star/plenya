@@ -3,12 +3,9 @@ import { motion } from 'framer-motion';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
 
 const CycleWheel: React.FC = () => {
-  const { cycleDay, cycleLength, currentPhase, getPhaseInfo } = useCycle();
+  const { cycleDay, cycleLength, currentPhase, getPhaseInfo, hasDUM, isLate, daysLate } = useCycle();
   
   const phaseInfo = getPhaseInfo();
-  
-  // Calculate rotation based on cycle day
-  const rotation = (cycleDay / cycleLength) * 360 - 90;
   
   // SVG dimensions
   const size = 280;
@@ -24,6 +21,10 @@ const CycleWheel: React.FC = () => {
     ovulatoria: '#F4A261',
     lutea: '#9B8BB0',
   };
+
+  // Neutral color for awaiting state
+  const neutralColor = '#9CA3AF';
+  const lateColor = '#EF4444';
 
   // Phase angles (approximate based on typical cycle)
   const phases = [
@@ -62,9 +63,66 @@ const CycleWheel: React.FC = () => {
     };
   };
 
-  // Calculate marker position
-  const markerAngle = (cycleDay / cycleLength) * 360;
+  // Calculate marker position - cap at 100% when late
+  const effectiveCycleDay = Math.min(cycleDay, cycleLength);
+  const markerAngle = (effectiveCycleDay / cycleLength) * 360;
   const markerPos = polarToCartesian(center, center, markerRadius, markerAngle);
+
+  // Get phase for display - when late, show as if at end of lutea
+  const displayPhase = isLate ? 'lutea' : currentPhase;
+
+  // Awaiting state - no DUM registered
+  if (!hasDUM) {
+    return (
+      <div id="cycle-wheel" className="relative flex flex-col items-center">
+        <div className="relative">
+          <svg width={size} height={size} className="drop-shadow-lg">
+            {/* Background circle - neutral/gray */}
+            <circle
+              cx={center}
+              cy={center}
+              r={outerRadius}
+              fill="none"
+              stroke={neutralColor}
+              strokeWidth="36"
+              opacity="0.3"
+            />
+            
+            {/* Inner circle (white center) */}
+            <circle
+              cx={center}
+              cy={center}
+              r={innerRadius - 10}
+              fill="hsl(var(--card))"
+              className="drop-shadow-sm"
+            />
+          </svg>
+          
+          {/* Center content - Awaiting state */}
+          <motion.div
+            className="absolute inset-0 flex flex-col items-center justify-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <span className="text-4xl mb-1">❓</span>
+            <span className="text-lg font-medium text-muted-foreground text-center px-4">
+              Aguardando
+            </span>
+            <span className="text-sm text-muted-foreground">primeiro ciclo</span>
+          </motion.div>
+        </div>
+        
+        {/* No legend when awaiting */}
+        <div className="flex gap-4 mt-6 flex-wrap justify-center">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50">
+            <div className="w-3 h-3 rounded-full bg-muted-foreground/30" />
+            <span className="text-xs text-muted-foreground">Registre sua menstruação</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div id="cycle-wheel" className="relative flex flex-col items-center">
@@ -87,14 +145,29 @@ const CycleWheel: React.FC = () => {
               key={phase}
               d={describeArc(center, center, outerRadius, startAngle, endAngle)}
               fill="none"
-              stroke={phaseColors[phase]}
+              stroke={isLate && phase === 'lutea' ? lateColor : phaseColors[phase]}
               strokeWidth="36"
               strokeLinecap="butt"
               className={`transition-opacity duration-300 ${
-                currentPhase === phase ? 'opacity-100' : 'opacity-40'
+                displayPhase === phase ? 'opacity-100' : 'opacity-40'
               }`}
             />
           ))}
+          
+          {/* Late indicator - pulsing outer ring when late */}
+          {isLate && (
+            <motion.circle
+              cx={center}
+              cy={center}
+              r={outerRadius + 5}
+              fill="none"
+              stroke={lateColor}
+              strokeWidth="2"
+              opacity="0.6"
+              animate={{ scale: [1, 1.02, 1], opacity: [0.6, 0.3, 0.6] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          )}
           
           {/* Inner circle (white center) */}
           <circle
@@ -122,7 +195,7 @@ const CycleWheel: React.FC = () => {
               cx={markerPos.x}
               cy={markerPos.y}
               r="10"
-              fill={phaseColors[currentPhase]}
+              fill={isLate ? lateColor : phaseColors[displayPhase]}
             />
           </motion.g>
         </svg>
@@ -134,9 +207,23 @@ const CycleWheel: React.FC = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <span className="text-4xl mb-1">{phaseInfo.icon}</span>
-          <span className="text-4xl font-bold text-foreground">Dia {cycleDay}</span>
-          <span className="text-sm text-muted-foreground mt-1">{phaseInfo.name}</span>
+          {isLate ? (
+            // Late state - show days late
+            <>
+              <span className="text-3xl mb-1">⚠️</span>
+              <span className="text-2xl font-bold text-red-500">
+                {daysLate} {daysLate === 1 ? 'dia' : 'dias'}
+              </span>
+              <span className="text-sm text-muted-foreground">de atraso</span>
+            </>
+          ) : (
+            // Normal state - show cycle day
+            <>
+              <span className="text-4xl mb-1">{phaseInfo.icon}</span>
+              <span className="text-4xl font-bold text-foreground">Dia {cycleDay}</span>
+              <span className="text-sm text-muted-foreground mt-1">{phaseInfo.name}</span>
+            </>
+          )}
         </motion.div>
       </div>
       
@@ -146,16 +233,20 @@ const CycleWheel: React.FC = () => {
           <div
             key={phase}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${
-              currentPhase === phase
-                ? 'bg-phase-secondary/50 scale-105'
+              displayPhase === phase
+                ? isLate && phase === 'lutea' 
+                  ? 'bg-red-500/20 scale-105' 
+                  : 'bg-phase-secondary/50 scale-105'
                 : 'opacity-60'
             }`}
           >
             <div
               className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: phaseColors[phase] }}
+              style={{ backgroundColor: isLate && phase === 'lutea' ? lateColor : phaseColors[phase] }}
             />
-            <span className="text-xs font-medium capitalize">{phase}</span>
+            <span className="text-xs font-medium capitalize">
+              {phase === 'lutea' && isLate ? 'atrasada' : phase}
+            </span>
           </div>
         ))}
       </div>

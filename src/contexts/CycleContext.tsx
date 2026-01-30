@@ -27,6 +27,10 @@ interface CycleContextType {
   getPredictedPeriodDates: (monthsAhead?: number) => Date[];
   isLoading: boolean;
   refreshCycleData: () => Promise<void>;
+  // New state flags for late/awaiting logic
+  hasDUM: boolean;
+  isLate: boolean;
+  daysLate: number;
 }
 
 interface PhaseInfo {
@@ -102,18 +106,18 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   // Calculate cycle day from last period start date
+  // REMOVED modulo operator - now counts actual days since last period
+  // This allows the app to show "late" status when cycleDay > cycleLength
   const calculateCycleDay = useCallback((lastPeriod: Date | null, length: number): number => {
-    if (!lastPeriod) return 10; // Default
+    if (!lastPeriod) return 0; // 0 indicates no DUM
 
     const today = new Date();
     const diffTime = today.getTime() - lastPeriod.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
     
-    // Handle cycles that have passed the cycle length
-    let dayInCycle = diffDays % length;
-    if (dayInCycle === 0) dayInCycle = length;
-    
-    return Math.max(1, Math.min(dayInCycle, length));
+    // Return actual days since last period (no modulo, no cap)
+    // This allows cycleDay to exceed cycleLength, indicating late period
+    return Math.max(1, diffDays);
   }, []);
 
   // Fetch cycle data from profile
@@ -263,6 +267,11 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return dates;
   }, [lastPeriodStart, cycleLength]);
 
+  // Computed state flags for late/awaiting logic
+  const hasDUM = !!lastPeriodStart;
+  const isLate = hasDUM && cycleDay > cycleLength;
+  const daysLate = isLate ? cycleDay - cycleLength : 0;
+
   return (
     <CycleContext.Provider
       value={{
@@ -280,6 +289,9 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         getPredictedPeriodDates,
         isLoading,
         refreshCycleData,
+        hasDUM,
+        isLate,
+        daysLate,
       }}
     >
       {children}

@@ -17,6 +17,8 @@ import IntimacyCard from '@/components/home/IntimacyCard';
 import PillTracker from '@/components/home/PillTracker';
 import DeviceExpirationCard from '@/components/home/DeviceExpirationCard';
 import NextPeriodCard from '@/components/home/NextPeriodCard';
+import LatePeriodCard from '@/components/home/LatePeriodCard';
+import AwaitingPeriodCard from '@/components/home/AwaitingPeriodCard';
 import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
 import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
 import MenopauseCard from '@/components/home/MenopauseCard';
@@ -31,7 +33,7 @@ import { useLifePhase } from '@/hooks/useLifePhase';
 import { isPillMethod, hasExpirationDate, isHormonalMethod } from '@/data/contraceptiveMethods';
 
 const Index: React.FC = () => {
-  const { getPhaseInfo } = useCycle();
+  const { getPhaseInfo, hasDUM, isLate } = useCycle();
   const { isToday } = useSelectedDate();
   const { contraceptive_type } = useContraceptive();
   const { lifePhase, pregnancyWeeks, pregnancyStartDate, isTryingToConceive, age, loading: lifePhaseLoading } = useLifePhase();
@@ -109,8 +111,21 @@ const Index: React.FC = () => {
             {/* Trying to Conceive Card - Golden Fertile Window */}
             {isTryingToConceive && <TryingToConceiveCard />}
 
-            {/* Next Period Prediction Card - HIDDEN for pregnant users */}
-            {!isPregnant && <NextPeriodCard />}
+            {/* Period State Cards - Conditional based on DUM and late status */}
+            {!isPregnant && (
+              <>
+                {!hasDUM ? (
+                  // No DUM registered - show awaiting card
+                  <AwaitingPeriodCard />
+                ) : isLate ? (
+                  // Period is late - show late card
+                  <LatePeriodCard />
+                ) : (
+                  // Normal state - show next period prediction
+                  <NextPeriodCard />
+                )}
+              </>
+            )}
           </>
         )}
 
