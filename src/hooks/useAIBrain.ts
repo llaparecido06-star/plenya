@@ -15,6 +15,7 @@ interface ChatPayload {
 interface TrainerPayload {
   energy_level: number;
   phase: string;
+  cycle_day?: number;
   goal: string | null;
   injuries?: string[];
   fitness_level?: string;
@@ -28,6 +29,7 @@ interface NutritionScannerPayload {
 
 interface ChefPayload {
   phase: string;
+  cycle_day?: number;
   ingredients?: string;
   image?: string;
   diet_type?: string;
