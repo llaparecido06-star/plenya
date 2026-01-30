@@ -341,6 +341,48 @@ export type Database = {
         }
         Relationships: []
       }
+      recipe_history: {
+        Row: {
+          created_at: string
+          cycle_phase: string | null
+          diet_type: string | null
+          hormonal_benefit: string | null
+          id: string
+          ingredients: string[]
+          instructions: string[]
+          is_favorite: boolean | null
+          recipe_description: string | null
+          recipe_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_phase?: string | null
+          diet_type?: string | null
+          hormonal_benefit?: string | null
+          id?: string
+          ingredients: string[]
+          instructions: string[]
+          is_favorite?: boolean | null
+          recipe_description?: string | null
+          recipe_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cycle_phase?: string | null
+          diet_type?: string | null
+          hormonal_benefit?: string | null
+          id?: string
+          ingredients?: string[]
+          instructions?: string[]
+          is_favorite?: boolean | null
+          recipe_description?: string | null
+          recipe_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workouts: {
         Row: {
           completed: boolean | null
