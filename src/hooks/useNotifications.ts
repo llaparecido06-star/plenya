@@ -7,6 +7,8 @@ interface NotificationSettings {
   pillReminderTime: string;
   fertileWindow: boolean;
   nextInjection: boolean;
+  recipeReminder: boolean;
+  recipeReminderTime: string;
 }
 
 const NOTIFICATION_SETTINGS_KEY = 'plenya_notification_settings';
@@ -21,6 +23,8 @@ export const useNotifications = () => {
     pillReminderTime: '08:00',
     fertileWindow: false,
     nextInjection: false,
+    recipeReminder: false,
+    recipeReminderTime: '11:00',
   });
 
   // Check for notification support
@@ -36,7 +40,8 @@ export const useNotifications = () => {
     const saved = localStorage.getItem(NOTIFICATION_SETTINGS_KEY);
     if (saved) {
       try {
-        setSettings(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setSettings(prev => ({ ...prev, ...parsed }));
       } catch (e) {
         console.error('Error loading notification settings:', e);
       }
@@ -151,6 +156,32 @@ export const useNotifications = () => {
     );
   }, [permission, scheduleNotification]);
 
+  // Schedule recipe reminder
+  const scheduleRecipeReminder = useCallback(async (time: string, recipeName?: string) => {
+    if (permission !== 'granted') return;
+
+    const [hours, minutes] = time.split(':').map(Number);
+    const now = new Date();
+    const scheduled = new Date(now);
+    scheduled.setHours(hours, minutes, 0, 0);
+
+    // If time has passed today, schedule for tomorrow
+    if (scheduled <= now) {
+      scheduled.setDate(scheduled.getDate() + 1);
+    }
+
+    const body = recipeName 
+      ? `Que tal preparar "${recipeName}" hoje? Receita adaptada para sua fase!`
+      : 'Confira a receita do dia adaptada para sua fase do ciclo!';
+
+    await scheduleNotification(
+      '👩‍🍳 Hora de cozinhar!',
+      body,
+      scheduled,
+      'recipe-reminder'
+    );
+  }, [permission, scheduleNotification]);
+
   // Update settings
   const updateSettings = useCallback((newSettings: Partial<NotificationSettings>) => {
     setSettings(prev => {
@@ -180,6 +211,7 @@ export const useNotifications = () => {
     registerServiceWorker,
     scheduleNotification,
     schedulePillReminder,
+    scheduleRecipeReminder,
     updateSettings,
     showNotification,
   };
