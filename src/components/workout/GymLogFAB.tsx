@@ -22,6 +22,13 @@ const exerciseTypes = [
 ] as const;
 
 type ExerciseType = typeof exerciseTypes[number]['value'];
+type Intensity = 'leve' | 'moderado' | 'intenso';
+
+const intensityOptions: { value: Intensity; label: string; color: string }[] = [
+  { value: 'leve', label: 'Leve', color: 'bg-green-500' },
+  { value: 'moderado', label: 'Moderado', color: 'bg-yellow-500' },
+  { value: 'intenso', label: 'Intenso', color: 'bg-red-500' },
+];
 
 interface Exercise {
   name: string;
@@ -30,6 +37,7 @@ interface Exercise {
   sets: number;
   reps: number;
   duration?: number;
+  intensity?: Intensity;
 }
 
 const GymLogFAB: React.FC = () => {
@@ -189,31 +197,57 @@ const GymLogFAB: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Duração (min)</Label>
-                    <Input
-                      type="number"
-                      placeholder="30"
-                      value={currentExercise.duration || ''}
-                      onChange={(e) => setCurrentExercise(prev => ({ 
-                        ...prev, 
-                        duration: parseInt(e.target.value) || 0 
-                      }))}
-                    />
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Duração (min)</Label>
+                      <Input
+                        type="number"
+                        placeholder="30"
+                        value={currentExercise.duration || ''}
+                        onChange={(e) => setCurrentExercise(prev => ({ 
+                          ...prev, 
+                          duration: parseInt(e.target.value) || 0 
+                        }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Distância (km)</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        placeholder="5.0"
+                        value={currentExercise.weight || ''}
+                        onChange={(e) => setCurrentExercise(prev => ({ 
+                          ...prev, 
+                          weight: parseFloat(e.target.value) || 0 
+                        }))}
+                      />
+                    </div>
                   </div>
+                  
+                  {/* Intensity Selector */}
                   <div className="space-y-2">
-                    <Label>Distância (km)</Label>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      placeholder="5.0"
-                      value={currentExercise.weight || ''}
-                      onChange={(e) => setCurrentExercise(prev => ({ 
-                        ...prev, 
-                        weight: parseFloat(e.target.value) || 0 
-                      }))}
-                    />
+                    <Label>Intensidade (opcional)</Label>
+                    <div className="flex gap-2">
+                      {intensityOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setCurrentExercise(prev => ({
+                            ...prev,
+                            intensity: prev.intensity === option.value ? undefined : option.value
+                          }))}
+                          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                            currentExercise.intensity === option.value
+                              ? `${option.color} text-white`
+                              : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -258,7 +292,7 @@ const GymLogFAB: React.FC = () => {
                         <p className="text-sm text-muted-foreground">
                           {['musculacao', 'hiit'].includes(exercise.type)
                             ? `${exercise.weight}kg • ${exercise.sets}x${exercise.reps}`
-                            : `${exercise.duration || 0}min${exercise.weight ? ` • ${exercise.weight}km` : ''}`
+                            : `${exercise.duration || 0}min${exercise.weight ? ` • ${exercise.weight}km` : ''}${exercise.intensity ? ` • ${intensityOptions.find(i => i.value === exercise.intensity)?.label}` : ''}`
                           }
                         </p>
                       </div>
