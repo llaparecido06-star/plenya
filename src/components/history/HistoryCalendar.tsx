@@ -101,6 +101,30 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     };
   }, [fetchIntimacyDates]);
 
+  // Force re-render when DUM is synced (menstruation manually marked)
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+  
+  React.useEffect(() => {
+    const handleDUMSync = () => {
+      // Give time for CycleContext to refresh
+      setTimeout(() => {
+        forceUpdate();
+      }, 300);
+    };
+    
+    const handleMenstruationUpdate = () => {
+      forceUpdate();
+    };
+    
+    window.addEventListener('dum-synced', handleDUMSync);
+    window.addEventListener('menstruation-log-updated', handleMenstruationUpdate);
+    
+    return () => {
+      window.removeEventListener('dum-synced', handleDUMSync);
+      window.removeEventListener('menstruation-log-updated', handleMenstruationUpdate);
+    };
+  }, []);
+
   // Get predicted period dates for the current view (only for non-menopause users)
   // Adjust for emergency contraception (+7 days)
   const predictedPeriodDates = useMemo(() => {
