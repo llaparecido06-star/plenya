@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Heart, Loader2, Check, AlertTriangle, Pill } from 'lucide-react';
+import { Flame, Heart, Loader2, Check, AlertTriangle, Pill, CalendarDays } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import {
   Drawer,
   DrawerContent,
@@ -9,12 +11,21 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useIntimacyLog } from '@/hooks/useIntimacyLog';
 import { useCycle } from '@/contexts/CycleContext';
 import { useMenstruationLog } from '@/hooks/useMenstruationLog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+
+type DateOption = 'today' | 'yesterday' | 'custom';
 
 interface TagOption {
   id: string;
@@ -58,7 +69,11 @@ interface IntimacyLogProps {
 }
 
 const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly = false }) => {
-  const { existingLog, loading, saving, saveLog, isAuthenticated, yesterdayRiskDetected } = useIntimacyLog();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [dateOption, setDateOption] = useState<DateOption>('today');
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  
+  const { existingLog, loading, saving, saveLog, isAuthenticated, yesterdayRiskDetected } = useIntimacyLog(selectedDate);
   const { currentPhase } = useCycle();
   const { logEmergencyContraception } = useMenstruationLog();
   
@@ -70,6 +85,36 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
   const [selectedSensations, setSelectedSensations] = useState<string[]>([]);
   const [selectedAftercare, setSelectedAftercare] = useState<string[]>([]);
   const [logMorningAfterPill, setLogMorningAfterPill] = useState(false);
+
+  // Handle date option changes
+  const handleDateOptionChange = (option: DateOption) => {
+    setDateOption(option);
+    if (option === 'today') {
+      setSelectedDate(new Date());
+    } else if (option === 'yesterday') {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      setSelectedDate(yesterday);
+    }
+    // Reset selections when date changes
+    setSelectedPractices([]);
+    setSelectedProtection([]);
+    setSelectedSensations([]);
+    setSelectedAftercare([]);
+  };
+
+  const handleCustomDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      setDateOption('custom');
+      setCalendarOpen(false);
+      // Reset selections when date changes
+      setSelectedPractices([]);
+      setSelectedProtection([]);
+      setSelectedSensations([]);
+      setSelectedAftercare([]);
+    }
+  };
 
   // Load existing data
   useEffect(() => {
@@ -114,7 +159,7 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
     
     // Check if morning after pill was selected
     if (logMorningAfterPill || selectedProtection.includes('morning_after')) {
-      await logEmergencyContraception(new Date());
+      await logEmergencyContraception(selectedDate);
     }
     
     const success = await saveLog({
@@ -128,7 +173,7 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
         : null,
       is_protected: selectedProtection.includes('condom'),
       pleasure_rating: selectedSensations.includes('orgasm') ? 5 : 3,
-    });
+    }, selectedDate);
     
     if (success) {
       setSaved(true);
@@ -138,6 +183,9 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
         setSaved(false);
         setDrawerOpen(false);
         setLogMorningAfterPill(false);
+        // Reset to today after saving
+        setDateOption('today');
+        setSelectedDate(new Date());
       }, 1500);
     }
   };
@@ -230,8 +278,71 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
           </DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-8 overflow-y-auto space-y-6">
+          {/* Date Selector */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">Quando aconteceu?</h4>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleDateOptionChange('today')}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                  dateOption === 'today'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                )}
+              >
+                Hoje
+              </button>
+              <button
+                onClick={() => handleDateOptionChange('yesterday')}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                  dateOption === 'yesterday'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                )}
+              >
+                Ontem
+              </button>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className={cn(
+                      "px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2",
+                      dateOption === 'custom'
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                    )}
+                  >
+                    <CalendarDays className="w-4 h-4" />
+                    {dateOption === 'custom' 
+                      ? format(selectedDate, "dd/MM", { locale: ptBR })
+                      : "Outra data"
+                    }
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleCustomDateSelect}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                    locale={ptBR}
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            {dateOption === 'custom' && (
+              <p className="text-xs text-muted-foreground">
+                Registrando para: {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+              </p>
+            )}
+          </div>
+
           {/* Fertility Warning */}
-          {currentPhase === 'ovulatoria' && (
+          {currentPhase === 'ovulatoria' && dateOption === 'today' && (
             <Alert className="border-purple-500/50 bg-purple-50 dark:bg-purple-950/20">
               <Heart className="h-4 w-4 text-purple-600" />
               <AlertDescription className="text-purple-700 dark:text-purple-400 text-sm">

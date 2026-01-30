@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { toLocalDateString } from '@/lib/dateUtils';
 
 interface IntimacyLogData {
   libido: number;
@@ -14,7 +15,7 @@ interface IntimacyLogData {
   pleasure_rating: number | null;
 }
 
-export const useIntimacyLog = () => {
+export const useIntimacyLog = (selectedDate?: Date) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,7 @@ export const useIntimacyLog = () => {
   const [existingLog, setExistingLog] = useState<IntimacyLogData | null>(null);
   const [yesterdayRiskDetected, setYesterdayRiskDetected] = useState(false);
 
-  const today = new Date().toISOString().split('T')[0];
+  const targetDate = selectedDate ? toLocalDateString(selectedDate) : toLocalDateString(new Date());
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
   useEffect(() => {
@@ -32,28 +33,31 @@ export const useIntimacyLog = () => {
     }
 
     const loadLogs = async () => {
+      setLoading(true);
       try {
-        // Load today's log
-        const { data: todayData, error: todayError } = await supabase
+        // Load log for target date
+        const { data: targetData, error: targetError } = await supabase
           .from('intimacy_logs')
           .select('*')
           .eq('user_id', user.id)
-          .eq('log_date', today)
+          .eq('log_date', targetDate)
           .maybeSingle();
 
-        if (todayError) throw todayError;
+        if (targetError) throw targetError;
 
-        if (todayData) {
+        if (targetData) {
           setExistingLog({
-            libido: todayData.libido || 2,
-            fluid_type: todayData.fluid_type,
-            sensation_emotional: todayData.sensation_emotional || [],
-            sensation_physical: todayData.sensation_physical || [],
-            symptoms: todayData.symptoms || [],
-            activity_type: todayData.activity_type as 'solo' | 'partner' | null,
-            is_protected: todayData.is_protected,
-            pleasure_rating: todayData.pleasure_rating,
+            libido: targetData.libido || 2,
+            fluid_type: targetData.fluid_type,
+            sensation_emotional: targetData.sensation_emotional || [],
+            sensation_physical: targetData.sensation_physical || [],
+            symptoms: targetData.symptoms || [],
+            activity_type: targetData.activity_type as 'solo' | 'partner' | null,
+            is_protected: targetData.is_protected,
+            pleasure_rating: targetData.pleasure_rating,
           });
+        } else {
+          setExistingLog(null);
         }
 
         // Check yesterday's log for risk detection
@@ -70,8 +74,6 @@ export const useIntimacyLog = () => {
                                  physicalTags.includes('withdrawal');
           const hadPenetrativeActivity = physicalTags.includes('vaginal');
           
-          // Check if user was in fertile window yesterday (approximation)
-          // This would need cycle context, but we approximate based on is_protected flag
           if (wasUnprotected && hadPenetrativeActivity && !yesterdayData.is_protected) {
             setYesterdayRiskDetected(true);
           }
@@ -84,9 +86,9 @@ export const useIntimacyLog = () => {
     };
 
     loadLogs();
-  }, [user, today, yesterday]);
+  }, [user, targetDate, yesterday]);
 
-  const saveLog = useCallback(async (data: IntimacyLogData) => {
+  const saveLog = useCallback(async (data: IntimacyLogData, logDate?: Date) => {
     if (!user) {
       toast({
         title: 'Faça login',
@@ -96,13 +98,15 @@ export const useIntimacyLog = () => {
       return false;
     }
 
+    const dateToSave = logDate ? toLocalDateString(logDate) : targetDate;
+
     setSaving(true);
     try {
       const { error } = await supabase
         .from('intimacy_logs')
         .upsert({
           user_id: user.id,
-          log_date: today,
+          log_date: dateToSave,
           libido: data.libido,
           fluid_type: data.fluid_type,
           sensation_emotional: data.sensation_emotional,
@@ -134,7 +138,7 @@ export const useIntimacyLog = () => {
     } finally {
       setSaving(false);
     }
-  }, [user, today, toast]);
+  }, [user, targetDate, toast]);
 
   return {
     existingLog,
