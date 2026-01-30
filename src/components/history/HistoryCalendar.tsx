@@ -154,6 +154,46 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     return dates;
   }, [getPredictedPeriodDates, lifePhase, emergencyContraceptionDates]);
 
+  // Calculate expected period continuation days (when user marks day 1, show days 2-5 as expected)
+  const expectedPeriodDays = useMemo(() => {
+    const PERIOD_DURATION = 5; // Typical period duration
+    const expectedDates: string[] = [];
+    
+    // Sort menstruation dates to find period starts
+    const sortedDates = [...menstruationDates].sort();
+    const processedStarts: string[] = [];
+    
+    for (const dateStr of sortedDates) {
+      // Check if this date is the start of a new period (not consecutive to previous)
+      const prevDay = new Date(dateStr);
+      prevDay.setDate(prevDay.getDate() - 1);
+      const prevDayStr = prevDay.toISOString().split('T')[0];
+      
+      if (!menstruationDates.includes(prevDayStr)) {
+        // This is a period start - mark next days as expected
+        processedStarts.push(dateStr);
+        const startDate = new Date(dateStr);
+        
+        for (let i = 1; i < PERIOD_DURATION; i++) {
+          const expectedDate = new Date(startDate);
+          expectedDate.setDate(startDate.getDate() + i);
+          const expectedDateStr = expectedDate.toISOString().split('T')[0];
+          
+          // Only add if not already manually marked and not in the future
+          if (!menstruationDates.includes(expectedDateStr)) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (expectedDate <= today) {
+              expectedDates.push(expectedDateStr);
+            }
+          }
+        }
+      }
+    }
+    
+    return expectedDates;
+  }, [menstruationDates]);
+
   // Calculate fertile window dates for trying to conceive users
   const fertileWindowDates = useMemo(() => {
     if (!isTryingToConceive || !lastPeriodStart || lifePhase !== 'menstruating') return [];
@@ -243,6 +283,11 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const isManualMenstruation = (day: number): boolean => {
     const dateStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return menstruationDates.includes(dateStr);
+  };
+
+  const isExpectedPeriodDay = (day: number): boolean => {
+    const dateStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return expectedPeriodDays.includes(dateStr);
   };
 
   const isDateWithData = (day: number): boolean => {
@@ -371,17 +416,19 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                       ? 'bg-primary text-primary-foreground' 
                       : isManualMenstruation(day)
                         ? 'bg-red-500 text-white'
-                        : isTodayDay(day)
-                          ? 'bg-primary/20 text-primary'
-                          : isFertileDay(day) && !isFutureDay(day)
-                            ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30'
-                            : isFertileDay(day) && isFutureDay(day)
-                              ? 'bg-amber-500/10 text-amber-500/70 border border-amber-500/20'
-                              : isPredictedPeriod(day) && isFutureDay(day)
-                                ? 'bg-red-500/20 text-red-500 border border-red-500/30'
-                                : isFutureDay(day)
-                                  ? 'text-muted-foreground/40'
-                                  : 'text-foreground hover:bg-muted'
+                        : isExpectedPeriodDay(day)
+                          ? 'bg-red-400/60 text-white'
+                          : isTodayDay(day)
+                            ? 'bg-primary/20 text-primary'
+                            : isFertileDay(day) && !isFutureDay(day)
+                              ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30'
+                              : isFertileDay(day) && isFutureDay(day)
+                                ? 'bg-amber-500/10 text-amber-500/70 border border-amber-500/20'
+                                : isPredictedPeriod(day) && isFutureDay(day)
+                                  ? 'bg-red-500/20 text-red-500 border border-red-500/30'
+                                  : isFutureDay(day)
+                                    ? 'text-muted-foreground/40'
+                                    : 'text-foreground hover:bg-muted'
                     }
                   `}
                 >
