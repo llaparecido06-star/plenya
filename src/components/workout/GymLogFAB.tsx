@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Dumbbell, X } from 'lucide-react';
+import { Plus, Dumbbell, X, Footprints, Waves, Bike, Heart, Zap, Mountain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
+const exerciseTypes = [
+  { value: 'musculacao', label: 'Musculação', icon: Dumbbell },
+  { value: 'corrida', label: 'Corrida', icon: Footprints },
+  { value: 'caminhada', label: 'Caminhada', icon: Footprints },
+  { value: 'natacao', label: 'Natação', icon: Waves },
+  { value: 'ciclismo', label: 'Ciclismo', icon: Bike },
+  { value: 'hiit', label: 'HIIT', icon: Zap },
+  { value: 'cardio', label: 'Cardio', icon: Heart },
+  { value: 'trilha', label: 'Trilha', icon: Mountain },
+] as const;
+
+type ExerciseType = typeof exerciseTypes[number]['value'];
+
 interface Exercise {
   name: string;
+  type: ExerciseType;
   weight: number;
   sets: number;
   reps: number;
+  duration?: number;
 }
 
 const GymLogFAB: React.FC = () => {
@@ -21,6 +37,7 @@ const GymLogFAB: React.FC = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [currentExercise, setCurrentExercise] = useState<Exercise>({
     name: '',
+    type: 'musculacao',
     weight: 0,
     sets: 3,
     reps: 12,
@@ -36,7 +53,7 @@ const GymLogFAB: React.FC = () => {
     }
 
     setExercises(prev => [...prev, currentExercise]);
-    setCurrentExercise({ name: '', weight: 0, sets: 3, reps: 12 });
+    setCurrentExercise({ name: '', type: 'musculacao', weight: 0, sets: 3, reps: 12 });
     toast({ title: `${currentExercise.name} adicionado!` });
   };
 
@@ -99,50 +116,107 @@ const GymLogFAB: React.FC = () => {
           <div className="space-y-4">
             {/* Exercise Form */}
             <div className="space-y-3 p-4 bg-muted/50 rounded-xl">
+              {/* Exercise Type Selector */}
               <div className="space-y-2">
-                <Label>Exercício</Label>
+                <Label>Tipo de Exercício</Label>
+                <Select
+                  value={currentExercise.type}
+                  onValueChange={(value: ExerciseType) => setCurrentExercise(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    {exerciseTypes.map((type) => {
+                      const Icon = type.icon;
+                      return (
+                        <SelectItem key={type.value} value={type.value}>
+                          <span className="flex items-center gap-2">
+                            <Icon className="w-4 h-4 text-primary" />
+                            {type.label}
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Nome do Exercício</Label>
                 <Input
-                  placeholder="Ex: Supino, Agachamento..."
+                  placeholder={currentExercise.type === 'musculacao' ? 'Ex: Supino, Agachamento...' : 'Ex: Parque, Academia...'}
                   value={currentExercise.name}
                   onChange={(e) => setCurrentExercise(prev => ({ ...prev, name: e.target.value }))}
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-2">
-                  <Label>Carga (kg)</Label>
-                  <Input
-                    type="number"
-                    value={currentExercise.weight}
-                    onChange={(e) => setCurrentExercise(prev => ({ 
-                      ...prev, 
-                      weight: parseFloat(e.target.value) || 0 
-                    }))}
-                  />
+              {/* Conditional fields based on exercise type */}
+              {['musculacao', 'hiit'].includes(currentExercise.type) ? (
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
+                    <Label>Carga (kg)</Label>
+                    <Input
+                      type="number"
+                      value={currentExercise.weight}
+                      onChange={(e) => setCurrentExercise(prev => ({ 
+                        ...prev, 
+                        weight: parseFloat(e.target.value) || 0 
+                      }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Séries</Label>
+                    <Input
+                      type="number"
+                      value={currentExercise.sets}
+                      onChange={(e) => setCurrentExercise(prev => ({ 
+                        ...prev, 
+                        sets: parseInt(e.target.value) || 0 
+                      }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Reps</Label>
+                    <Input
+                      type="number"
+                      value={currentExercise.reps}
+                      onChange={(e) => setCurrentExercise(prev => ({ 
+                        ...prev, 
+                        reps: parseInt(e.target.value) || 0 
+                      }))}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Séries</Label>
-                  <Input
-                    type="number"
-                    value={currentExercise.sets}
-                    onChange={(e) => setCurrentExercise(prev => ({ 
-                      ...prev, 
-                      sets: parseInt(e.target.value) || 0 
-                    }))}
-                  />
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Duração (min)</Label>
+                    <Input
+                      type="number"
+                      placeholder="30"
+                      value={currentExercise.duration || ''}
+                      onChange={(e) => setCurrentExercise(prev => ({ 
+                        ...prev, 
+                        duration: parseInt(e.target.value) || 0 
+                      }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Distância (km)</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="5.0"
+                      value={currentExercise.weight || ''}
+                      onChange={(e) => setCurrentExercise(prev => ({ 
+                        ...prev, 
+                        weight: parseFloat(e.target.value) || 0 
+                      }))}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Reps</Label>
-                  <Input
-                    type="number"
-                    value={currentExercise.reps}
-                    onChange={(e) => setCurrentExercise(prev => ({ 
-                      ...prev, 
-                      reps: parseInt(e.target.value) || 0 
-                    }))}
-                  />
-                </div>
-              </div>
+              )}
 
               <Button 
                 onClick={handleAddExercise} 
@@ -175,9 +249,17 @@ const GymLogFAB: React.FC = () => {
                       exit={{ opacity: 0, x: 20 }}
                     >
                       <div>
-                        <p className="font-medium">{exercise.name}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                            {exerciseTypes.find(t => t.value === exercise.type)?.label || exercise.type}
+                          </span>
+                          <p className="font-medium">{exercise.name}</p>
+                        </div>
                         <p className="text-sm text-muted-foreground">
-                          {exercise.weight}kg • {exercise.sets}x{exercise.reps}
+                          {['musculacao', 'hiit'].includes(exercise.type)
+                            ? `${exercise.weight}kg • ${exercise.sets}x${exercise.reps}`
+                            : `${exercise.duration || 0}min${exercise.weight ? ` • ${exercise.weight}km` : ''}`
+                          }
                         </p>
                       </div>
                       <button
