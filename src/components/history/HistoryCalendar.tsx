@@ -265,8 +265,8 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Only allow past days
-    if (date < today) {
+    // Allow today and past days
+    if (date <= today) {
       setSelectedDayForMenstruation(date);
       setMenstruationDialogOpen(true);
     }
