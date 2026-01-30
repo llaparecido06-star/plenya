@@ -77,7 +77,7 @@ const CycleSyncInsightCard: React.FC = () => {
 
   return (
     <motion.div
-      className={`glass-card p-4 mx-4 ${insight.bgColor} border-l-4`}
+      className={`glass-card p-4 mx-4 mt-4 ${insight.bgColor} border-l-4`}
       style={{ borderLeftColor: `hsl(var(--${currentPhase}))` }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
