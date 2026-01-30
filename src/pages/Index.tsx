@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import PageLayout from '@/components/layout/PageLayout';
 import CycleWheel from '@/components/cycle/CycleWheel';
 import InsightCard from '@/components/cycle/InsightCard';
+import CycleSyncInsightCard from '@/components/cycle/CycleSyncInsightCard';
 import QuickLog from '@/components/cycle/QuickLog';
 import ChefSuggestion from '@/components/cycle/ChefSuggestion';
 import HistoryCalendar from '@/components/history/HistoryCalendar';
@@ -92,6 +93,9 @@ const Index: React.FC = () => {
 
         {/* Show CycleWheel only for menstruating users viewing today */}
         {isToday && isMenstruating && <CycleWheel />}
+        
+        {/* Cycle Sync Insight Card - Right below the wheel for menstruating users */}
+        {isToday && isMenstruating && <CycleSyncInsightCard />}
       </div>
 
       <div className="space-y-4 mt-4">

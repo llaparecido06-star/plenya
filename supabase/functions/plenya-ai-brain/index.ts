@@ -16,6 +16,7 @@ interface ChatPayload {
 interface TrainerPayload {
   energy_level: number;
   phase: string;
+  cycle_day?: number;
   goal: string | null;
   injuries?: string[];
   fitness_level?: string;
@@ -29,6 +30,7 @@ interface NutritionScannerPayload {
 
 interface ChefPayload {
   phase: string;
+  cycle_day?: number;
   ingredients?: string;
   image?: string; // base64 for fridge photo
   diet_type?: string;
@@ -70,7 +72,7 @@ CONTEXTO IMPORTANTE: A usuária está no climatério/menopausa.
 A usuária está em fase menstruante normal. Você pode mencionar fases do ciclo quando relevante.`;
 }
 
-function getTrainerSystemPrompt(phase: string, fitnessLevel?: string): string {
+function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?: string): string {
   const phaseGuidance: Record<string, string> = {
     menstrual: 'Fase Menstrual: Priorize Yoga, Mobilidade e Caminhadas leves. Evite exercícios de alta intensidade.',
     folicular: 'Fase Folicular: Energia em ascensão! Sugira treinos de Força e HIIT. Ótimo momento para novos desafios.',
@@ -85,11 +87,25 @@ function getTrainerSystemPrompt(phase: string, fitnessLevel?: string): string {
     intense: 'Nível Intenso/Atleta: Pode sugerir exercícios avançados e maior volume. 45-60 minutos.',
   };
 
-  return `Você é uma personal trainer especializada em saúde feminina.
-Crie um treino seguro e eficaz baseado na fase do ciclo.
+  // Cycle day specific guidance
+  let cycleDayGuidance = '';
+  if (cycleDay) {
+    if (cycleDay >= 1 && cycleDay <= 3) {
+      cycleDayGuidance = '\n\nAVISO IMPORTANTE - Dia 1-3 (Fluxo intenso): EVITE posturas invertidas no Yoga (ex: Vela, Invertida na Parede), exercícios abdominais intensos, e saltos. Prefira alongamentos suaves e respiração.';
+    } else if (cycleDay >= 4 && cycleDay <= 5) {
+      cycleDayGuidance = '\n\nDia 4-5 (Fluxo leve): Ainda priorize exercícios de baixa intensidade, mas pode introduzir movimentos mais dinâmicos se a usuária se sentir bem.';
+    } else if (cycleDay >= 12 && cycleDay <= 16) {
+      cycleDayGuidance = '\n\nDia 12-16 (Janela Ovulatória): Pico de energia! Pode sugerir exercícios de alta intensidade, força máxima e cardio intenso.';
+    } else if (cycleDay >= 26 && cycleDay <= 28) {
+      cycleDayGuidance = '\n\nDia 26-28 (Pré-menstrual/TPM): Energia mais baixa, possível desconforto. Sugira exercícios calmantes, alongamentos e mobilidade. Evite exercícios que aumentem a irritabilidade.';
+    }
+  }
+
+  return `Você é uma personal trainer especializada em saúde feminina e Cycle Syncing.
+Crie um treino seguro e eficaz baseado na fase e DIA ESPECÍFICO do ciclo.
 
 ${phaseGuidance[phase] || 'Adapte o treino à condição atual da usuária.'}
-${fitnessLevel ? intensityGuidance[fitnessLevel] || '' : ''}
+${fitnessLevel ? intensityGuidance[fitnessLevel] || '' : ''}${cycleDayGuidance}
 
 RESPONDA APENAS COM JSON VÁLIDO no formato:
 {
@@ -147,7 +163,7 @@ RESPONDA APENAS COM JSON VÁLIDO:
 Seja realista nas estimativas. Não inclua texto fora do JSON.`;
 }
 
-function getChefSystemPrompt(phase: string, dietType?: string): string {
+function getChefSystemPrompt(phase: string, cycleDay?: number, dietType?: string): string {
   let dietRestrictions = '';
   if (dietType) {
     const restrictions: Record<string, string> = {
@@ -166,11 +182,23 @@ function getChefSystemPrompt(phase: string, dietType?: string): string {
     lutea: 'Priorize: magnésio (chocolate amargo, abacate), vitamina B6, triptofano.',
   };
 
-  return `Você é uma chef especializada em nutrição hormonal feminina.
-Sugira receitas saudáveis e deliciosas adaptadas à fase do ciclo.
+  // Cycle day specific nutrition guidance
+  let cycleDayGuidance = '';
+  if (cycleDay) {
+    if (cycleDay >= 1 && cycleDay <= 3) {
+      cycleDayGuidance = '\n\nDia 1-3 (Fluxo intenso): Foque em alimentos RICOS EM FERRO (espinafre, lentilhas, carne vermelha) combinados com vitamina C para absorção. Evite cafeína excessiva e alimentos muito salgados.';
+    } else if (cycleDay >= 26 && cycleDay <= 28) {
+      cycleDayGuidance = '\n\nDia 26-28 (TPM): Priorize MAGNÉSIO (chocolate amargo 70%+, banana, abacate, castanhas) e TRIPTOFANO (ovos, laticínios, peru) para estabilizar o humor. Reduza sódio para diminuir inchaço.';
+    } else if (cycleDay >= 12 && cycleDay <= 16) {
+      cycleDayGuidance = '\n\nDia 12-16 (Ovulação): Apoie a detoxificação de estrogênio com vegetais crucíferos (brócolis, couve, couve-flor). Fibras e probióticos são excelentes.';
+    }
+  }
 
-Fase atual: ${phase}
-${phaseNutrition[phase] || 'Sugira refeições equilibradas e nutritivas.'}
+  return `Você é uma chef especializada em nutrição hormonal feminina e Cycle Syncing.
+Sugira receitas saudáveis e deliciosas adaptadas à fase e DIA ESPECÍFICO do ciclo.
+
+Fase atual: ${phase}${cycleDay ? ` (Dia ${cycleDay})` : ''}
+${phaseNutrition[phase] || 'Sugira refeições equilibradas e nutritivas.'}${cycleDayGuidance}
 ${dietRestrictions}
 
 Se receber uma foto da geladeira, sugira receitas com os ingredientes visíveis.
@@ -266,12 +294,15 @@ serve(async (req) => {
 
       case 'trainer': {
         const trainerPayload = payload as TrainerPayload;
-        systemPrompt = getTrainerSystemPrompt(trainerPayload.phase, trainerPayload.fitness_level);
+        systemPrompt = getTrainerSystemPrompt(trainerPayload.phase, trainerPayload.cycle_day, trainerPayload.fitness_level);
         
         let userMessage = `Crie um treino para hoje.
 Nível de energia: ${trainerPayload.energy_level}/5
 Fase do ciclo: ${trainerPayload.phase}`;
         
+        if (trainerPayload.cycle_day) {
+          userMessage += `\nDia do ciclo: ${trainerPayload.cycle_day}`;
+        }
         if (trainerPayload.goal) {
           userMessage += `\nObjetivo: ${trainerPayload.goal}`;
         }
@@ -380,7 +411,7 @@ Fase do ciclo: ${trainerPayload.phase}`;
 
       case 'chef': {
         const chefPayload = payload as ChefPayload;
-        systemPrompt = getChefSystemPrompt(chefPayload.phase, chefPayload.diet_type);
+        systemPrompt = getChefSystemPrompt(chefPayload.phase, chefPayload.cycle_day, chefPayload.diet_type);
         
         let messages: any[] = [{ role: 'system', content: systemPrompt }];
         

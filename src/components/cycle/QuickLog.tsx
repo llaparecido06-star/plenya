@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Smile, Scale, Loader2, Check, Stethoscope } from 'lucide-react';
 import {
@@ -12,8 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useDailyLog } from '@/hooks/useDailyLog';
 import { useMedication } from '@/hooks/useMedication';
+import { useCycle, CyclePhase } from '@/contexts/CycleContext';
 import MedicationEffectBadge from '@/components/profile/MedicationEffectBadge';
 import IntimacyLog from './IntimacyLog';
+
 interface LogType {
   id: string;
   icon: React.ElementType;
@@ -27,10 +29,19 @@ const logTypes: LogType[] = [
   { id: 'weight', icon: Scale, label: 'Peso', color: 'bg-blue-100 text-blue-600' },
 ];
 
-const symptoms = [
+// Base symptoms list
+const baseSymptoms = [
   'Cólica', 'Dor de cabeça', 'Inchaço', 'Fadiga', 
-  'Sensibilidade', 'Acne', 'Náusea', 'Insônia'
+  'Sensibilidade', 'Acne', 'Náusea', 'Insônia', 'Irritabilidade', 'Espinhas'
 ];
+
+// Symptoms prioritized by phase - these will appear first
+const phaseSymptomPriority: Record<CyclePhase, string[]> = {
+  menstrual: ['Cólica', 'Fadiga', 'Dor de cabeça', 'Náusea'],
+  folicular: ['Acne', 'Sensibilidade'],
+  ovulatoria: ['Inchaço', 'Sensibilidade'],
+  lutea: ['Irritabilidade', 'Inchaço', 'Espinhas', 'Dor de cabeça', 'Fadiga'],
+};
 
 const moods = [
   { emoji: '😢', label: 'Triste', value: 1 },
@@ -43,12 +54,25 @@ const moods = [
 const QuickLog: React.FC = () => {
   const { data, loading, saving, saveLog, isAuthenticated } = useDailyLog();
   const { medicationName } = useMedication();
+  const { currentPhase } = useCycle();
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedMood, setSelectedMood] = useState<number>(2);
   const [weight, setWeight] = useState<number[]>([60]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  
+  // Sort symptoms based on current phase - prioritized symptoms first
+  const sortedSymptoms = useMemo(() => {
+    const prioritySymptoms = phaseSymptomPriority[currentPhase] || [];
+    const prioritySet = new Set(prioritySymptoms);
+    
+    // Get unique symptoms: priority ones first, then the rest
+    const priority = prioritySymptoms.filter(s => baseSymptoms.includes(s));
+    const rest = baseSymptoms.filter(s => !prioritySet.has(s));
+    
+    return [...priority, ...rest];
+  }, [currentPhase]);
 
   // Load saved values
   useEffect(() => {
@@ -97,27 +121,32 @@ const QuickLog: React.FC = () => {
             <p className="text-sm text-muted-foreground">
               Selecione os sintomas que você está sentindo hoje
             </p>
-            <div className="flex flex-wrap gap-2">
-              {symptoms.map(symptom => (
-                <div key={symptom} className="flex flex-col items-start gap-1">
-                  <button
-                    onClick={() => toggleSymptom(symptom)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      selectedSymptoms.includes(symptom)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                    }`}
-                  >
-                    {symptom}
-                  </button>
-                  {selectedSymptoms.includes(symptom) && (
-                    <MedicationEffectBadge
-                      medicationName={medicationName}
-                      symptom={symptom}
-                    />
-                  )}
-                </div>
-              ))}
+          <div className="flex flex-wrap gap-2">
+              {sortedSymptoms.map((symptom, index) => {
+                const isPriority = phaseSymptomPriority[currentPhase]?.includes(symptom);
+                return (
+                  <div key={symptom} className="flex flex-col items-start gap-1">
+                    <button
+                      onClick={() => toggleSymptom(symptom)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        selectedSymptoms.includes(symptom)
+                          ? 'bg-primary text-primary-foreground'
+                          : isPriority 
+                            ? 'bg-phase-secondary/50 text-foreground ring-1 ring-phase-primary/30 hover:bg-phase-secondary/70'
+                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                      }`}
+                    >
+                      {isPriority && index < 3 && '⚡ '}{symptom}
+                    </button>
+                    {selectedSymptoms.includes(symptom) && (
+                      <MedicationEffectBadge
+                        medicationName={medicationName}
+                        symptom={symptom}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
