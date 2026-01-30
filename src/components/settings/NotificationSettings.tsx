@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, BellOff, Clock, Droplets, Syringe, Heart } from 'lucide-react';
+import { Bell, BellOff, Clock, Droplets, Syringe, Heart, ChefHat } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useNotifications } from '@/hooks/useNotifications';
 import { useContraceptive } from '@/hooks/useContraceptive';
 import { useLifePhase } from '@/hooks/useLifePhase';
+import { useRecipeHistory } from '@/hooks/useRecipeHistory';
 
 const NotificationSettings: React.FC = () => {
   const {
@@ -19,10 +20,12 @@ const NotificationSettings: React.FC = () => {
     registerServiceWorker,
     updateSettings,
     schedulePillReminder,
+    scheduleRecipeReminder,
   } = useNotifications();
   
   const { contraceptive_type: contraceptiveType } = useContraceptive();
   const { isTryingToConceive } = useLifePhase();
+  const { favorites } = useRecipeHistory();
 
   // Register service worker on mount
   useEffect(() => {
@@ -38,9 +41,20 @@ const NotificationSettings: React.FC = () => {
     }
   }, [settings.pillReminder, settings.pillReminderTime, permission, schedulePillReminder]);
 
+  // Schedule recipe reminder when enabled
+  useEffect(() => {
+    if (settings.recipeReminder && permission === 'granted') {
+      const randomFavorite = favorites.length > 0 
+        ? favorites[Math.floor(Math.random() * favorites.length)]?.recipe_name 
+        : undefined;
+      scheduleRecipeReminder(settings.recipeReminderTime, randomFavorite);
+    }
+  }, [settings.recipeReminder, settings.recipeReminderTime, permission, scheduleRecipeReminder, favorites]);
+
   const showPillOption = contraceptiveType === 'Pílula';
   const showInjectionOption = contraceptiveType === 'Injeção';
   const showFertileOption = isTryingToConceive;
+  const showRecipeOption = favorites.length > 0;
 
   if (!supported) {
     return (
@@ -153,6 +167,55 @@ const NotificationSettings: React.FC = () => {
                 onCheckedChange={(checked) => updateSettings({ fertileWindow: checked })}
                 disabled={permission !== 'granted'}
               />
+            </div>
+          )}
+
+          {/* Recipe Reminder - Only show if user has favorites */}
+          {showRecipeOption && (
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
+                  <ChefHat className="w-4 h-4" />
+                </div>
+                <div>
+                  <Label className="text-base font-medium">Lembrete de Receitas</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receitas favoritas ({favorites.length})
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Input
+                  type="time"
+                  value={settings.recipeReminderTime}
+                  onChange={(e) => updateSettings({ recipeReminderTime: e.target.value })}
+                  className="w-24"
+                  disabled={permission !== 'granted'}
+                />
+                <Switch
+                  checked={settings.recipeReminder}
+                  onCheckedChange={(checked) => updateSettings({ recipeReminder: checked })}
+                  disabled={permission !== 'granted'}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* No favorites message */}
+          {!showRecipeOption && permission === 'granted' && (
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 opacity-60">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-muted text-muted-foreground">
+                  <ChefHat className="w-4 h-4" />
+                </div>
+                <div>
+                  <Label className="text-base font-medium text-muted-foreground">Lembrete de Receitas</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Salve receitas favoritas para ativar
+                  </p>
+                </div>
+              </div>
+              <Switch disabled checked={false} />
             </div>
           )}
 

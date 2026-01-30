@@ -20,6 +20,7 @@ import NextPeriodCard from '@/components/home/NextPeriodCard';
 import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
 import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
 import MenopauseCard from '@/components/home/MenopauseCard';
+import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
 
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
@@ -138,6 +139,9 @@ const Index: React.FC = () => {
                 <DeviceExpirationCard />
               </div>
             )}
+            
+            {/* Recipe of the Day - All modes */}
+            <RecipeOfTheDayCard />
             
             {/* Chef Suggestion - All modes */}
             <ChefSuggestion />
