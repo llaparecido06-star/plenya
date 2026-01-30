@@ -24,7 +24,6 @@ import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
 import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
 import MenopauseCard from '@/components/home/MenopauseCard';
 import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
-
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
@@ -32,15 +31,28 @@ import { useSelectedDate } from '@/contexts/SelectedDateContext';
 import { useContraceptive } from '@/hooks/useContraceptive';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { isPillMethod, hasExpirationDate, isHormonalMethod } from '@/data/contraceptiveMethods';
-
 const Index: React.FC = () => {
-  const { getPhaseInfo, hasDUM, isLate } = useCycle();
-  const { isToday } = useSelectedDate();
-  const { contraceptive_type } = useContraceptive();
-  const { lifePhase, pregnancyWeeks, pregnancyStartDate, isTryingToConceive, age, loading: lifePhaseLoading } = useLifePhase();
+  const {
+    getPhaseInfo,
+    hasDUM,
+    isLate
+  } = useCycle();
+  const {
+    isToday
+  } = useSelectedDate();
+  const {
+    contraceptive_type
+  } = useContraceptive();
+  const {
+    lifePhase,
+    pregnancyWeeks,
+    pregnancyStartDate,
+    isTryingToConceive,
+    age,
+    loading: lifePhaseLoading
+  } = useLifePhase();
   const phaseInfo = getPhaseInfo();
   const [showCalendar, setShowCalendar] = useState(false);
-
   const showPillTracker = isPillMethod(contraceptive_type);
   const showDeviceExpiration = hasExpirationDate(contraceptive_type);
   const usesHormonal = isHormonalMethod(contraceptive_type);
@@ -49,46 +61,34 @@ const Index: React.FC = () => {
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
   const isMenstruating = lifePhase === 'menstruating' || !lifePhase;
-
-  return (
-    <PageLayout>
-      <div className="hero-gradient pt-12 pb-6">
-        <motion.div
-          className="text-center mb-6 px-4"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+  return <PageLayout>
+      <div className="hero-gradient pt-12 pb-6 my-[10px] py-0">
+        <motion.div className="text-center mb-6 px-4" initial={{
+        opacity: 0,
+        y: -20
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }}>
           {/* Header with Streak and Calendar */}
           <div className="flex items-center justify-between mb-4">
             <GardenStreak streak={3} />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowCalendar(!showCalendar)}
-            >
+            <Button variant="ghost" size="icon" onClick={() => setShowCalendar(!showCalendar)}>
               <Calendar className="w-5 h-5 text-primary" />
             </Button>
           </div>
           
           <h1 className="text-2xl font-bold text-foreground">Plenya</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isToday 
-              ? isPregnant 
-                ? 'Acompanhando sua gestação' 
-                : isMenopause 
-                  ? 'Seu bem-estar em primeiro lugar'
-                  : 'Sinta-se em casa no seu corpo' 
-              : 'Visualizando histórico'}
+            {isToday ? isPregnant ? 'Acompanhando sua gestação' : isMenopause ? 'Seu bem-estar em primeiro lugar' : 'Sinta-se em casa no seu corpo' : 'Visualizando histórico'}
           </p>
         </motion.div>
 
         {/* Calendar Dropdown */}
         <AnimatePresence>
-          {showCalendar && (
-            <div className="px-4 mb-4">
+          {showCalendar && <div className="px-4 mb-4">
               <HistoryCalendar onClose={() => setShowCalendar(false)} />
-            </div>
-          )}
+            </div>}
         </AnimatePresence>
 
         {/* Show CycleWheel only for menstruating users viewing today */}
@@ -100,45 +100,33 @@ const Index: React.FC = () => {
 
       <div className="space-y-4 mt-4">
         {/* === PREGNANT MODE === */}
-        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyStartDate && (
-          <PregnancyWeeksCard weeks={pregnancyWeeks} pregnancyStartDate={pregnancyStartDate} />
-        )}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyStartDate && <PregnancyWeeksCard weeks={pregnancyWeeks} pregnancyStartDate={pregnancyStartDate} />}
 
         {/* === MENOPAUSE MODE === */}
-        {isToday && isMenopause && (
-          <MenopauseCard age={age} />
-        )}
+        {isToday && isMenopause && <MenopauseCard age={age} />}
 
         {/* === MENSTRUATING MODE === */}
-        {isToday && isMenstruating && (
-          <>
+        {isToday && isMenstruating && <>
             {/* Trying to Conceive Card - Golden Fertile Window */}
             {isTryingToConceive && <TryingToConceiveCard />}
 
             {/* Period State Cards - Conditional based on DUM and late status */}
-            {!isPregnant && (
-              <>
-                {!hasDUM ? (
-                  // No DUM registered - show awaiting card
-                  <AwaitingPeriodCard />
-                ) : isLate ? (
-                  // Period is late - show late card
-                  <LatePeriodCard />
-                ) : (
-                  // Normal state - show next period prediction
-                  <NextPeriodCard />
-                )}
-              </>
-            )}
-          </>
-        )}
+            {!isPregnant && <>
+                {!hasDUM ?
+          // No DUM registered - show awaiting card
+          <AwaitingPeriodCard /> : isLate ?
+          // Period is late - show late card
+          <LatePeriodCard /> :
+          // Normal state - show next period prediction
+          <NextPeriodCard />}
+              </>}
+          </>}
 
         {/* Show historical data summary when viewing past dates */}
         {!isToday && <DayDataSummary />}
         
         {/* Show current day components when viewing today */}
-        {isToday && (
-          <>
+        {isToday && <>
             {/* Adaptive Home Card - Shows based on contraceptive method (menstruating only, NOT pregnant) */}
             {isMenstruating && !isPregnant && <AdaptiveHomeCard />}
             
@@ -146,18 +134,14 @@ const Index: React.FC = () => {
             <WaterTracker />
 
             {/* Pill Tracker - Menstruating only, NOT pregnant */}
-            {isMenstruating && !isPregnant && showPillTracker && (
-              <div className="px-4">
+            {isMenstruating && !isPregnant && showPillTracker && <div className="px-4">
                 <PillTracker />
-              </div>
-            )}
+              </div>}
 
             {/* Device Expiration Card (DIU/Implant) - Menstruating only, NOT pregnant */}
-            {isMenstruating && !isPregnant && showDeviceExpiration && (
-              <div className="px-4">
+            {isMenstruating && !isPregnant && showDeviceExpiration && <div className="px-4">
                 <DeviceExpirationCard />
-              </div>
-            )}
+              </div>}
             
             {/* Recipe of the Day - All modes */}
             <RecipeOfTheDayCard />
@@ -166,11 +150,9 @@ const Index: React.FC = () => {
             <ChefSuggestion />
             
             {/* Intimacy & Health Card - Menstruating and Menopause */}
-            {(isMenstruating || isMenopause) && (
-              <div className="px-4">
+            {(isMenstruating || isMenopause) && <div className="px-4">
                 <IntimacyCard />
-              </div>
-            )}
+              </div>}
             
             {/* Insight Card - Menstruating only */}
             {isMenstruating && <InsightCard />}
@@ -180,14 +162,11 @@ const Index: React.FC = () => {
             
             {/* SOS Partner FAB */}
             <SOSPartnerButton />
-          </>
-        )}
+          </>}
       </div>
 
       {/* Tutorial Overlay */}
       <TutorialOverlay tutorialKey="home" steps={homeTutorialSteps} />
-    </PageLayout>
-  );
+    </PageLayout>;
 };
-
 export default Index;
