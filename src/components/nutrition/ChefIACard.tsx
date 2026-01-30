@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ChefHat, Camera, Mic, Keyboard, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChefHat, Camera, Keyboard, Loader2, Sparkles, ArrowLeft, Upload, Send, Clock, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -12,221 +13,34 @@ import {
 import { useCycle } from '@/contexts/CycleContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useLifePhase } from '@/hooks/useLifePhase';
+import { useAIBrain } from '@/hooks/useAIBrain';
+import { useToast } from '@/hooks/use-toast';
 
-// Diet-specific restrictions
-const dietRestrictions: Record<string, string[]> = {
-  vegan: ['carne', 'frango', 'peixe', 'ovos', 'leite', 'queijo', 'manteiga', 'mel', 'iogurte'],
-  vegetarian: ['carne', 'frango', 'peixe', 'bacon', 'linguiça'],
-  lactose_free: ['leite', 'queijo', 'manteiga', 'iogurte', 'creme de leite', 'requeijão'],
-  low_carb: ['pão', 'arroz', 'macarrão', 'batata', 'açúcar', 'farinha'],
-};
+interface Recipe {
+  name: string;
+  description: string;
+  ingredients: string[];
+  instructions: string[];
+  hormonal_benefit: string;
+}
 
-// Diet-aware recipe alternatives
-const getRecipeForDiet = (phase: string, dietType: string | null) => {
-  const baseRecipes = {
-    menstrual: {
-      name: 'Omelete Anti-Inflamatória',
-      description: 'Rica em ferro e anti-inflamatórios para aliviar cólicas',
-      ingredients: ['2 ovos', 'Espinafre fresco', 'Cúrcuma em pó', 'Azeite de oliva', 'Sal rosa'],
-      instructions: [
-        'Bata os ovos com uma pitada de cúrcuma',
-        'Refogue o espinafre no azeite',
-        'Adicione os ovos e cozinhe em fogo baixo',
-        'Dobre ao meio e sirva',
-      ],
-      time: '10 min',
-      benefits: ['🩸 Rico em Ferro', '🔥 Anti-inflamatório', '💪 Proteína'],
-    },
-    folicular: {
-      name: 'Bowl Energizante',
-      description: 'Carboidratos complexos para energia sustentada',
-      ingredients: ['Quinoa', 'Frango grelhado', 'Abacate', 'Grão de bico', 'Limão'],
-      instructions: [
-        'Cozinhe a quinoa conforme instruções',
-        'Grelhe o frango temperado',
-        'Monte o bowl com todos os ingredientes',
-        'Finalize com limão espremido',
-      ],
-      time: '25 min',
-      benefits: ['⚡ Energia', '🥗 Fibras', '🧠 Foco'],
-    },
-    ovulatoria: {
-      name: 'Salada Glow',
-      description: 'Antioxidantes para pele radiante e vitalidade',
-      ingredients: ['Mix de folhas', 'Salmão', 'Sementes de chia', 'Frutas vermelhas', 'Azeite'],
-      instructions: [
-        'Grelhe o salmão com ervas',
-        'Monte a base com folhas frescas',
-        'Adicione as frutas e sementes',
-        'Finalize com azeite extra virgem',
-      ],
-      time: '20 min',
-      benefits: ['✨ Antioxidantes', '🐟 Ômega-3', '💅 Pele'],
-    },
-    lutea: {
-      name: 'Smoothie Calmante',
-      description: 'Magnésio e triptofano para equilibrar o humor',
-      ingredients: ['Banana', 'Cacau em pó', 'Leite de amêndoas', 'Manteiga de amendoim', 'Mel'],
-      instructions: [
-        'Congele a banana previamente',
-        'Bata todos os ingredientes no liquidificador',
-        'Ajuste a consistência com mais leite se necessário',
-        'Sirva gelado com cacau por cima',
-      ],
-      time: '5 min',
-      benefits: ['🧘 Relaxante', '🍫 Magnésio', '😴 Triptofano'],
-    },
-  };
-
-  // Vegan alternatives
-  const veganRecipes = {
-    menstrual: {
-      name: 'Tofu Refogado com Espinafre',
-      description: 'Rico em ferro vegetal e anti-inflamatórios',
-      ingredients: ['200g tofu firme', 'Espinafre fresco', 'Cúrcuma em pó', 'Azeite de oliva', 'Limão'],
-      instructions: [
-        'Corte o tofu em cubos e tempere com cúrcuma',
-        'Doure o tofu no azeite até ficar crocante',
-        'Adicione o espinafre e refogue rapidamente',
-        'Finalize com limão espremido',
-      ],
-      time: '15 min',
-      benefits: ['🩸 Rico em Ferro', '🔥 Anti-inflamatório', '🌱 100% Vegano'],
-    },
-    folicular: {
-      name: 'Bowl Vegano Proteico',
-      description: 'Energia e proteína vegetal para sua fase ativa',
-      ingredients: ['Quinoa', 'Grão de bico assado', 'Abacate', 'Edamame', 'Tahine'],
-      instructions: [
-        'Cozinhe a quinoa conforme instruções',
-        'Asse o grão de bico com especiarias',
-        'Monte o bowl com todos os ingredientes',
-        'Finalize com tahine e limão',
-      ],
-      time: '25 min',
-      benefits: ['⚡ Energia', '💪 Proteína vegetal', '🧠 Foco'],
-    },
-    ovulatoria: {
-      name: 'Salada Rainbow Vegana',
-      description: 'Antioxidantes coloridos para brilhar',
-      ingredients: ['Mix de folhas', 'Beterraba ralada', 'Cenoura', 'Sementes de girassol', 'Azeite'],
-      instructions: [
-        'Rale a beterraba e a cenoura',
-        'Monte a base com folhas frescas',
-        'Adicione os legumes e sementes',
-        'Finalize com azeite e vinagre balsâmico',
-      ],
-      time: '15 min',
-      benefits: ['✨ Antioxidantes', '🌈 Vitaminas', '💅 Pele'],
-    },
-    lutea: {
-      name: 'Smoothie Vegano Calmante',
-      description: 'Magnésio e conforto sem ingredientes animais',
-      ingredients: ['Banana', 'Cacau em pó', 'Leite de coco', 'Pasta de amendoim', 'Tâmaras'],
-      instructions: [
-        'Congele a banana previamente',
-        'Bata todos os ingredientes no liquidificador',
-        'Ajuste a consistência com mais leite se necessário',
-        'Sirva gelado com cacau por cima',
-      ],
-      time: '5 min',
-      benefits: ['🧘 Relaxante', '🍫 Magnésio', '🌱 100% Vegano'],
-    },
-  };
-
-  // Vegetarian alternatives (no meat/fish)
-  const vegetarianRecipes = {
-    ...baseRecipes,
-    folicular: {
-      name: 'Bowl Vegetariano',
-      description: 'Proteína de leguminosas para energia sustentada',
-      ingredients: ['Quinoa', 'Ovo poché', 'Abacate', 'Grão de bico', 'Limão'],
-      instructions: [
-        'Cozinhe a quinoa conforme instruções',
-        'Prepare o ovo poché',
-        'Monte o bowl com todos os ingredientes',
-        'Finalize com limão espremido',
-      ],
-      time: '25 min',
-      benefits: ['⚡ Energia', '🥗 Fibras', '🥚 Proteína'],
-    },
-    ovulatoria: {
-      name: 'Salada Caprese Glow',
-      description: 'Antioxidantes do tomate e proteína do queijo',
-      ingredients: ['Tomate', 'Mozzarella de búfala', 'Manjericão', 'Sementes de chia', 'Azeite'],
-      instructions: [
-        'Fatie o tomate e a mozzarella',
-        'Intercale as fatias com folhas de manjericão',
-        'Adicione as sementes de chia',
-        'Finalize com azeite e flor de sal',
-      ],
-      time: '10 min',
-      benefits: ['✨ Antioxidantes', '🧀 Cálcio', '💅 Pele'],
-    },
-  };
-
-  // Low carb alternatives
-  const lowCarbRecipes = {
-    ...baseRecipes,
-    folicular: {
-      name: 'Bowl Low Carb Proteico',
-      description: 'Alta proteína sem carboidratos extras',
-      ingredients: ['Couve-flor ralada', 'Frango grelhado', 'Abacate', 'Ovos', 'Azeite'],
-      instructions: [
-        'Refogue a couve-flor ralada (arroz de couve-flor)',
-        'Grelhe o frango temperado',
-        'Monte o bowl com ovo cozido',
-        'Finalize com abacate e azeite',
-      ],
-      time: '25 min',
-      benefits: ['⚡ Energia', '💪 Proteína', '🥑 Low Carb'],
-    },
-  };
-
-  // Lactose-free alternatives
-  const lactoseFreeRecipes = {
-    ...baseRecipes,
-    lutea: {
-      name: 'Smoothie Sem Lactose',
-      description: 'Magnésio e conforto sem laticínios',
-      ingredients: ['Banana', 'Cacau em pó', 'Leite de coco', 'Manteiga de amendoim', 'Mel'],
-      instructions: [
-        'Congele a banana previamente',
-        'Bata todos os ingredientes no liquidificador',
-        'Ajuste a consistência com mais leite se necessário',
-        'Sirva gelado com cacau por cima',
-      ],
-      time: '5 min',
-      benefits: ['🧘 Relaxante', '🍫 Magnésio', '🥛 Sem Lactose'],
-    },
-  };
-
-  // Select recipe based on diet
-  switch (dietType) {
-    case 'vegan':
-      return veganRecipes[phase as keyof typeof veganRecipes] || baseRecipes[phase as keyof typeof baseRecipes];
-    case 'vegetarian':
-      return vegetarianRecipes[phase as keyof typeof vegetarianRecipes] || baseRecipes[phase as keyof typeof baseRecipes];
-    case 'low_carb':
-      return lowCarbRecipes[phase as keyof typeof lowCarbRecipes] || baseRecipes[phase as keyof typeof baseRecipes];
-    case 'lactose_free':
-      return lactoseFreeRecipes[phase as keyof typeof lactoseFreeRecipes] || baseRecipes[phase as keyof typeof baseRecipes];
-    default:
-      return baseRecipes[phase as keyof typeof baseRecipes];
-  }
-};
+interface ChefResponse {
+  recipes: Recipe[];
+}
 
 const ChefIACard: React.FC = () => {
   const { currentPhase } = useCycle();
   const { diet_type } = useProfile();
   const { lifePhase, pregnancyWeeks } = useLifePhase();
+  const { getRecipes, loading: aiLoading } = useAIBrain();
+  const { toast } = useToast();
+  
   const [showDialog, setShowDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showRecipe, setShowRecipe] = useState(false);
-
-  // For pregnant users, use a safe phase instead of cycle phase
-  const recipePhase = lifePhase === 'pregnant' ? 'folicular' : currentPhase;
-  const recipe = getRecipeForDiet(recipePhase, diet_type);
+  const [inputMode, setInputMode] = useState<'select' | 'text' | 'photo'>('select');
+  const [ingredients, setIngredients] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   // Get diet label for display
   const getDietLabel = (dietType: string | null): string | null => {
@@ -240,18 +54,65 @@ const ChefIACard: React.FC = () => {
     return dietType ? labels[dietType] || null : null;
   };
 
-  const handleInputMethod = (method: string) => {
-    setLoading(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setLoading(false);
-      setShowRecipe(true);
-    }, 2000);
+  const recipePhase = lifePhase === 'pregnant' ? 'folicular' : currentPhase;
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGenerateRecipes = async () => {
+    const result = await getRecipes({
+      phase: recipePhase,
+      ingredients: inputMode === 'text' ? ingredients : undefined,
+      image: inputMode === 'photo' ? imagePreview || undefined : undefined,
+      diet_type: diet_type || undefined,
+    });
+
+    if (result && result.recipes && result.recipes.length > 0) {
+      setRecipes(result.recipes);
+      toast({
+        title: 'Receitas geradas! 🍳',
+        description: `${result.recipes.length} receitas personalizadas para você`,
+      });
+    }
+  };
+
+  const handleGenerateQuickRecipes = async () => {
+    setInputMode('select');
+    const result = await getRecipes({
+      phase: recipePhase,
+      diet_type: diet_type || undefined,
+    });
+
+    if (result && result.recipes && result.recipes.length > 0) {
+      setRecipes(result.recipes);
+    }
   };
 
   const resetState = () => {
-    setShowRecipe(false);
-    setLoading(false);
+    setInputMode('select');
+    setIngredients('');
+    setImagePreview(null);
+    setRecipes([]);
+    setSelectedRecipe(null);
+  };
+
+  const handleBack = () => {
+    if (selectedRecipe) {
+      setSelectedRecipe(null);
+    } else if (recipes.length > 0) {
+      setRecipes([]);
+    } else {
+      setInputMode('select');
+      setImagePreview(null);
+    }
   };
 
   return (
@@ -273,12 +134,12 @@ const ChefIACard: React.FC = () => {
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-foreground">Chef IA</h3>
               <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-xs font-medium text-amber-600">
-                Premium
+                IA
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
               {diet_type && getDietLabel(diet_type) 
-                ? `Receitas ${getDietLabel(diet_type)}s para você` 
+                ? `Receitas ${getDietLabel(diet_type)}s personalizadas` 
                 : 'O que tem na sua geladeira?'}
             </p>
           </div>
@@ -289,121 +150,291 @@ const ChefIACard: React.FC = () => {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ChefHat className="w-5 h-5 text-amber-500" />
-              Chef IA
-              {diet_type && getDietLabel(diet_type) && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-normal">
-                  {getDietLabel(diet_type)}
-                </span>
+            <div className="flex items-center gap-2">
+              {(inputMode !== 'select' || recipes.length > 0 || selectedRecipe) && (
+                <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
               )}
-            </DialogTitle>
+              <DialogTitle className="flex items-center gap-2 flex-1">
+                <ChefHat className="w-5 h-5 text-amber-500" />
+                Chef IA
+                {diet_type && getDietLabel(diet_type) && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-normal">
+                    {getDietLabel(diet_type)}
+                  </span>
+                )}
+              </DialogTitle>
+            </div>
             <DialogDescription>
               {lifePhase === 'pregnant'
-                ? `Receitas seguras para gestantes na semana ${pregnancyWeeks || ''}! Foco em nutrientes para você e seu bebê.`
-                : diet_type 
-                  ? `Receitas personalizadas para sua dieta ${getDietLabel(diet_type)?.toLowerCase()} e fase do ciclo!`
-                  : 'Me conte o que você tem na geladeira e vou criar uma receita personalizada para sua fase!'}
+                ? `Receitas seguras para gestantes (semana ${pregnancyWeeks || '?'})!`
+                : `Receitas personalizadas para a fase ${recipePhase}!`}
             </DialogDescription>
           </DialogHeader>
 
-          {loading ? (
-            <motion.div
-              className="flex flex-col items-center justify-center py-12"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <Loader2 className="w-12 h-12 text-amber-500 animate-spin mb-4" />
-              <p className="text-muted-foreground">Criando receita personalizada...</p>
-              {diet_type && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Respeitando sua dieta {getDietLabel(diet_type)?.toLowerCase()}
+          <AnimatePresence mode="wait">
+            {aiLoading ? (
+              <motion.div
+                key="loading"
+                className="flex flex-col items-center justify-center py-12"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                    <ChefHat className="w-8 h-8 text-white" />
+                  </div>
+                </motion.div>
+                <p className="text-muted-foreground mt-4">Chef IA preparando receitas...</p>
+                {diet_type && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Respeitando sua dieta {getDietLabel(diet_type)?.toLowerCase()}
+                  </p>
+                )}
+              </motion.div>
+            ) : selectedRecipe ? (
+              <motion.div
+                key="recipe-detail"
+                className="space-y-4"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <div className="p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50">
+                  <h4 className="font-semibold text-foreground text-lg mb-2">{selectedRecipe.name}</h4>
+                  <p className="text-sm text-muted-foreground">{selectedRecipe.description}</p>
+                  {selectedRecipe.hormonal_benefit && (
+                    <div className="mt-3 flex items-center gap-2 text-sm">
+                      <Leaf className="w-4 h-4 text-green-500" />
+                      <span className="text-green-700 dark:text-green-400">{selectedRecipe.hormonal_benefit}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">📝 Ingredientes</h5>
+                  <ul className="space-y-1">
+                    {selectedRecipe.ingredients.map((ing, i) => (
+                      <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                        {ing}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 className="font-medium text-foreground mb-2">👩‍🍳 Modo de Preparo</h5>
+                  <ol className="space-y-2">
+                    {selectedRecipe.instructions.map((step, i) => (
+                      <li key={i} className="text-sm text-muted-foreground flex gap-2">
+                        <span className="font-semibold text-primary flex-shrink-0">{i + 1}.</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </motion.div>
+            ) : recipes.length > 0 ? (
+              <motion.div
+                key="recipes-list"
+                className="space-y-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <p className="text-sm text-muted-foreground text-center mb-2">
+                  {recipes.length} receitas geradas para você:
                 </p>
-              )}
-            </motion.div>
-          ) : showRecipe ? (
-            <motion.div
-              className="space-y-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-foreground">{recipe.name}</h4>
-                  <span className="text-xs text-muted-foreground">⏱️ {recipe.time}</span>
+                {recipes.map((recipe, idx) => (
+                  <motion.button
+                    key={idx}
+                    onClick={() => setSelectedRecipe(recipe)}
+                    className="w-full p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 text-left hover:shadow-md transition-all"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-semibold text-foreground">{recipe.name}</h4>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{recipe.description}</p>
+                      </div>
+                      <ChefHat className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                    </div>
+                    {recipe.hormonal_benefit && (
+                      <div className="mt-2 flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+                        <Leaf className="w-3 h-3" />
+                        {recipe.hormonal_benefit}
+                      </div>
+                    )}
+                  </motion.button>
+                ))}
+
+                <Button className="w-full mt-4" variant="outline" onClick={resetState}>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Gerar Novas Receitas
+                </Button>
+              </motion.div>
+            ) : inputMode === 'text' ? (
+              <motion.div
+                key="text-input"
+                className="space-y-4"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    O que você tem na geladeira?
+                  </label>
+                  <Textarea
+                    value={ingredients}
+                    onChange={(e) => setIngredients(e.target.value)}
+                    placeholder="Ex: frango, brócolis, arroz, limão, alho..."
+                    className="min-h-[100px] resize-none"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Liste os ingredientes separados por vírgula
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground mb-3">{recipe.description}</p>
-                <div className="flex gap-2 flex-wrap">
-                  {recipe.benefits.map((benefit, i) => (
-                    <span key={i} className="px-2 py-1 rounded-full bg-white/80 dark:bg-black/20 text-xs">
-                      {benefit}
-                    </span>
-                  ))}
+
+                <Button 
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
+                  onClick={handleGenerateRecipes}
+                  disabled={!ingredients.trim() || aiLoading}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Gerar Receitas
+                </Button>
+              </motion.div>
+            ) : inputMode === 'photo' ? (
+              <motion.div
+                key="photo-input"
+                className="space-y-4"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                {imagePreview ? (
+                  <>
+                    <div className="w-full h-48 rounded-xl overflow-hidden">
+                      <img
+                        src={imagePreview}
+                        alt="Geladeira"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
+                      onClick={handleGenerateRecipes}
+                      disabled={aiLoading}
+                    >
+                      <ChefHat className="w-4 h-4 mr-2" />
+                      Criar Receitas com Esses Ingredientes
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setImagePreview(null)}
+                    >
+                      Tirar Outra Foto
+                    </Button>
+                  </>
+                ) : (
+                  <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center bg-secondary/30">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="p-4 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20">
+                        <Camera className="w-8 h-8 text-amber-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">Tire uma foto da geladeira</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          A IA vai identificar os ingredientes
+                        </p>
+                      </div>
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                        <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium">
+                          <Camera className="w-4 h-4" />
+                          Tirar Foto
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="select-mode"
+                className="space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <p className="text-sm text-center text-muted-foreground mb-4">
+                  Escolha como deseja informar seus ingredientes:
+                </p>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex flex-col h-28 gap-2 hover:border-amber-500/50"
+                    onClick={() => setInputMode('photo')}
+                  >
+                    <div className="p-3 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20">
+                      <Camera className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <span className="text-sm">Foto da Geladeira</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex flex-col h-28 gap-2 hover:border-amber-500/50"
+                    onClick={() => setInputMode('text')}
+                  >
+                    <div className="p-3 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20">
+                      <Keyboard className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <span className="text-sm">Digitar Ingredientes</span>
+                  </Button>
                 </div>
-              </div>
 
-              <div>
-                <h5 className="font-medium text-foreground mb-2">📝 Ingredientes</h5>
-                <ul className="space-y-1">
-                  {recipe.ingredients.map((ing, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                      {ing}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">ou</span>
+                  </div>
+                </div>
 
-              <div>
-                <h5 className="font-medium text-foreground mb-2">👩‍🍳 Modo de Preparo</h5>
-                <ol className="space-y-2">
-                  {recipe.instructions.map((step, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                      <span className="font-semibold text-primary">{i + 1}.</span>
-                      {step}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              <Button className="w-full" variant="outline" onClick={resetState}>
-                Gerar Nova Receita
-              </Button>
-            </motion.div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-center text-muted-foreground mb-4">
-                Escolha como deseja informar seus ingredientes:
-              </p>
-              
-              <div className="grid grid-cols-3 gap-3">
                 <Button
-                  variant="outline"
-                  className="flex flex-col h-24 gap-2"
-                  onClick={() => handleInputMethod('photo')}
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
+                  onClick={handleGenerateQuickRecipes}
+                  disabled={aiLoading}
                 >
-                  <Camera className="w-6 h-6 text-primary" />
-                  <span className="text-xs">Foto</span>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Sugerir Receitas para Minha Fase
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex flex-col h-24 gap-2"
-                  onClick={() => handleInputMethod('voice')}
-                >
-                  <Mic className="w-6 h-6 text-primary" />
-                  <span className="text-xs">Voz</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex flex-col h-24 gap-2"
-                  onClick={() => handleInputMethod('text')}
-                >
-                  <Keyboard className="w-6 h-6 text-primary" />
-                  <span className="text-xs">Digitar</span>
-                </Button>
-              </div>
-            </div>
-          )}
+                <p className="text-xs text-center text-muted-foreground">
+                  Receitas otimizadas para a fase {recipePhase} do seu ciclo
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
     </>
