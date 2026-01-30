@@ -119,8 +119,17 @@ export const useChatMessages = () => {
       return;
     }
 
-    // Note: We don't have DELETE policy on chat_messages,
-    // so we just clear local state for now
+    try {
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting messages:', error);
+    }
+
     setMessages([INITIAL_MESSAGE]);
   }, [user]);
 
