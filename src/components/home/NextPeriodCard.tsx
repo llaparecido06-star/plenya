@@ -4,6 +4,7 @@ import { CalendarDays, Droplets } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCycle } from '@/contexts/CycleContext';
+import QuickMenstruationButton from './QuickMenstruationButton';
 
 const NextPeriodCard: React.FC = () => {
   const { lastPeriodStart, cycleLength, cycleDay } = useCycle();
@@ -28,6 +29,7 @@ const NextPeriodCard: React.FC = () => {
   if (!nextPeriodDate) return null;
 
   const daysUntilPeriod = differenceInDays(nextPeriodDate, new Date());
+  const periodEndDate = addDays(nextPeriodDate, 4);
   
   // Determine urgency level
   const getUrgencyClass = () => {
@@ -84,10 +86,17 @@ const NextPeriodCard: React.FC = () => {
         </div>
       </div>
 
-      {/* Period duration hint */}
-      <div className="mt-3 pt-3 border-t border-border/50 flex items-center gap-2 text-xs text-muted-foreground">
-        <span className="w-2 h-2 rounded-full bg-red-400" />
-        <span>Duração estimada: ~5 dias (até {format(addDays(nextPeriodDate, 4), "dd/MM", { locale: ptBR })})</span>
+      {/* Quick Menstruation Button - Inline and discrete */}
+      <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between">
+        <QuickMenstruationButton />
+        
+        {/* Period duration hint */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="w-2 h-2 rounded-full bg-red-400" />
+          <span>
+            Término: ~{format(periodEndDate, "dd/MM", { locale: ptBR })}
+          </span>
+        </div>
       </div>
     </motion.div>
   );
