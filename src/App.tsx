@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,16 +9,25 @@ import { CycleProvider } from "@/contexts/CycleContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SelectedDateProvider } from "@/contexts/SelectedDateContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import Index from "./pages/Index";
-import Nutricao from "./pages/Nutricao";
-import Corpo from "./pages/Corpo";
-import Mente from "./pages/Mente";
-import Perfil from "./pages/Perfil";
-import Auth from "./pages/Auth";
-import Onboarding from "./pages/Onboarding";
-import NotFound from "./pages/NotFound";
+
+// Lazy load pages for code splitting
+const Index = lazy(() => import("./pages/Index"));
+const Nutricao = lazy(() => import("./pages/Nutricao"));
+const Corpo = lazy(() => import("./pages/Corpo"));
+const Mente = lazy(() => import("./pages/Mente"));
+const Perfil = lazy(() => import("./pages/Perfil"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="animate-pulse text-muted-foreground">Carregando...</div>
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,51 +39,53 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <AnimatePresence mode="wait">
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/onboarding" element={<Onboarding />} />
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <Index />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/nutricao"
-                    element={
-                      <ProtectedRoute>
-                        <Nutricao />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/corpo"
-                    element={
-                      <ProtectedRoute>
-                        <Corpo />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/mente"
-                    element={
-                      <ProtectedRoute>
-                        <Mente />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/perfil"
-                    element={
-                      <ProtectedRoute>
-                        <Perfil />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/onboarding" element={<Onboarding />} />
+                    <Route
+                      path="/"
+                      element={
+                        <ProtectedRoute>
+                          <Index />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/nutricao"
+                      element={
+                        <ProtectedRoute>
+                          <Nutricao />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/corpo"
+                      element={
+                        <ProtectedRoute>
+                          <Corpo />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/mente"
+                      element={
+                        <ProtectedRoute>
+                          <Mente />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/perfil"
+                      element={
+                        <ProtectedRoute>
+                          <Perfil />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
               </AnimatePresence>
             </BrowserRouter>
           </TooltipProvider>
