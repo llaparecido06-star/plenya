@@ -3,6 +3,15 @@ import { motion } from 'framer-motion';
 import { Leaf, Sparkles } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
 import { useProfile } from '@/hooks/useProfile';
+import { Badge } from '@/components/ui/badge';
+
+const dietLabels: Record<string, { label: string; emoji: string }> = {
+  vegetarian: { label: 'Vegetariana', emoji: '🌱' },
+  vegan: { label: 'Vegana', emoji: '🌿' },
+  low_carb: { label: 'Low Carb', emoji: '🥩' },
+  lactose_free: { label: 'Sem Lactose', emoji: '🥛' },
+  default: { label: 'Padrão', emoji: '🍽️' },
+};
 
 interface PhaseSuggestion {
   title: string;
@@ -102,14 +111,19 @@ const HormonalSuggestion: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <div className="flex items-center gap-2 mb-3">
-        <div className="p-2 rounded-xl phase-gradient">
-          <Sparkles className="w-4 h-4 text-white" />
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-xl phase-gradient">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Sugestão Hormonal</h3>
+            <p className="text-xs text-muted-foreground">Fase {phaseInfo.name}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Sugestão Hormonal</h3>
-          <p className="text-xs text-muted-foreground">Fase {phaseInfo.name}</p>
-        </div>
+        <Badge variant="secondary" className="text-xs">
+          {dietLabels[diet_type || 'default']?.emoji} {dietLabels[diet_type || 'default']?.label}
+        </Badge>
       </div>
 
       <h4 className="text-lg font-semibold text-primary mb-2">{suggestion.title}</h4>
