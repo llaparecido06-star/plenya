@@ -90,23 +90,26 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Get signed URL (valid for 1 year)
+      const { data: signedData, error: signedError } = await supabase.storage
         .from('avatars')
-        .getPublicUrl(fileName);
+        .createSignedUrl(fileName, 60 * 60 * 24 * 365); // 1 year expiry
 
-      // Add cache buster to force refresh
-      const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
+      if (signedError || !signedData?.signedUrl) {
+        throw signedError || new Error('Failed to get signed URL');
+      }
+
+      const signedUrl = signedData.signedUrl;
 
       // Update profile with new avatar URL
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: urlWithCacheBuster })
+        .update({ avatar_url: signedUrl })
         .eq('user_id', user.id);
 
       if (updateError) throw updateError;
 
-      onAvatarChange(urlWithCacheBuster);
+      onAvatarChange(signedUrl);
 
       toast({
         title: 'Foto atualizada!',
