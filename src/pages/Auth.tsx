@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { lovable } from '@/integrations/lovable/index';
+import logoImage from '@/assets/logo-plenya.png';
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
@@ -124,14 +125,13 @@ const Auth: React.FC = () => {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <motion.div
-            className="w-20 h-20 mx-auto mb-4 rounded-full phase-gradient flex items-center justify-center shadow-glow"
-            animate={{ scale: [1, 1.05, 1] }}
+          <motion.img
+            src={logoImage}
+            alt="Plenya Logo"
+            className="w-28 h-28 mx-auto mb-4 object-contain"
+            animate={{ scale: [1, 1.02, 1] }}
             transition={{ duration: 3, repeat: Infinity }}
-          >
-            <span className="text-3xl">🌿</span>
-          </motion.div>
-          <h1 className="text-3xl font-bold text-foreground">Plenya</h1>
+          />
           <p className="text-muted-foreground mt-1">Sinta-se em casa no seu corpo</p>
         </div>
 
