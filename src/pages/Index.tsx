@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageLayout from '@/components/layout/PageLayout';
+import logoImage from '@/assets/logo-plenya.png';
 import CycleWheel from '@/components/cycle/CycleWheel';
 import InsightCard from '@/components/cycle/InsightCard';
 import CycleSyncInsightCard from '@/components/cycle/CycleSyncInsightCard';
@@ -70,15 +71,15 @@ const Index: React.FC = () => {
         opacity: 1,
         y: 0
       }}>
-          {/* Header with Streak and Calendar */}
+          {/* Header with Logo, Streak and Calendar */}
           <div className="flex items-center justify-between mb-4">
             <GardenStreak streak={3} />
+            <img src={logoImage} alt="Plenya" className="w-10 h-10 object-contain" />
             <Button variant="ghost" size="icon" onClick={() => setShowCalendar(!showCalendar)}>
               <Calendar className="w-5 h-5 text-primary" />
             </Button>
           </div>
           
-          <h1 className="text-2xl font-bold text-foreground">Plenya</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {isToday ? isPregnant ? 'Acompanhando sua gestação' : isMenopause ? 'Seu bem-estar em primeiro lugar' : 'Sinta-se em casa no seu corpo' : 'Visualizando histórico'}
           </p>
