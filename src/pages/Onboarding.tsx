@@ -36,7 +36,7 @@ import { useCycle } from '@/contexts/CycleContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { toLocalDateString } from '@/lib/dateUtils';
-import logoImage from '@/assets/logo-plenya.png';
+
 
 // Life phase options - THE BIG FILTER
 const lifePhases = [
@@ -449,14 +449,14 @@ const Onboarding: React.FC = () => {
           animate={{ scale: 1, opacity: 1 }}
           className="text-center"
         >
-          {/* Pulsing Logo */}
-          <motion.img
-            src={logoImage}
-            alt="Plenya"
-            className="w-24 h-24 mx-auto mb-8 object-contain"
+          {/* Pulsing Icon */}
+          <motion.div
+            className="w-24 h-24 mx-auto mb-8 rounded-full bg-gradient-to-br from-terracotta to-burnt-pink flex items-center justify-center"
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 1.5, repeat: Infinity }}
-          />
+          >
+            <Sparkles className="w-12 h-12 text-white" />
+          </motion.div>
 
           <h2 className="text-2xl font-bold text-foreground mb-2">Preparando seu Plenya</h2>
           <p className="text-muted-foreground mb-8">Um momento, {fullName.split(' ')[0]}...</p>
