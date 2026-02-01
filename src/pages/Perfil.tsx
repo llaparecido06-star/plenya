@@ -12,8 +12,10 @@ import MedicalReportButton from '@/components/profile/MedicalReportButton';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
 import { useProfile } from '@/hooks/useProfile';
+import { useAvatar } from '@/hooks/useAvatar';
 import { Badge } from '@/components/ui/badge';
 import ProfileSettingsEditor from '@/components/profile/ProfileSettingsEditor';
+import AvatarUpload from '@/components/profile/AvatarUpload';
 
 // Goal configuration for badges
 const goalConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -43,7 +45,8 @@ const activityConfig: Record<string, { label: string; icon: string }> = {
 
 const Perfil: React.FC = () => {
   const { user, signOut } = useAuth();
-  const { goals, diet_type, fitness_level, loading, refetch } = useProfile();
+  const { goals, diet_type, fitness_level, full_name, loading, refetch } = useProfile();
+  const { avatarUrl, updateAvatarUrl } = useAvatar();
 
   if (!user) {
     return (
@@ -83,14 +86,15 @@ const Perfil: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full phase-gradient flex items-center justify-center">
-              <span className="text-2xl text-white font-bold">
-                {user.email?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">{user.email}</h3>
-              <p className="text-sm text-muted-foreground">Membro Plenya</p>
+            <AvatarUpload
+              currentAvatarUrl={avatarUrl}
+              onAvatarChange={updateAvatarUrl}
+              fallbackInitial={full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || '?'}
+            />
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground">{full_name || user.email}</h3>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Membro Plenya</p>
             </div>
           </div>
 
