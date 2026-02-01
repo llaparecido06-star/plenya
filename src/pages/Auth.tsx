@@ -128,11 +128,12 @@ const Auth: React.FC = () => {
           <motion.img
             src={logoImage}
             alt="Plenya Logo"
-            className="w-28 h-28 mx-auto mb-4 object-contain"
+            className="w-28 h-28 mx-auto mb-2 object-contain"
             animate={{ scale: [1, 1.02, 1] }}
             transition={{ duration: 3, repeat: Infinity }}
           />
-          <p className="text-muted-foreground mt-1">Sinta-se em casa no seu corpo</p>
+          <h1 className="text-3xl font-bold text-foreground mb-1">Plenya</h1>
+          <p className="text-muted-foreground">Sinta-se em casa no seu corpo</p>
         </div>
 
         {/* Tabs */}
