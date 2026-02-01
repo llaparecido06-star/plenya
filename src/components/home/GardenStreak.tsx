@@ -1,12 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sprout, Leaf, Flower2, TreeDeciduous } from 'lucide-react';
+import { Sprout, Leaf, Flower2, TreeDeciduous, Loader2 } from 'lucide-react';
+import { useLoginStreak } from '@/hooks/useLoginStreak';
 
-interface GardenStreakProps {
-  streak?: number;
-}
+const GardenStreak: React.FC = () => {
+  const { streak, loading } = useLoginStreak();
 
-const GardenStreak: React.FC<GardenStreakProps> = ({ streak = 0 }) => {
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-leaf-green/10 to-leaf-green/5 border border-leaf-green/20">
+        <Loader2 className="w-4 h-4 text-leaf-green animate-spin" />
+        <span className="text-sm text-muted-foreground">...</span>
+      </div>
+    );
+  }
+
   // Determine growth stage based on streak
   const getGrowthStage = () => {
     if (streak < 3) return { icon: Sprout, label: 'Semente', color: 'text-amber-600' };

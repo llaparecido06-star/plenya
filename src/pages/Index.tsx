@@ -72,7 +72,7 @@ const Index: React.FC = () => {
       }}>
           {/* Header with Streak and Calendar */}
           <div className="flex items-center justify-between mb-4">
-            <GardenStreak streak={3} />
+            <GardenStreak />
             <Button variant="ghost" size="icon" onClick={() => setShowCalendar(!showCalendar)}>
               <Calendar className="w-5 h-5 text-primary" />
             </Button>
