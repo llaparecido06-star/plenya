@@ -9,6 +9,7 @@ import { CycleProvider } from "@/contexts/CycleContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SelectedDateProvider } from "@/contexts/SelectedDateContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import NotificationPrompt from "@/components/notifications/NotificationPrompt";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -41,6 +42,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <NotificationPrompt />
             <BrowserRouter>
               <AnimatePresence mode="wait">
                 <Suspense fallback={<PageLoader />}>
