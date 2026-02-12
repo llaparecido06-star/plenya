@@ -304,6 +304,8 @@ export type Database = {
           onboarding_completed: boolean
           pill_reminder_time: string | null
           pregnancy_start_date: string | null
+          trial_end_date: string | null
+          trial_reminder_sent: boolean | null
           tutorial_progress: Json | null
           updated_at: string
           user_id: string
@@ -330,6 +332,8 @@ export type Database = {
           onboarding_completed?: boolean
           pill_reminder_time?: string | null
           pregnancy_start_date?: string | null
+          trial_end_date?: string | null
+          trial_reminder_sent?: boolean | null
           tutorial_progress?: Json | null
           updated_at?: string
           user_id: string
@@ -356,6 +360,8 @@ export type Database = {
           onboarding_completed?: boolean
           pill_reminder_time?: string | null
           pregnancy_start_date?: string | null
+          trial_end_date?: string | null
+          trial_reminder_sent?: boolean | null
           tutorial_progress?: Json | null
           updated_at?: string
           user_id?: string
