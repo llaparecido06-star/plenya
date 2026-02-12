@@ -11,6 +11,14 @@ export const STRIPE_PLANS = {
       'Acompanhamento de água',
       'Receitas básicas',
     ],
+    missingFeatures: [
+      'IA Plenya ilimitada',
+      'Relatório médico completo',
+      'Chef IA personalizado',
+      'Insights avançados de ciclo',
+      'Treinos personalizados por fase',
+      'Suporte prioritário',
+    ],
   },
   premium_monthly: {
     name: 'Premium Mensal',
@@ -20,12 +28,18 @@ export const STRIPE_PLANS = {
     product_id: 'prod_TxxM1RKhJVtRJW',
     description: 'Acesso completo mensal',
     features: [
-      'Tudo do plano Gratuito',
+      'Registro de ciclo menstrual',
+      'Log diário de humor e sintomas',
+      'Acompanhamento de água',
+      'Receitas básicas',
       'IA Plenya ilimitada',
       'Relatório médico completo',
       'Chef IA personalizado',
       'Insights avançados de ciclo',
       'Treinos personalizados por fase',
+    ],
+    missingFeatures: [
+      'Suporte prioritário',
     ],
   },
   premium_annual: {
@@ -37,12 +51,34 @@ export const STRIPE_PLANS = {
     product_id: 'prod_TxxMucqxpJbsLV',
     description: '2 meses grátis!',
     features: [
-      'Tudo do plano Premium',
-      '2 meses grátis',
+      'Registro de ciclo menstrual',
+      'Log diário de humor e sintomas',
+      'Acompanhamento de água',
+      'Receitas básicas',
+      'IA Plenya ilimitada',
+      'Relatório médico completo',
+      'Chef IA personalizado',
+      'Insights avançados de ciclo',
+      'Treinos personalizados por fase',
       'Suporte prioritário',
     ],
+    missingFeatures: [],
   },
 } as const;
+
+// All features for comparison table
+export const ALL_FEATURES = [
+  { key: 'cycle', label: 'Registro de ciclo menstrual', category: 'Básico' },
+  { key: 'daily_log', label: 'Log diário de humor e sintomas', category: 'Básico' },
+  { key: 'water', label: 'Acompanhamento de água', category: 'Básico' },
+  { key: 'recipes_basic', label: 'Receitas básicas', category: 'Básico' },
+  { key: 'ai_chat', label: 'IA Plenya ilimitada', category: 'Premium' },
+  { key: 'medical_report', label: 'Relatório médico completo', category: 'Premium' },
+  { key: 'chef_ia', label: 'Chef IA personalizado', category: 'Premium' },
+  { key: 'cycle_insights', label: 'Insights avançados de ciclo', category: 'Premium' },
+  { key: 'workouts', label: 'Treinos personalizados por fase', category: 'Premium' },
+  { key: 'support', label: 'Suporte prioritário', category: 'Exclusivo' },
+] as const;
 
 export type PlanKey = keyof typeof STRIPE_PLANS;
 
