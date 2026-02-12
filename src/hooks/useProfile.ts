@@ -12,6 +12,10 @@ interface ProfileData {
   life_phase: string | null;
   pregnancy_start_date: string | null;
   is_trying_to_conceive: boolean;
+  macro_protein_goal: number;
+  macro_carbs_goal: number;
+  macro_fat_goal: number;
+  macro_calories_goal: number;
 }
 
 export const useProfile = () => {
@@ -26,6 +30,10 @@ export const useProfile = () => {
     life_phase: null,
     pregnancy_start_date: null,
     is_trying_to_conceive: false,
+    macro_protein_goal: 120,
+    macro_carbs_goal: 250,
+    macro_fat_goal: 70,
+    macro_calories_goal: 2000,
   });
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -39,7 +47,7 @@ export const useProfile = () => {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('goal, diet_type, fitness_level, full_name, date_of_birth, life_phase, pregnancy_start_date, is_trying_to_conceive')
+        .select('goal, diet_type, fitness_level, full_name, date_of_birth, life_phase, pregnancy_start_date, is_trying_to_conceive, macro_protein_goal, macro_carbs_goal, macro_fat_goal, macro_calories_goal')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -58,6 +66,10 @@ export const useProfile = () => {
           life_phase: profile.life_phase,
           pregnancy_start_date: profile.pregnancy_start_date,
           is_trying_to_conceive: profile.is_trying_to_conceive ?? false,
+          macro_protein_goal: profile.macro_protein_goal ?? 120,
+          macro_carbs_goal: profile.macro_carbs_goal ?? 250,
+          macro_fat_goal: profile.macro_fat_goal ?? 70,
+          macro_calories_goal: profile.macro_calories_goal ?? 2000,
         });
       }
     } catch (err) {

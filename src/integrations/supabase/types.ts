@@ -299,6 +299,10 @@ export type Database = {
           is_trying_to_conceive: boolean | null
           last_period_start: string | null
           life_phase: string | null
+          macro_calories_goal: number | null
+          macro_carbs_goal: number | null
+          macro_fat_goal: number | null
+          macro_protein_goal: number | null
           medication_name: string | null
           medication_type: string | null
           onboarding_completed: boolean
@@ -327,6 +331,10 @@ export type Database = {
           is_trying_to_conceive?: boolean | null
           last_period_start?: string | null
           life_phase?: string | null
+          macro_calories_goal?: number | null
+          macro_carbs_goal?: number | null
+          macro_fat_goal?: number | null
+          macro_protein_goal?: number | null
           medication_name?: string | null
           medication_type?: string | null
           onboarding_completed?: boolean
@@ -355,6 +363,10 @@ export type Database = {
           is_trying_to_conceive?: boolean | null
           last_period_start?: string | null
           life_phase?: string | null
+          macro_calories_goal?: number | null
+          macro_carbs_goal?: number | null
+          macro_fat_goal?: number | null
+          macro_protein_goal?: number | null
           medication_name?: string | null
           medication_type?: string | null
           onboarding_completed?: boolean

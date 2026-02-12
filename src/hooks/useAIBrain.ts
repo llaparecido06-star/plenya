@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-type AIMode = 'chat' | 'trainer' | 'nutrition_scanner' | 'chef';
+type AIMode = 'chat' | 'trainer' | 'nutrition_scanner' | 'chef' | 'estimate_macros';
 
 interface ChatPayload {
   message: string;
@@ -23,6 +23,12 @@ interface TrainerPayload {
 
 interface NutritionScannerPayload {
   image: string;
+  phase: string;
+  diet_type?: string;
+}
+
+interface EstimateMacrosPayload {
+  foods: string;
   phase: string;
   diet_type?: string;
 }
@@ -72,7 +78,7 @@ export const useAIBrain = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const callAI = useCallback(async <T>(mode: AIMode, payload: ChatPayload | TrainerPayload | NutritionScannerPayload | ChefPayload): Promise<T | null> => {
+  const callAI = useCallback(async <T>(mode: AIMode, payload: ChatPayload | TrainerPayload | NutritionScannerPayload | ChefPayload | EstimateMacrosPayload): Promise<T | null> => {
     setLoading(true);
     
     try {
@@ -130,11 +136,16 @@ export const useAIBrain = () => {
     return callAI<ChefResponse>('chef', payload);
   }, [callAI]);
 
+  const estimateMacros = useCallback(async (payload: EstimateMacrosPayload): Promise<NutritionScannerResponse | null> => {
+    return callAI<NutritionScannerResponse>('estimate_macros', payload);
+  }, [callAI]);
+
   return {
     loading,
     chat,
     generateWorkout,
     scanMeal,
     getRecipes,
+    estimateMacros,
   };
 };
