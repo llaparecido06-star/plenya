@@ -27,6 +27,7 @@ import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
+import TrialExpirationBanner from '@/components/subscription/TrialExpirationBanner';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
@@ -109,6 +110,9 @@ const Index: React.FC = () => {
       </div>
 
       <div className="space-y-4 mt-4">
+        {/* Trial Expiration Banner */}
+        {isToday && <TrialExpirationBanner />}
+        
         {/* Upgrade Banner for free users */}
         {isToday && <UpgradeBanner />}
 
