@@ -162,6 +162,22 @@ const Perfil: React.FC = () => {
           )}
         </motion.div>
 
+        {/* Subscription Plans Link */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+        >
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => navigate('/planos')}
+          >
+            <Crown className="w-4 h-4 text-primary" />
+            Ver Planos e Assinatura
+          </Button>
+        </motion.div>
+
         {/* Profile Settings Editor */}
         <ProfileSettingsEditor
           currentGoals={goals}
@@ -211,22 +227,6 @@ const Perfil: React.FC = () => {
           transition={{ delay: 0.3 }}
         >
           <NotificationSettings />
-        </motion.div>
-
-        {/* Subscription Plans Link */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.32 }}
-        >
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center gap-2"
-            onClick={() => navigate('/planos')}
-          >
-            <Crown className="w-4 h-4 text-primary" />
-            Ver Planos e Assinatura
-          </Button>
         </motion.div>
 
         {/* Medical Report Button */}
