@@ -272,68 +272,6 @@ const DUMPicker: React.FC = () => {
         </PopoverContent>
       </Popover>
 
-      {/* Cycle Length Editor */}
-      <div className="mt-4 p-3 rounded-lg bg-secondary/50 border border-border">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-foreground font-medium">Duração do ciclo</span>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={() => handleCycleLengthChange(localCycleLength - 1)}
-              disabled={localCycleLength <= 20 || savingLength}
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </Button>
-            <span className="text-lg font-bold text-primary w-8 text-center">
-              {savingLength ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : localCycleLength}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={() => handleCycleLengthChange(localCycleLength + 1)}
-              disabled={localCycleLength >= 45 || savingLength}
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </Button>
-            <span className="text-sm text-muted-foreground">dias</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Period Duration Editor */}
-      <div className="mt-3 p-3 rounded-lg bg-secondary/50 border border-border">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-foreground font-medium">Duração da menstruação</span>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={() => handlePeriodDurationChange(localPeriodDuration - 1)}
-              disabled={localPeriodDuration <= 2}
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </Button>
-            <span className="text-lg font-bold text-primary w-8 text-center">
-              {localPeriodDuration}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-              onClick={() => handlePeriodDurationChange(localPeriodDuration + 1)}
-              disabled={localPeriodDuration >= 10}
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </Button>
-            <span className="text-sm text-muted-foreground">dias</span>
-          </div>
-        </div>
-      </div>
-
       {calculatedCycleDay && (
         <motion.div
           className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20 cursor-pointer"
@@ -360,6 +298,7 @@ const DUMPicker: React.FC = () => {
                 className="overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
+                {/* Cycle Day Adjuster */}
                 <div className="flex items-center justify-center gap-4 mt-3 pt-3 border-t border-primary/20">
                   <Button
                     variant="outline"
@@ -386,6 +325,38 @@ const DUMPicker: React.FC = () => {
                 <p className="text-xs text-muted-foreground text-center mt-2">
                   Ajustar recalcula a DUM automaticamente
                 </p>
+
+                {/* Cycle Length */}
+                <div className="mt-3 pt-3 border-t border-primary/20 flex items-center justify-between">
+                  <span className="text-sm text-foreground font-medium">Duração do ciclo</span>
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => handleCycleLengthChange(localCycleLength - 1)} disabled={localCycleLength <= 20 || savingLength}>
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <span className="text-base font-bold text-primary w-7 text-center">
+                      {savingLength ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : localCycleLength}
+                    </span>
+                    <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => handleCycleLengthChange(localCycleLength + 1)} disabled={localCycleLength >= 45 || savingLength}>
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                    <span className="text-xs text-muted-foreground">dias</span>
+                  </div>
+                </div>
+
+                {/* Period Duration */}
+                <div className="mt-2 pt-2 border-t border-primary/20 flex items-center justify-between">
+                  <span className="text-sm text-foreground font-medium">Duração da menstruação</span>
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => handlePeriodDurationChange(localPeriodDuration - 1)} disabled={localPeriodDuration <= 2}>
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <span className="text-base font-bold text-primary w-7 text-center">{localPeriodDuration}</span>
+                    <Button variant="outline" size="icon" className="h-7 w-7 rounded-full" onClick={() => handlePeriodDurationChange(localPeriodDuration + 1)} disabled={localPeriodDuration >= 10}>
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                    <span className="text-xs text-muted-foreground">dias</span>
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
