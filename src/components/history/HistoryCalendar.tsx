@@ -422,14 +422,25 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
       <div className="grid grid-cols-7 gap-1">
         {days.map((day, index) => {
           let pressTimer: NodeJS.Timeout | null = null;
+          let longPressTriggered = false;
           
           return (
             <div key={index} className="aspect-square flex items-center justify-center">
               {day !== null && (
                 <button
-                  onClick={() => !isFutureDay(day) && handleDayClick(day)}
+                  onClick={() => {
+                    if (longPressTriggered) {
+                      longPressTriggered = false;
+                      return;
+                    }
+                    if (!isFutureDay(day)) handleDayClick(day);
+                  }}
                   onMouseDown={() => {
-                    pressTimer = setTimeout(() => handleDayLongPress(day), 500);
+                    longPressTriggered = false;
+                    pressTimer = setTimeout(() => {
+                      longPressTriggered = true;
+                      handleDayLongPress(day);
+                    }, 500);
                   }}
                   onMouseUp={() => {
                     if (pressTimer) clearTimeout(pressTimer);
@@ -437,10 +448,20 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                   onMouseLeave={() => {
                     if (pressTimer) clearTimeout(pressTimer);
                   }}
-                  onTouchStart={() => {
-                    pressTimer = setTimeout(() => handleDayLongPress(day), 500);
+                  onTouchStart={(e) => {
+                    longPressTriggered = false;
+                    pressTimer = setTimeout(() => {
+                      longPressTriggered = true;
+                      handleDayLongPress(day);
+                    }, 500);
                   }}
-                  onTouchEnd={() => {
+                  onTouchEnd={(e) => {
+                    if (pressTimer) clearTimeout(pressTimer);
+                    if (longPressTriggered) {
+                      e.preventDefault(); // prevent click from firing after long press
+                    }
+                  }}
+                  onTouchMove={() => {
                     if (pressTimer) clearTimeout(pressTimer);
                   }}
                   disabled={false}
