@@ -6,6 +6,7 @@ import HormonalSuggestion from '@/components/nutrition/HormonalSuggestion';
 import AddMealDrawer from '@/components/nutrition/AddMealDrawer';
 import MealScanner from '@/components/nutrition/MealScanner';
 import RecentMealsHistory from '@/components/nutrition/RecentMealsHistory';
+import MonthlySummaryCard from '@/components/nutrition/MonthlySummaryCard';
 import ChefIACard from '@/components/nutrition/ChefIACard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { nutritionTutorialSteps } from '@/components/tutorial/tutorialSteps';
@@ -59,6 +60,11 @@ const Nutricao: React.FC = () => {
 
       <div className="px-4 mt-6">
         <AddMealDrawer />
+      </div>
+
+      {/* Monthly Summary */}
+      <div className="mt-6">
+        <MonthlySummaryCard />
       </div>
 
       {/* Recent Meals with Mood Correlation */}
