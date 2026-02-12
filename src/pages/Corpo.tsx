@@ -4,6 +4,7 @@ import WorkoutCard from '@/components/workout/WorkoutCard';
 import GymLogFAB from '@/components/workout/GymLogFAB';
 import LastWorkoutCard from '@/components/workout/LastWorkoutCard';
 import WorkoutHistoryCalendar from '@/components/workout/WorkoutHistoryCalendar';
+import MonthlyWorkoutSummary from '@/components/workout/MonthlyWorkoutSummary';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { bodyTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
@@ -33,6 +34,11 @@ const Corpo: React.FC = () => {
 
       <div className="mt-4">
         <WorkoutCard />
+      </div>
+
+      {/* Monthly Workout Summary */}
+      <div className="mt-4 px-4">
+        <MonthlyWorkoutSummary />
       </div>
 
       {/* Workout History Calendar */}
