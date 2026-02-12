@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Check, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Check, Loader2, Minus, Plus } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
@@ -18,11 +18,17 @@ import { toLocalDateString, parseLocalDate } from '@/lib/dateUtils';
 
 const DUMPicker: React.FC = () => {
   const { user } = useAuth();
-  const { setCycleDay, cycleLength, lastPeriodStart, setLastPeriodStart } = useCycle();
+  const { setCycleDay, cycleLength, setCycleLength, lastPeriodStart, setLastPeriodStart } = useCycle();
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(lastPeriodStart || undefined);
+  const [localCycleLength, setLocalCycleLength] = useState(cycleLength);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [savingLength, setSavingLength] = useState(false);
+
+  useEffect(() => {
+    setLocalCycleLength(cycleLength);
+  }, [cycleLength]);
 
   // Load saved DUM from profile
   useEffect(() => {
@@ -41,17 +47,19 @@ const DUMPicker: React.FC = () => {
 
         if (error) throw error;
 
+        if (data?.cycle_length) {
+          setLocalCycleLength(data.cycle_length);
+          setCycleLength(data.cycle_length);
+        }
+
         if (data?.last_period_start) {
-          // Parse the date string safely to avoid timezone issues
           const savedDate = parseLocalDate(data.last_period_start);
           setDate(savedDate);
           setLastPeriodStart(savedDate);
           
-          // Calculate and set cycle day
           const today = new Date();
           const daysSince = differenceInDays(today, savedDate) + 1;
-          const currentCycleDay = ((daysSince - 1) % cycleLength) + 1;
-          setCycleDay(currentCycleDay);
+          setCycleDay(Math.max(1, daysSince));
         }
       } catch (error) {
         console.error('Error loading profile:', error);
@@ -61,7 +69,7 @@ const DUMPicker: React.FC = () => {
     };
 
     loadProfile();
-  }, [user, cycleLength, setCycleDay, setLastPeriodStart]);
+  }, [user, setCycleDay, setLastPeriodStart, setCycleLength]);
 
   const handleDateSelect = async (selectedDate: Date | undefined) => {
     if (!selectedDate || !user) return;
@@ -70,7 +78,6 @@ const DUMPicker: React.FC = () => {
     setSaving(true);
 
     try {
-      // Use toLocalDateString to prevent timezone bugs
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -84,11 +91,9 @@ const DUMPicker: React.FC = () => {
 
       setLastPeriodStart(selectedDate);
       
-      // Calculate and set cycle day
       const today = new Date();
       const daysSince = differenceInDays(today, selectedDate) + 1;
-      const currentCycleDay = ((daysSince - 1) % cycleLength) + 1;
-      setCycleDay(currentCycleDay);
+      setCycleDay(Math.max(1, daysSince));
 
       toast({
         title: 'DUM Atualizada! ✨',
@@ -106,8 +111,39 @@ const DUMPicker: React.FC = () => {
     }
   };
 
+  const handleCycleLengthChange = async (newLength: number) => {
+    if (newLength < 20 || newLength > 45 || !user) return;
+    
+    setLocalCycleLength(newLength);
+    setSavingLength(true);
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          cycle_length: newLength,
+        }, {
+          onConflict: 'user_id',
+        });
+
+      if (error) throw error;
+
+      setCycleLength(newLength);
+    } catch (error: any) {
+      console.error('Error saving cycle length:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar a duração do ciclo.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingLength(false);
+    }
+  };
+
   const calculatedCycleDay = date 
-    ? ((differenceInDays(new Date(), date)) % cycleLength) + 1
+    ? Math.max(1, differenceInDays(new Date(), date) + 1)
     : null;
 
   if (loading) {
@@ -165,6 +201,37 @@ const DUMPicker: React.FC = () => {
         </PopoverContent>
       </Popover>
 
+      {/* Cycle Length Editor */}
+      <div className="mt-4 p-3 rounded-lg bg-secondary/50 border border-border">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-foreground font-medium">Duração do ciclo</span>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={() => handleCycleLengthChange(localCycleLength - 1)}
+              disabled={localCycleLength <= 20 || savingLength}
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </Button>
+            <span className="text-lg font-bold text-primary w-8 text-center">
+              {savingLength ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : localCycleLength}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={() => handleCycleLengthChange(localCycleLength + 1)}
+              disabled={localCycleLength >= 45 || savingLength}
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </Button>
+            <span className="text-sm text-muted-foreground">dias</span>
+          </div>
+        </div>
+      </div>
+
       {calculatedCycleDay && (
         <motion.div
           className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20"
@@ -174,7 +241,7 @@ const DUMPicker: React.FC = () => {
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-primary" />
             <span className="text-sm text-foreground">
-              Dia atual do ciclo: <span className="font-bold text-primary">{calculatedCycleDay}</span> de {cycleLength}
+              Dia atual do ciclo: <span className="font-bold text-primary">{calculatedCycleDay}</span> de {localCycleLength}
             </span>
           </div>
         </motion.div>
