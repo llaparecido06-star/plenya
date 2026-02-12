@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X, Droplets, Heart, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Droplets, Heart, Star, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
 import { useHistoricalData } from '@/hooks/useHistoricalData';
@@ -45,6 +45,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const [menstruationDialogOpen, setMenstruationDialogOpen] = useState(false);
   const [selectedDayForMenstruation, setSelectedDayForMenstruation] = useState<Date | null>(null);
   const [menstruationAction, setMenstruationAction] = useState<'add' | 'remove' | 'remove_expected'>('add');
+  const [longPressingDay, setLongPressingDay] = useState<number | null>(null);
   
   // Use ref to track previous dates for comparison without causing re-renders
   const previousDatesRef = React.useRef<string[]>([]);
@@ -477,32 +478,44 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                   }}
                   onMouseDown={() => {
                     longPressTriggered = false;
+                    if ((isManualMenstruation(day) || isExpectedPeriodDay(day)) && !isFutureDay(day)) {
+                      setLongPressingDay(day);
+                    }
                     pressTimer = setTimeout(() => {
                       longPressTriggered = true;
+                      setLongPressingDay(null);
                       handleDayLongPress(day);
                     }, 500);
                   }}
                   onMouseUp={() => {
                     if (pressTimer) clearTimeout(pressTimer);
+                    setLongPressingDay(null);
                   }}
                   onMouseLeave={() => {
                     if (pressTimer) clearTimeout(pressTimer);
+                    setLongPressingDay(null);
                   }}
                   onTouchStart={(e) => {
                     longPressTriggered = false;
+                    if ((isManualMenstruation(day) || isExpectedPeriodDay(day)) && !isFutureDay(day)) {
+                      setLongPressingDay(day);
+                    }
                     pressTimer = setTimeout(() => {
                       longPressTriggered = true;
+                      setLongPressingDay(null);
                       handleDayLongPress(day);
                     }, 500);
                   }}
                   onTouchEnd={(e) => {
                     if (pressTimer) clearTimeout(pressTimer);
+                    setLongPressingDay(null);
                     if (longPressTriggered) {
-                      e.preventDefault(); // prevent click from firing after long press
+                      e.preventDefault();
                     }
                   }}
                   onTouchMove={() => {
                     if (pressTimer) clearTimeout(pressTimer);
+                    setLongPressingDay(null);
                   }}
                   disabled={false}
                   className={`
@@ -529,9 +542,35 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                   `}
                 >
                   {day}
-                  {/* Manual menstruation indicator */}
+                  {/* Manual menstruation indicator — show X when long pressing */}
                   {isManualMenstruation(day) && !isSelectedDay(day) && (
-                    <Droplets className="absolute -top-0.5 -right-0.5 w-3 h-3 text-white" />
+                    longPressingDay === day ? (
+                      <motion.span
+                        className="absolute -top-0.5 -right-0.5"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <XCircle className="w-3.5 h-3.5 text-white drop-shadow-sm" />
+                      </motion.span>
+                    ) : (
+                      <Droplets className="absolute -top-0.5 -right-0.5 w-3 h-3 text-white" />
+                    )
+                  )}
+                  {/* Expected period day indicator — show X when long pressing */}
+                  {isExpectedPeriodDay(day) && !isSelectedDay(day) && !isManualMenstruation(day) && (
+                    longPressingDay === day ? (
+                      <motion.span
+                        className="absolute -top-0.5 -right-0.5"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <XCircle className="w-3.5 h-3.5 text-white drop-shadow-sm" />
+                      </motion.span>
+                    ) : (
+                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-300/80 border border-white/50" />
+                    )
                   )}
                   {/* Fertile day indicator - golden star for trying to conceive */}
                   {isFertileDay(day) && !isSelectedDay(day) && !isManualMenstruation(day) && (
