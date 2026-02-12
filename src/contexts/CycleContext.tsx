@@ -179,8 +179,10 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
     
     window.addEventListener('dum-synced', handleDUMSync as EventListener);
+    window.addEventListener('profile-updated', () => refreshCycleData());
     return () => {
       window.removeEventListener('dum-synced', handleDUMSync as EventListener);
+      window.removeEventListener('profile-updated', () => refreshCycleData());
     };
   }, [refreshCycleData]);
 
