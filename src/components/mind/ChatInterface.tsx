@@ -6,6 +6,7 @@ import { useCycle } from '@/contexts/CycleContext';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useAIBrain } from '@/hooks/useAIBrain';
+import PremiumGate from '@/components/subscription/PremiumGate';
 
 const ChatInterface: React.FC = () => {
   const { messages, loading, addMessage } = useChatMessages();
@@ -76,6 +77,7 @@ const ChatInterface: React.FC = () => {
   }
 
   return (
+    <PremiumGate feature="Chat com IA Plenya" mode="banner">
     <div id="chat-interface" className="flex flex-col h-[calc(100vh-200px)]">
       {/* Chat header */}
       <div className="flex items-center gap-3 p-4 border-b border-border/50">
@@ -188,6 +190,7 @@ const ChatInterface: React.FC = () => {
         </div>
       </div>
     </div>
+    </PremiumGate>
   );
 };
 

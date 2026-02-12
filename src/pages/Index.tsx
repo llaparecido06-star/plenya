@@ -26,6 +26,7 @@ import MenopauseCard from '@/components/home/MenopauseCard';
 import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
+import UpgradeBanner from '@/components/subscription/UpgradeBanner';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
@@ -108,6 +109,9 @@ const Index: React.FC = () => {
       </div>
 
       <div className="space-y-4 mt-4">
+        {/* Upgrade Banner for free users */}
+        {isToday && <UpgradeBanner />}
+
         {/* === PREGNANT MODE === */}
         {isToday && isPregnant && pregnancyWeeks !== null && pregnancyStartDate && (
           <PregnancyWeeksCard weeks={pregnancyWeeks} pregnancyStartDate={pregnancyStartDate} />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import PremiumGate from '@/components/subscription/PremiumGate';
 import { FileText, Loader2, Download, Calendar, Share2, MessageCircle, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -196,12 +197,13 @@ const MedicalReportButton: React.FC = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.25 }}
-      className="space-y-3"
-    >
+    <PremiumGate feature="Relatório Médico" mode="inline">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="space-y-3"
+      >
       <div className="flex items-center gap-2">
         <Calendar className="w-4 h-4 text-muted-foreground" />
         <span className="text-sm text-muted-foreground">Período do relatório:</span>
@@ -269,6 +271,7 @@ const MedicalReportButton: React.FC = () => {
         Compartilhe este relatório com seu médico ou nutricionista
       </p>
     </motion.div>
+    </PremiumGate>
   );
 };
 

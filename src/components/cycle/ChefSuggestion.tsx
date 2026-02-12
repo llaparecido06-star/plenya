@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ChefHat, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import PremiumGate from '@/components/subscription/PremiumGate';
 
 interface PhaseSuggestion {
   title: string;
@@ -49,6 +50,7 @@ const ChefSuggestion: React.FC = () => {
   const suggestion = phaseSuggestions[currentPhase];
 
   return (
+    <PremiumGate feature="Sugestão do Chef" mode="inline">
     <motion.div
       className="mx-4"
       initial={{ opacity: 0, y: 20 }}
@@ -96,6 +98,7 @@ const ChefSuggestion: React.FC = () => {
         </div>
       </motion.button>
     </motion.div>
+    </PremiumGate>
   );
 };
 
