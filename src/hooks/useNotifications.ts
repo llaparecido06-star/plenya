@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -66,14 +67,23 @@ export const useNotifications = () => {
     }
 
     try {
+      const isNative = Capacitor.isNativePlatform();
+      
+      if (isNative) {
+        const result = await LocalNotifications.requestPermissions();
+        const granted = result.display === 'granted';
+        setPermission(granted ? 'granted' : 'denied');
+        if (granted) {
+          toast({ title: 'Notificações ativadas! 🔔', description: 'Você receberá lembretes personalizados.' });
+        }
+        return granted;
+      }
+
       const result = await Notification.requestPermission();
       setPermission(result);
 
       if (result === 'granted') {
-        toast({
-          title: 'Notificações ativadas! 🔔',
-          description: 'Você receberá lembretes personalizados.',
-        });
+        toast({ title: 'Notificações ativadas! 🔔', description: 'Você receberá lembretes personalizados.' });
         return true;
       } else {
         toast({
