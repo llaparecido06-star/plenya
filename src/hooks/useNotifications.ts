@@ -9,6 +9,7 @@ interface NotificationSettings {
   nextInjection: boolean;
   recipeReminder: boolean;
   recipeReminderTime: string;
+  trialExpiration: boolean;
 }
 
 const NOTIFICATION_SETTINGS_KEY = 'plenya_notification_settings';
@@ -25,6 +26,7 @@ export const useNotifications = () => {
     nextInjection: false,
     recipeReminder: false,
     recipeReminderTime: '11:00',
+    trialExpiration: true,
   });
 
   // Check for notification support
@@ -203,6 +205,27 @@ export const useNotifications = () => {
     });
   }, [permission]);
 
+  // Schedule trial expiration reminder (2 days before)
+  const scheduleTrialExpirationReminder = useCallback(async (subscriptionEnd: string | null) => {
+    if (permission !== 'granted' || !subscriptionEnd || !settings.trialExpiration) return;
+
+    const endDate = new Date(subscriptionEnd);
+    const reminderDate = new Date(endDate);
+    reminderDate.setDate(reminderDate.getDate() - 2);
+    reminderDate.setHours(10, 0, 0, 0); // 10:00 AM
+
+    const now = new Date();
+    if (reminderDate <= now || reminderDate >= endDate) return;
+
+    await scheduleNotification(
+      '⏰ Seu trial Premium expira em 2 dias!',
+      'Aproveite para assinar e continuar com acesso ao Chef IA, relatórios e muito mais.',
+      reminderDate,
+      'trial-expiration'
+    );
+    console.log(`Trial expiration reminder scheduled for ${reminderDate.toISOString()}`);
+  }, [permission, settings.trialExpiration, scheduleNotification]);
+
   return {
     supported,
     permission,
@@ -212,6 +235,7 @@ export const useNotifications = () => {
     scheduleNotification,
     schedulePillReminder,
     scheduleRecipeReminder,
+    scheduleTrialExpirationReminder,
     updateSettings,
     showNotification,
   };

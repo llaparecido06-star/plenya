@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, BellOff, Clock, Droplets, Syringe, Heart, ChefHat } from 'lucide-react';
+import { Bell, BellOff, Clock, Droplets, Syringe, Heart, ChefHat, Timer } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useContraceptive } from '@/hooks/useContraceptive';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useRecipeHistory } from '@/hooks/useRecipeHistory';
+import { useAuth } from '@/contexts/AuthContext';
 
 const NotificationSettings: React.FC = () => {
   const {
@@ -21,11 +22,13 @@ const NotificationSettings: React.FC = () => {
     updateSettings,
     schedulePillReminder,
     scheduleRecipeReminder,
+    scheduleTrialExpirationReminder,
   } = useNotifications();
   
   const { contraceptive_type: contraceptiveType } = useContraceptive();
   const { isTryingToConceive } = useLifePhase();
   const { favorites } = useRecipeHistory();
+  const { subscriptionEnd, subscribed } = useAuth();
 
   // Register service worker on mount
   useEffect(() => {
@@ -51,10 +54,18 @@ const NotificationSettings: React.FC = () => {
     }
   }, [settings.recipeReminder, settings.recipeReminderTime, permission, scheduleRecipeReminder, favorites]);
 
+  // Schedule trial expiration reminder
+  useEffect(() => {
+    if (settings.trialExpiration && permission === 'granted' && subscriptionEnd) {
+      scheduleTrialExpirationReminder(subscriptionEnd);
+    }
+  }, [settings.trialExpiration, permission, subscriptionEnd, scheduleTrialExpirationReminder]);
+
   const showPillOption = contraceptiveType === 'Pílula';
   const showInjectionOption = contraceptiveType === 'Injeção';
   const showFertileOption = isTryingToConceive;
   const showRecipeOption = favorites.length > 0;
+  const showTrialOption = subscribed && subscriptionEnd;
 
   if (!supported) {
     return (
@@ -216,6 +227,26 @@ const NotificationSettings: React.FC = () => {
                 </div>
               </div>
               <Switch disabled checked={false} />
+            </div>
+          )}
+
+          {/* Trial Expiration Reminder */}
+          {showTrialOption && (
+            <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+                  <Timer className="w-4 h-4" />
+                </div>
+                <div>
+                  <Label className="text-base font-medium">Expiração do Trial</Label>
+                  <p className="text-sm text-muted-foreground">2 dias antes</p>
+                </div>
+              </div>
+              <Switch
+                checked={settings.trialExpiration}
+                onCheckedChange={(checked) => updateSettings({ trialExpiration: checked })}
+                disabled={permission !== 'granted'}
+              />
             </div>
           )}
 
