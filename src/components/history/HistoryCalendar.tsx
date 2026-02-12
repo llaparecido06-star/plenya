@@ -624,6 +624,12 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
           <span>Menstruação</span>
         </div>
         <div className="flex items-center gap-1.5">
+          <div className="w-4 h-4 rounded-full bg-red-400/60 flex items-center justify-center">
+            <span className="w-2 h-2 rounded-full bg-red-300/80 border border-white/50" />
+          </div>
+          <span>Continuação</span>
+        </div>
+        <div className="flex items-center gap-1.5">
           <Heart className="w-3 h-3 text-purple-500" fill="currentColor" />
           <span>Intimidade</span>
         </div>
