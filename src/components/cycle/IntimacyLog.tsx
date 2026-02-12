@@ -79,6 +79,15 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
   
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Listen for open-intimacy-log event from DayDataSummary
+  React.useEffect(() => {
+    const handleOpenIntimacy = () => {
+      setDrawerOpen(true);
+    };
+    window.addEventListener('open-intimacy-log', handleOpenIntimacy);
+    return () => window.removeEventListener('open-intimacy-log', handleOpenIntimacy);
+  }, []);
   
   const [selectedPractices, setSelectedPractices] = useState<string[]>([]);
   const [selectedProtection, setSelectedProtection] = useState<string[]>([]);
