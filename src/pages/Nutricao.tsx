@@ -1,6 +1,7 @@
 import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
 import MacroRings from '@/components/nutrition/MacroRings';
+import MacroGoalEditor from '@/components/nutrition/MacroGoalEditor';
 import HormonalSuggestion from '@/components/nutrition/HormonalSuggestion';
 import AddMealDrawer from '@/components/nutrition/AddMealDrawer';
 import MealScanner from '@/components/nutrition/MealScanner';
@@ -9,8 +10,13 @@ import ChefIACard from '@/components/nutrition/ChefIACard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { nutritionTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
+import { useNutrition } from '@/hooks/useNutrition';
+import { useProfile } from '@/hooks/useProfile';
 
 const Nutricao: React.FC = () => {
+  const { totals } = useNutrition();
+  const { macro_protein_goal, macro_carbs_goal, macro_fat_goal } = useProfile();
+
   return (
     <PageLayout>
       <div className="hero-gradient pt-12 pb-6 px-4">
@@ -35,11 +41,14 @@ const Nutricao: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h3 className="font-semibold text-foreground mb-2">Macros do Dia</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-foreground">Macros do Dia</h3>
+            <MacroGoalEditor />
+          </div>
           <MacroRings
-            protein={{ current: 0, goal: 120 }}
-            carbs={{ current: 0, goal: 250 }}
-            fat={{ current: 0, goal: 70 }}
+            protein={{ current: totals.protein, goal: macro_protein_goal }}
+            carbs={{ current: totals.carbs, goal: macro_carbs_goal }}
+            fat={{ current: totals.fat, goal: macro_fat_goal }}
           />
         </motion.div>
       </div>

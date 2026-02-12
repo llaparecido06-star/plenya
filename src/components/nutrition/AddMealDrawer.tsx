@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Coffee, Sun, Moon, Apple, Plus, Check, Loader2 } from 'lucide-react';
+import { Coffee, Sun, Moon, Apple, Plus, Check, Loader2, Sparkles } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -11,6 +11,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNutrition } from '@/hooks/useNutrition';
+import { useAIBrain } from '@/hooks/useAIBrain';
+import { useCycle } from '@/contexts/CycleContext';
+import { useProfile } from '@/hooks/useProfile';
 import type { Database } from '@/integrations/supabase/types';
 
 type MealType = Database['public']['Enums']['meal_type'];
@@ -51,11 +54,16 @@ const mealPresets: MealPreset[] = [
 
 const AddMealDrawer: React.FC = () => {
   const { addMeal, saving, isAuthenticated } = useNutrition();
+  const { estimateMacros, loading: aiLoading } = useAIBrain();
+  const { currentPhase } = useCycle();
+  const { diet_type } = useProfile();
   const [selectedMeal, setSelectedMeal] = useState<MealType | null>(null);
   const [selectedFoods, setSelectedFoods] = useState<string[]>([]);
   const [customFood, setCustomFood] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [estimatedMacros, setEstimatedMacros] = useState<{ calories: number; protein: number; carbs: number; fat: number } | null>(null);
+  const [estimating, setEstimating] = useState(false);
 
   const toggleFood = (food: string) => {
     setSelectedFoods(prev =>
@@ -63,20 +71,43 @@ const AddMealDrawer: React.FC = () => {
         ? prev.filter(f => f !== food)
         : [...prev, food]
     );
+    setEstimatedMacros(null);
   };
 
   const addCustomFood = () => {
     if (customFood.trim()) {
       setSelectedFoods(prev => [...prev, customFood.trim()]);
       setCustomFood('');
+      setEstimatedMacros(null);
     }
+  };
+
+  const handleEstimateMacros = async () => {
+    if (selectedFoods.length === 0) return;
+    setEstimating(true);
+    
+    const result = await estimateMacros({
+      foods: selectedFoods.join(', '),
+      phase: currentPhase,
+      diet_type: diet_type || undefined,
+    });
+
+    if (result?.macros) {
+      setEstimatedMacros(result.macros);
+    }
+    setEstimating(false);
   };
 
   const handleSave = async () => {
     if (!selectedMeal || selectedFoods.length === 0) return;
 
     const mealName = selectedFoods.join(', ');
-    const success = await addMeal(selectedMeal, mealName);
+    const success = await addMeal(selectedMeal, mealName, estimatedMacros ? {
+      calories: estimatedMacros.calories,
+      protein: estimatedMacros.protein,
+      carbs: estimatedMacros.carbs,
+      fat: estimatedMacros.fat,
+    } : undefined);
     
     if (success) {
       setSaved(true);
@@ -85,6 +116,7 @@ const AddMealDrawer: React.FC = () => {
         setDrawerOpen(false);
         setSelectedMeal(null);
         setSelectedFoods([]);
+        setEstimatedMacros(null);
       }, 1500);
     }
   };
@@ -131,6 +163,7 @@ const AddMealDrawer: React.FC = () => {
                 onClick={() => {
                   setSelectedMeal(null);
                   setSelectedFoods([]);
+                  setEstimatedMacros(null);
                 }}
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
@@ -181,19 +214,68 @@ const AddMealDrawer: React.FC = () => {
               </div>
 
               {selectedFoods.length > 0 && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Selecionados:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedFoods.map((food) => (
-                      <span
-                        key={food}
-                        className="px-3 py-1 bg-phase-secondary/50 text-phase-primary rounded-full text-sm"
-                      >
-                        {food}
-                      </span>
-                    ))}
+                <>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Selecionados:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedFoods.map((food) => (
+                        <span
+                          key={food}
+                          className="px-3 py-1 bg-phase-secondary/50 text-phase-primary rounded-full text-sm"
+                        >
+                          {food}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+
+                  {/* AI Macro Estimation */}
+                  {!estimatedMacros && (
+                    <Button
+                      variant="outline"
+                      className="w-full border-primary/30 text-primary"
+                      onClick={handleEstimateMacros}
+                      disabled={estimating || aiLoading}
+                    >
+                      {estimating || aiLoading ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Calculando macros...
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4" />
+                          Calcular macros com IA
+                        </span>
+                      )}
+                    </Button>
+                  )}
+
+                  {estimatedMacros && (
+                    <motion.div
+                      className="grid grid-cols-4 gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-primary">{estimatedMacros.calories}</p>
+                        <p className="text-xs text-muted-foreground">kcal</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-terracotta">{estimatedMacros.protein}g</p>
+                        <p className="text-xs text-muted-foreground">Proteína</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-leaf-green">{estimatedMacros.carbs}g</p>
+                        <p className="text-xs text-muted-foreground">Carbs</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-amber-500">{estimatedMacros.fat}g</p>
+                        <p className="text-xs text-muted-foreground">Gordura</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </>
               )}
 
               <Button 
@@ -214,7 +296,7 @@ const AddMealDrawer: React.FC = () => {
                 ) : !isAuthenticated ? (
                   'Faça login para salvar'
                 ) : (
-                  'Salvar Refeição'
+                  `Salvar Refeição${estimatedMacros ? ' com Macros' : ''}`
                 )}
               </Button>
             </div>
