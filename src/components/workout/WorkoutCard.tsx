@@ -9,6 +9,8 @@ import ExerciseDetailDrawer from './ExerciseDetailDrawer';
 import RestTimerModal from './RestTimerModal';
 import { useProfile } from '@/hooks/useProfile';
 import { useAIBrain } from '@/hooks/useAIBrain';
+import { useAuth } from '@/contexts/AuthContext';
+import PremiumGate from '@/components/subscription/PremiumGate';
 
 interface Exercise {
   id: string;
@@ -114,10 +116,12 @@ const activityIntensityLabel: Record<string, string> = {
 const WorkoutCard: React.FC = () => {
   const { workout: savedWorkout, loading, saving, saveExercises, completeExercise, workoutPhase, isToday } = useWorkouts();
   const { fitness_level, goals } = useProfile();
+  const { subscribed } = useAuth();
   const { toast } = useToast();
   const { generateWorkout, loading: aiLoading } = useAIBrain();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [exercises, setExercises] = useState(workoutPlans[workoutPhase].exercises);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [hasWorkout, setHasWorkout] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showRestTimer, setShowRestTimer] = useState(false);
@@ -132,7 +136,7 @@ const WorkoutCard: React.FC = () => {
   useEffect(() => {
     if (savedWorkout?.exercises && savedWorkout.exercises.length > 0) {
       setExercises(savedWorkout.exercises);
-      // Check if it was an AI workout
+      setHasWorkout(true);
       if (savedWorkout.workout_name?.includes('IA')) {
         setAiWorkout({
           title: savedWorkout.workout_name,
@@ -141,7 +145,8 @@ const WorkoutCard: React.FC = () => {
         });
       }
     } else {
-      setExercises(workoutPlans[workoutPhase].exercises);
+      setExercises([]);
+      setHasWorkout(false);
       setAiWorkout(null);
     }
   }, [savedWorkout, workoutPhase]);
@@ -173,6 +178,7 @@ const WorkoutCard: React.FC = () => {
         intensity: result.intensity,
       });
       setIsExpanded(true);
+      setHasWorkout(true);
 
       // Auto-save AI workout
       if (isToday) {
@@ -260,12 +266,12 @@ const WorkoutCard: React.FC = () => {
     });
   };
 
-  const totalSets = exercises.reduce((acc, ex) => acc + ex.sets, 0);
-  const completedSets = exercises.reduce(
+  const totalSets = exercises.length > 0 ? exercises.reduce((acc, ex) => acc + ex.sets, 0) : 0;
+  const completedSets = exercises.length > 0 ? exercises.reduce(
     (acc, ex) => acc + ex.completed.filter(Boolean).length,
     0
-  );
-  const progress = (completedSets / totalSets) * 100;
+  ) : 0;
+  const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
 
   if (loading) {
     return (
@@ -295,6 +301,69 @@ const WorkoutCard: React.FC = () => {
         <p className="text-sm text-muted-foreground text-center py-4">
           O treino planejado para esta fase seria: <span className="font-medium text-foreground">{defaultPlan.title}</span>
         </p>
+      </motion.div>
+    );
+  }
+
+  // Show generate workout CTA when no workout exists for today
+  if (isToday && !hasWorkout) {
+    return (
+      <motion.div
+        className="rounded-3xl p-5 mx-4 glass-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-3 rounded-2xl phase-gradient shadow-glow">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-foreground">Treino do Dia</h3>
+            <p className="text-sm text-muted-foreground">
+              Fase {defaultPlan.title.toLowerCase()} — {defaultPlan.intensity}
+            </p>
+          </div>
+        </div>
+
+        <PremiumGate feature="Gerar Treino do Dia" mode="banner">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Energia hoje:</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setEnergyLevel(level)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      energyLevel >= level
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground'
+                    }`}
+                  >
+                    <Zap className="w-4 h-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Button
+              onClick={handleGenerateAIWorkout}
+              disabled={aiLoading}
+              className="w-full bg-gradient-to-r from-primary to-terracotta text-white hover:opacity-90"
+            >
+              {aiLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Gerando treino...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Gerar Treino do Dia ⚡
+                </>
+              )}
+            </Button>
+          </div>
+        </PremiumGate>
       </motion.div>
     );
   }

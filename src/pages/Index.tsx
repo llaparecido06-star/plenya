@@ -4,7 +4,7 @@ import { Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageLayout from '@/components/layout/PageLayout';
 import CycleWheel from '@/components/cycle/CycleWheel';
-import InsightCard from '@/components/cycle/InsightCard';
+
 import CycleSyncInsightCard from '@/components/cycle/CycleSyncInsightCard';
 import QuickLog from '@/components/cycle/QuickLog';
 import ChefSuggestion from '@/components/cycle/ChefSuggestion';
@@ -14,7 +14,7 @@ import GardenStreak from '@/components/home/GardenStreak';
 import AdaptiveHomeCard from '@/components/home/AdaptiveHomeCard';
 import SOSPartnerButton from '@/components/home/SOSPartnerButton';
 import WaterTracker from '@/components/home/WaterTracker';
-import IntimacyCard from '@/components/home/IntimacyCard';
+
 import PillTracker from '@/components/home/PillTracker';
 import DeviceExpirationCard from '@/components/home/DeviceExpirationCard';
 import NextPeriodCard from '@/components/home/NextPeriodCard';
@@ -180,15 +180,6 @@ const Index: React.FC = () => {
             {/* Chef Suggestion - All modes */}
             <ChefSuggestion />
             
-            {/* Intimacy & Health Card - Menstruating and Menopause */}
-            {(isMenstruating || isMenopause) && (
-              <div className="px-4">
-                <IntimacyCard />
-              </div>
-            )}
-            
-            {/* Insight Card - Menstruating only */}
-            {isMenstruating && <InsightCard />}
             
             {/* Quick Log - All modes */}
             <QuickLog />

@@ -27,16 +27,16 @@ const Mente: React.FC = () => {
         <BreathingCard />
       </div>
 
-      <Tabs defaultValue="chat" className="px-4">
+      <Tabs defaultValue="checkin" className="px-4">
         <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="checkin">Check-in</TabsTrigger>
+          <TabsTrigger value="chat">Chat</TabsTrigger>
         </TabsList>
-        <TabsContent value="chat" className="-mx-4">
-          <ChatInterface />
-        </TabsContent>
         <TabsContent value="checkin">
           <EmotionalCheckin />
+        </TabsContent>
+        <TabsContent value="chat" className="-mx-4">
+          <ChatInterface />
         </TabsContent>
       </Tabs>
 

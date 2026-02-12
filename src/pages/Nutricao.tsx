@@ -37,9 +37,9 @@ const Nutricao: React.FC = () => {
         >
           <h3 className="font-semibold text-foreground mb-2">Macros do Dia</h3>
           <MacroRings
-            protein={{ current: 65, goal: 120 }}
-            carbs={{ current: 180, goal: 250 }}
-            fat={{ current: 45, goal: 70 }}
+            protein={{ current: 0, goal: 120 }}
+            carbs={{ current: 0, goal: 250 }}
+            fat={{ current: 0, goal: 70 }}
           />
         </motion.div>
       </div>
