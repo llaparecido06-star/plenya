@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -29,13 +30,16 @@ export const useNotifications = () => {
     trialExpiration: true,
   });
 
-  // Check for notification support
+  // Check for notification support (web or native)
   useEffect(() => {
-    const isSupported = 'Notification' in window && 'serviceWorker' in navigator;
-    setSupported(isSupported);
+    const isNative = Capacitor.isNativePlatform();
+    const isWebSupported = 'Notification' in window && 'serviceWorker' in navigator;
+    setSupported(isNative || isWebSupported);
     
-    if (isSupported) {
+    if (isWebSupported && !isNative) {
       setPermission(Notification.permission);
+    } else if (isNative) {
+      setPermission('granted'); // Native handles its own permission flow
     }
 
     // Load saved settings
