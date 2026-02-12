@@ -44,12 +44,12 @@ export const STRIPE_PLANS = {
   },
   premium_annual: {
     name: 'Premium Anual',
-    price: 199.90,
-    priceLabel: 'R$199,90/ano',
-    priceMonthly: 'R$16,66/mês',
+    price: 119.90,
+    priceLabel: 'R$119,90/ano',
+    priceMonthly: 'R$9,99/mês',
     price_id: 'price_1T01ReBY8FNRl6PsBtyoDLjr',
     product_id: 'prod_TxxMucqxpJbsLV',
-    description: '2 meses grátis!',
+    description: '50% de desconto!',
     features: [
       'Registro de ciclo menstrual',
       'Log diário de humor e sintomas',

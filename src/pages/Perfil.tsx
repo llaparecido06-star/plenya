@@ -1,17 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthForm from '@/components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
-import { LogOut, Target, Dumbbell, Heart, Baby, Activity, Utensils, Zap } from 'lucide-react';
+import { LogOut, Target, Dumbbell, Heart, Baby, Activity, Utensils, Zap, Crown } from 'lucide-react';
 import DUMPicker from '@/components/profile/DUMPicker';
 import PatternsCard from '@/components/history/PatternsCard';
 import ContraceptiveConfig from '@/components/profile/ContraceptiveConfig';
 import MedicalReportButton from '@/components/profile/MedicalReportButton';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
-import PricingCards from '@/components/subscription/PricingCards';
 import { useProfile } from '@/hooks/useProfile';
 import { useAvatar } from '@/hooks/useAvatar';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +45,7 @@ const activityConfig: Record<string, { label: string; icon: string }> = {
 };
 
 const Perfil: React.FC = () => {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { goals, diet_type, fitness_level, full_name, loading, refetch } = useProfile();
   const { avatarUrl, updateAvatarUrl } = useAvatar();
@@ -212,16 +213,20 @@ const Perfil: React.FC = () => {
           <NotificationSettings />
         </motion.div>
 
-        {/* Subscription Plans */}
+        {/* Subscription Plans Link */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.32 }}
         >
-          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-            👑 Planos
-          </h3>
-          <PricingCards />
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => navigate('/planos')}
+          >
+            <Crown className="w-4 h-4 text-primary" />
+            Ver Planos e Assinatura
+          </Button>
         </motion.div>
 
         {/* Medical Report Button */}
