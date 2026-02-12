@@ -20,6 +20,9 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Planos = lazy(() => import("./pages/Planos"));
+const Instalar = lazy(() => import("./pages/Instalar"));
+const Privacidade = lazy(() => import("./pages/Privacidade"));
+const Termos = lazy(() => import("./pages/Termos"));
 
 const queryClient = new QueryClient();
 
@@ -92,6 +95,9 @@ const App = () => (
                         </ProtectedRoute>
                       }
                     />
+                    <Route path="/instalar" element={<Instalar />} />
+                    <Route path="/privacidade" element={<Privacidade />} />
+                    <Route path="/termos" element={<Termos />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

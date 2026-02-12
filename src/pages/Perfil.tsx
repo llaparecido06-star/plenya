@@ -17,6 +17,7 @@ import { useAvatar } from '@/hooks/useAvatar';
 import { Badge } from '@/components/ui/badge';
 import ProfileSettingsEditor from '@/components/profile/ProfileSettingsEditor';
 import AvatarUpload from '@/components/profile/AvatarUpload';
+import DeleteAccountButton from '@/components/profile/DeleteAccountButton';
 
 // Goal configuration for badges
 const goalConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -235,11 +236,28 @@ const Perfil: React.FC = () => {
         <Button
           onClick={signOut}
           variant="outline"
-          className="w-full mt-6 mb-24"
+          className="w-full mt-6"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Sair
         </Button>
+
+        {/* Delete Account */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-24"
+        >
+          <DeleteAccountButton />
+        </motion.div>
+
+        {/* Legal Links */}
+        <div className="flex justify-center gap-4 text-xs text-muted-foreground mb-8">
+          <a href="/privacidade" className="hover:underline">Política de Privacidade</a>
+          <span>•</span>
+          <a href="/termos" className="hover:underline">Termos de Uso</a>
+        </div>
       </div>
     </PageLayout>
   );
