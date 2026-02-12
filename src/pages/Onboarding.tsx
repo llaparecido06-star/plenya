@@ -26,6 +26,7 @@ import {
   Cake
 } from 'lucide-react';
 import PremiumTrialStep from '@/components/onboarding/PremiumTrialStep';
+import PWAInstallStep from '@/components/onboarding/PWAInstallStep';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -138,7 +139,8 @@ const chapters = [
   { id: 2, title: 'O Momento', subtitle: 'Sua fase biológica' },
   { id: 3, title: 'Estilo', subtitle: 'Nutrição e movimento' },
   { id: 4, title: 'Sincronização', subtitle: 'Seu ciclo' },
-  { id: 5, title: 'Premium', subtitle: 'Experimente grátis' },
+  { id: 5, title: 'Instalação', subtitle: 'Tenha o app' },
+  { id: 6, title: 'Premium', subtitle: 'Experimente grátis' },
 ];
 
 const Onboarding: React.FC = () => {
@@ -239,9 +241,9 @@ const Onboarding: React.FC = () => {
 
   // Calculate total steps based on life phase (reduced by 1 since name step removed)
   const getTotalSteps = () => {
-    if (lifePhase === 'menopause') return 6; // Birth (1) + Phase (1) + Style (3) + Premium (1) = 6
-    if (lifePhase === 'pregnant') return 7; // Birth + Phase + Style + Pregnancy date + Premium
-    return 9; // Full flow with contraceptive + Premium
+    if (lifePhase === 'menopause') return 7; // Birth (1) + Phase (1) + Style (3) + PWA (1) + Premium (1) = 7
+    if (lifePhase === 'pregnant') return 8; // Birth + Phase + Style + Pregnancy date + PWA + Premium
+    return 10; // Full flow with contraceptive + PWA + Premium
   };
 
   const totalSteps = getTotalSteps();
@@ -347,19 +349,19 @@ const Onboarding: React.FC = () => {
     
     // Determine next step based on life phase - now goes to premium step before complete
     if (currentStep === 5 && lifePhase === 'menopause') {
-      // Go to premium trial step
+      // Go to PWA install step
       setCurrentStep(6);
       return;
     }
     
     if (lifePhase === 'pregnant' && currentStep === 6) {
-      // Go to premium trial step
+      // Go to PWA install step
       setCurrentStep(7);
       return;
     }
     
     if (lifePhase === 'menstruating' && currentStep === 8) {
-      // Go to premium trial step
+      // Go to PWA install step
       setCurrentStep(9);
       return;
     }
@@ -462,8 +464,10 @@ const Onboarding: React.FC = () => {
     if (currentStep === 1) return 1; // Birth date only
     if (currentStep === 2) return 2; // Life phase
     if (currentStep <= 5) return 3; // Goals, Diet, Activity
+    // PWA install step is second to last
+    if (currentStep === totalSteps - 1) return 5; // PWA Install
     // Premium step is always the last step
-    if (currentStep === totalSteps) return 5; // Premium
+    if (currentStep === totalSteps) return 6; // Premium
     return 4; // Sync
   };
 
@@ -1311,6 +1315,19 @@ const Onboarding: React.FC = () => {
         );
 
       default:
+        // PWA install step (second to last)
+        if (currentStep === totalSteps - 1) {
+          return (
+            <motion.div
+              key="pwa-install"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <PWAInstallStep onNext={() => setCurrentStep(totalSteps)} />
+            </motion.div>
+          );
+        }
         // Premium trial step (always the last step number = totalSteps)
         if (currentStep === totalSteps) {
           return (
@@ -1346,7 +1363,7 @@ const Onboarding: React.FC = () => {
           
           <div className="text-center">
             <p className="text-xs text-muted-foreground uppercase tracking-wider">
-              Capítulo {currentChapter} de 5
+              Capítulo {currentChapter} de 6
             </p>
             <p className="text-sm font-medium text-foreground">
               {chapters[currentChapter - 1]?.title}
@@ -1375,7 +1392,7 @@ const Onboarding: React.FC = () => {
       </div>
 
       {/* Bottom Navigation - Hide on premium step */}
-      {currentStep !== totalSteps && (
+      {currentStep !== totalSteps && currentStep !== totalSteps - 1 && (
         <div className="p-6 pt-2">
           <Button
             onClick={handleNext}

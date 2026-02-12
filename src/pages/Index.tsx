@@ -28,6 +28,7 @@ import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
 import TrialExpirationBanner from '@/components/subscription/TrialExpirationBanner';
+import PWAInstallBanner from '@/components/home/PWAInstallBanner';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
@@ -115,6 +116,9 @@ const Index: React.FC = () => {
         
         {/* Upgrade Banner for free users */}
         {isToday && <UpgradeBanner />}
+
+        {/* PWA Install Banner */}
+        {isToday && <PWAInstallBanner />}
 
         {/* === PREGNANT MODE === */}
         {isToday && isPregnant && pregnancyWeeks !== null && pregnancyStartDate && (
