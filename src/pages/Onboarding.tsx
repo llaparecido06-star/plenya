@@ -530,6 +530,33 @@ const Onboarding: React.FC = () => {
   }
 
   const renderStep = () => {
+    // PWA install step (second to last) — check BEFORE switch to avoid case collisions
+    if (currentStep === totalSteps - 1) {
+      return (
+        <motion.div
+          key="pwa-install"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+        >
+          <PWAInstallStep onNext={() => setCurrentStep(totalSteps)} />
+        </motion.div>
+      );
+    }
+    // Premium trial step (always the last step)
+    if (currentStep === totalSteps) {
+      return (
+        <motion.div
+          key="premium-trial"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+        >
+          <PremiumTrialStep onSkip={handleComplete} onCompleteBeforeCheckout={saveOnboardingData} />
+        </motion.div>
+      );
+    }
+
     switch (currentStep) {
       // CHAPTER 1: Identity - Birth Date (Name removed, auto-fetched)
       case 1:
@@ -1315,32 +1342,6 @@ const Onboarding: React.FC = () => {
         );
 
       default:
-        // PWA install step (second to last)
-        if (currentStep === totalSteps - 1) {
-          return (
-            <motion.div
-              key="pwa-install"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <PWAInstallStep onNext={() => setCurrentStep(totalSteps)} />
-            </motion.div>
-          );
-        }
-        // Premium trial step (always the last step number = totalSteps)
-        if (currentStep === totalSteps) {
-          return (
-            <motion.div
-              key="premium-trial"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <PremiumTrialStep onSkip={handleComplete} onCompleteBeforeCheckout={saveOnboardingData} />
-            </motion.div>
-          );
-        }
         return null;
     }
   };
