@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useNativePush } from '@/hooks/useNativePush';
 import { useContraceptive } from '@/hooks/useContraceptive';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useRecipeHistory } from '@/hooks/useRecipeHistory';
@@ -25,17 +26,23 @@ const NotificationSettings: React.FC = () => {
     scheduleTrialExpirationReminder,
   } = useNotifications();
   
+  
+  const { isNative, register: registerNativePush } = useNativePush();
   const { contraceptive_type: contraceptiveType } = useContraceptive();
   const { isTryingToConceive } = useLifePhase();
   const { favorites } = useRecipeHistory();
   const { subscriptionEnd, subscribed } = useAuth();
 
-  // Register service worker on mount
+  // Register service worker or native push on mount
   useEffect(() => {
     if (supported) {
-      registerServiceWorker();
+      if (isNative) {
+        registerNativePush();
+      } else {
+        registerServiceWorker();
+      }
     }
-  }, [supported, registerServiceWorker]);
+  }, [supported, isNative, registerServiceWorker, registerNativePush]);
 
   // Schedule pill reminder when enabled
   useEffect(() => {
