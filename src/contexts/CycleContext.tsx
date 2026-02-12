@@ -19,6 +19,8 @@ interface CycleContextType {
   setCycleDay: (day: number) => void;
   cycleLength: number;
   setCycleLength: (length: number) => void;
+  periodDuration: number;
+  setPeriodDuration: (duration: number) => void;
   lastPeriodStart: Date | null;
   setLastPeriodStart: (date: Date | null) => void;
   getPhaseInfo: () => PhaseInfo;
@@ -95,6 +97,7 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [cycleDay, setCycleDay] = useState(10);
   const [cycleLength, setCycleLength] = useState(28);
   const [lastPeriodStart, setLastPeriodStart] = useState<Date | null>(null);
+  const [periodDuration, setPeriodDuration] = useState(5);
   const [isLoading, setIsLoading] = useState(true);
 
   // Calculate phase based on cycle day
@@ -130,7 +133,7 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('last_period_start, cycle_length')
+        .select('last_period_start, cycle_length, period_duration')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -143,6 +146,7 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (profile) {
         const newCycleLength = profile.cycle_length || 28;
         setCycleLength(newCycleLength);
+        setPeriodDuration((profile as any).period_duration || 5);
 
         if (profile.last_period_start) {
           const periodDate = new Date(profile.last_period_start);
@@ -237,10 +241,10 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     
     const nextPeriodDate = addDays(lastPeriodStart, (cyclesPassed + 1) * cycleLength);
     const daysUntil = differenceInDays(nextPeriodDate, today);
-    const predictedEndDate = addDays(nextPeriodDate, 4); // Assume 5 days period
+    const predictedEndDate = addDays(nextPeriodDate, periodDuration - 1);
     
     return { nextPeriodDate, daysUntil, predictedEndDate };
-  }, [lastPeriodStart, cycleLength]);
+  }, [lastPeriodStart, cycleLength, periodDuration]);
 
   // Get predicted period dates for calendar marking (returns start dates of predicted periods)
   const getPredictedPeriodDates = useCallback((monthsAhead: number = 3): Date[] => {
@@ -257,15 +261,15 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     for (let i = 0; i <= Math.ceil(monthsAhead * 30 / cycleLength) + 1; i++) {
       const periodDate = addDays(lastPeriodStart, (cyclesPassed + i) * cycleLength);
       if (periodDate >= today && periodDate <= endDate) {
-        // Add all days of predicted period (5 days)
-        for (let day = 0; day < 5; day++) {
+        // Add all days of predicted period
+        for (let day = 0; day < periodDuration; day++) {
           dates.push(addDays(periodDate, day));
         }
       }
     }
     
     return dates;
-  }, [lastPeriodStart, cycleLength]);
+  }, [lastPeriodStart, cycleLength, periodDuration]);
 
   // Computed state flags for late/awaiting logic
   const hasDUM = !!lastPeriodStart;
@@ -281,6 +285,8 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setCycleDay,
         cycleLength,
         setCycleLength,
+        periodDuration,
+        setPeriodDuration,
         lastPeriodStart,
         setLastPeriodStart,
         getPhaseInfo,

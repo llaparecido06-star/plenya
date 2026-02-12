@@ -306,6 +306,7 @@ export type Database = {
           medication_name: string | null
           medication_type: string | null
           onboarding_completed: boolean
+          period_duration: number | null
           pill_reminder_time: string | null
           pregnancy_start_date: string | null
           trial_end_date: string | null
@@ -338,6 +339,7 @@ export type Database = {
           medication_name?: string | null
           medication_type?: string | null
           onboarding_completed?: boolean
+          period_duration?: number | null
           pill_reminder_time?: string | null
           pregnancy_start_date?: string | null
           trial_end_date?: string | null
@@ -370,6 +372,7 @@ export type Database = {
           medication_name?: string | null
           medication_type?: string | null
           onboarding_completed?: boolean
+          period_duration?: number | null
           pill_reminder_time?: string | null
           pregnancy_start_date?: string | null
           trial_end_date?: string | null

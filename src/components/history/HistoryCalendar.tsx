@@ -34,7 +34,7 @@ interface HistoryCalendarProps {
 const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const { selectedDate, setSelectedDate, isToday, goToToday } = useSelectedDate();
   const { datesWithData } = useHistoricalData();
-  const { getPredictedPeriodDates, cycleLength, lastPeriodStart } = useCycle();
+  const { getPredictedPeriodDates, cycleLength, lastPeriodStart, periodDuration } = useCycle();
   const { isTryingToConceive, lifePhase } = useLifePhase();
   const { user } = useAuth();
   const { menstruationDates, toggleMenstruation, isMenstruating, emergencyContraceptionDates } = useMenstruationLog();
@@ -156,7 +156,6 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
 
   // Calculate expected period continuation days (when user marks day 1, show days 2-5 as expected)
   const expectedPeriodDays = useMemo(() => {
-    const PERIOD_DURATION = 5; // Typical period duration
     const expectedDates: string[] = [];
     
     // Sort menstruation dates to find period starts
@@ -174,7 +173,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
         processedStarts.push(dateStr);
         const startDate = new Date(dateStr);
         
-        for (let i = 1; i < PERIOD_DURATION; i++) {
+        for (let i = 1; i < periodDuration; i++) {
           const expectedDate = new Date(startDate);
           expectedDate.setDate(startDate.getDate() + i);
           const expectedDateStr = expectedDate.toISOString().split('T')[0];
@@ -192,7 +191,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     }
     
     return expectedDates;
-  }, [menstruationDates]);
+  }, [menstruationDates, periodDuration]);
 
   // Calculate fertile window dates for trying to conceive users
   const fertileWindowDates = useMemo(() => {
