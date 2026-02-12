@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PremiumGate from '@/components/subscription/PremiumGate';
 import { ChefHat, Camera, Keyboard, Loader2, Sparkles, ArrowLeft, Send, Leaf, History, Star, Trash2, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -141,7 +142,7 @@ const ChefIACard: React.FC = () => {
   const displayedHistory = showFavoritesOnly ? favorites : savedRecipes;
 
   return (
-    <>
+    <PremiumGate feature="Chef IA" mode="inline">
       <motion.button
         id="chef-ia-card"
         onClick={() => { setShowDialog(true); resetState(); }}
@@ -653,7 +654,7 @@ const ChefIACard: React.FC = () => {
           </AnimatePresence>
         </DialogContent>
       </Dialog>
-    </>
+    </PremiumGate>
   );
 };
 
