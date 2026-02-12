@@ -37,13 +37,21 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
+    // Check if user already had a subscription (no trial for returning customers)
+    let hasExistingSub = false;
+    if (customerId) {
+      const subs = await stripe.subscriptions.list({ customer: customerId, limit: 1, status: 'all' });
+      hasExistingSub = subs.data.length > 0;
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/perfil?subscription=success`,
-      cancel_url: `${req.headers.get("origin")}/perfil?subscription=canceled`,
+      subscription_data: hasExistingSub ? undefined : { trial_period_days: 7 },
+      success_url: `${req.headers.get("origin")}/planos?subscription=success`,
+      cancel_url: `${req.headers.get("origin")}/planos?subscription=canceled`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

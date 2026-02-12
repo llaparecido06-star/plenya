@@ -19,7 +19,7 @@ const UpgradeBanner: React.FC = () => {
       transition={{ delay: 0.1 }}
     >
       <motion.button
-        onClick={() => navigate('/perfil')}
+        onClick={() => navigate('/planos')}
         className="w-full relative overflow-hidden rounded-2xl p-4 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-lg shadow-orange-500/30"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -30,7 +30,7 @@ const UpgradeBanner: React.FC = () => {
           </div>
           <div className="flex-1 text-left">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-base">Desbloqueie o Premium</h3>
+              <h3 className="font-bold text-base">7 dias grátis de Premium!</h3>
               <Sparkles className="w-4 h-4" />
             </div>
             <p className="text-xs text-white/80 mt-0.5">

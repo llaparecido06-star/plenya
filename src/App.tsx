@@ -19,6 +19,7 @@ const Perfil = lazy(() => import("./pages/Perfil"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Planos = lazy(() => import("./pages/Planos"));
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,14 @@ const App = () => (
                       element={
                         <ProtectedRoute>
                           <Perfil />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/planos"
+                      element={
+                        <ProtectedRoute>
+                          <Planos />
                         </ProtectedRoute>
                       }
                     />

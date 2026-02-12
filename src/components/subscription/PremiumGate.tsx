@@ -35,7 +35,7 @@ const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, mode = 'in
             : 'Este recurso é exclusivo para assinantes Premium.'}
         </p>
         <Button
-          onClick={() => navigate('/perfil')}
+          onClick={() => navigate('/planos')}
           className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
         >
           <Sparkles className="w-4 h-4 mr-2" />
@@ -65,7 +65,7 @@ const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, mode = 'in
         </p>
         <Button
           size="sm"
-          onClick={() => navigate('/perfil')}
+          onClick={() => navigate('/planos')}
           className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
         >
           <Crown className="w-3.5 h-3.5 mr-1.5" />
