@@ -246,11 +246,28 @@ const Onboarding: React.FC = () => {
 
   const totalSteps = getTotalSteps();
 
-  // Filter brands based on search
-  const filteredBrands = contraceptiveBrands.filter(brand =>
-    brand.label.toLowerCase().includes(brandSearch.toLowerCase()) ||
-    brand.type.toLowerCase().includes(brandSearch.toLowerCase())
-  );
+  // Map selected method to matching brand types
+  const getMethodBrandTypes = (method: string | null): string[] => {
+    switch (method) {
+      case 'pill': return ['Pílula Combinada', 'Pílula Anti-androgênica', 'Pílula Progesterona', 'Pílula Bioidêntica'];
+      case 'injection': return ['Injeção Trimestral', 'Injeção Mensal'];
+      case 'iud': return ['DIU Hormonal', 'DIU Não-Hormonal'];
+      case 'implant': return ['Implante'];
+      case 'ring': return ['Anel'];
+      case 'patch': return ['Adesivo'];
+      default: return [];
+    }
+  };
+
+  // Filter brands based on search AND selected method
+  const allowedBrandTypes = getMethodBrandTypes(selectedMethod);
+  const filteredBrands = contraceptiveBrands.filter(brand => {
+    const matchesSearch = !brandSearch || 
+      brand.label.toLowerCase().includes(brandSearch.toLowerCase()) ||
+      brand.type.toLowerCase().includes(brandSearch.toLowerCase());
+    const matchesMethod = allowedBrandTypes.length === 0 || allowedBrandTypes.includes(brand.type);
+    return matchesSearch && matchesMethod;
+  });
 
   // Check contraceptive requirements
   const needsBrand = ['pill', 'injection', 'iud', 'implant'].includes(selectedMethod || '');
@@ -356,46 +373,50 @@ const Onboarding: React.FC = () => {
     }
   };
 
+  // Save onboarding data without showing animation (used before checkout redirect)
+  const saveOnboardingData = async () => {
+    if (!user) return;
+
+    const updateData: any = {
+      full_name: fullName,
+      date_of_birth: dateOfBirth ? toLocalDateString(dateOfBirth) : null,
+      life_phase: lifePhase,
+      is_trying_to_conceive: isTryingToConceive || selectedGoals.includes('get_pregnant'),
+      goal: selectedGoals.join(','),
+      diet_type: selectedDiet,
+      fitness_level: selectedActivity,
+      onboarding_completed: true,
+    };
+
+    if (lifePhase === 'menstruating') {
+      updateData.last_period_start = lastPeriodDate ? toLocalDateString(lastPeriodDate) : null;
+      updateData.cycle_length = cycleLength;
+      updateData.contraceptive_type = selectedMethod;
+      updateData.contraceptive_brand = contraceptiveDetails.brand || null;
+      updateData.pill_reminder_time = contraceptiveDetails.reminderTime || null;
+      updateData.contraceptive_details = contraceptiveDetails;
+    }
+
+    if (lifePhase === 'pregnant') {
+      updateData.pregnancy_start_date = pregnancyStartDate ? toLocalDateString(pregnancyStartDate) : null;
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updateData)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+    await refreshCycleData();
+  };
+
   const handleComplete = async () => {
     if (!user) return;
     
     setIsSubmitting(true);
     
     try {
-      const updateData: any = {
-        full_name: fullName,
-        date_of_birth: dateOfBirth ? toLocalDateString(dateOfBirth) : null,
-        life_phase: lifePhase,
-        is_trying_to_conceive: isTryingToConceive || selectedGoals.includes('get_pregnant'),
-        goal: selectedGoals.join(','),
-        diet_type: selectedDiet,
-        fitness_level: selectedActivity,
-        onboarding_completed: true,
-      };
-
-      // Add cycle data for menstruating users
-      if (lifePhase === 'menstruating') {
-        updateData.last_period_start = lastPeriodDate ? toLocalDateString(lastPeriodDate) : null;
-        updateData.cycle_length = cycleLength;
-        updateData.contraceptive_type = selectedMethod;
-        updateData.contraceptive_brand = contraceptiveDetails.brand || null;
-        updateData.pill_reminder_time = contraceptiveDetails.reminderTime || null;
-        updateData.contraceptive_details = contraceptiveDetails;
-      }
-
-      // Add pregnancy data for pregnant users
-      if (lifePhase === 'pregnant') {
-        updateData.pregnancy_start_date = pregnancyStartDate ? toLocalDateString(pregnancyStartDate) : null;
-      }
-
-      const { error } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      await refreshCycleData();
+      await saveOnboardingData();
 
       // Show building profile animation
       setShowBuildingProfile(true);
@@ -1299,7 +1320,7 @@ const Onboarding: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
             >
-              <PremiumTrialStep onSkip={handleComplete} />
+              <PremiumTrialStep onSkip={handleComplete} onCompleteBeforeCheckout={saveOnboardingData} />
             </motion.div>
           );
         }

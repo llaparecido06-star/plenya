@@ -17,9 +17,10 @@ const premiumFeatures = [
 
 interface PremiumTrialStepProps {
   onSkip: () => void;
+  onCompleteBeforeCheckout?: () => Promise<void>;
 }
 
-const PremiumTrialStep: React.FC<PremiumTrialStepProps> = ({ onSkip }) => {
+const PremiumTrialStep: React.FC<PremiumTrialStepProps> = ({ onSkip, onCompleteBeforeCheckout }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
@@ -28,12 +29,18 @@ const PremiumTrialStep: React.FC<PremiumTrialStepProps> = ({ onSkip }) => {
     if (!user) return;
     setLoading(true);
     try {
+      // Complete onboarding BEFORE opening checkout so user isn't redirected back
+      if (onCompleteBeforeCheckout) {
+        await onCompleteBeforeCheckout();
+      }
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId },
       });
       if (error) throw error;
       if (data?.url) {
-        window.open(data.url, '_blank');
+        // Navigate in same window so success_url works properly
+        window.location.href = data.url;
       }
     } catch (err) {
       console.error('Checkout error:', err);
