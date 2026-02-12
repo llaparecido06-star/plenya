@@ -11,6 +11,7 @@ import ContraceptiveConfig from '@/components/profile/ContraceptiveConfig';
 import MedicalReportButton from '@/components/profile/MedicalReportButton';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
+import PricingCards from '@/components/subscription/PricingCards';
 import { useProfile } from '@/hooks/useProfile';
 import { useAvatar } from '@/hooks/useAvatar';
 import { Badge } from '@/components/ui/badge';
@@ -209,6 +210,18 @@ const Perfil: React.FC = () => {
           transition={{ delay: 0.3 }}
         >
           <NotificationSettings />
+        </motion.div>
+
+        {/* Subscription Plans */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.32 }}
+        >
+          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+            👑 Planos
+          </h3>
+          <PricingCards />
         </motion.div>
 
         {/* Medical Report Button */}
