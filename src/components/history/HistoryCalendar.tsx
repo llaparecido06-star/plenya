@@ -249,7 +249,13 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const handleDayClick = (day: number) => {
     const newDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
     if (newDate <= new Date()) {
-      setSelectedDate(newDate);
+      // If the day is already marked as menstruation, open the dialog to allow unmarking
+      if (isManualMenstruation(day) && lifePhase !== 'pregnant') {
+        setSelectedDayForMenstruation(newDate);
+        setMenstruationDialogOpen(true);
+      } else {
+        setSelectedDate(newDate);
+      }
     }
   };
 
