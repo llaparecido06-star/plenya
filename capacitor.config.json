@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.23584ca0d6a848d49275dab1f6be180e",
+  "appName": "plenya",
+  "webDir": "dist",
+  "server": {
+    "url": "https://23584ca0-d6a8-48d4-9275-dab1f6be180e.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}
