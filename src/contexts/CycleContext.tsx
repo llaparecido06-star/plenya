@@ -171,18 +171,19 @@ export const CycleProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     refreshCycleData();
   }, [refreshCycleData]);
 
-  // Listen for DUM sync events from manual menstruation logs
+  // Listen for DUM sync events and profile updates
   useEffect(() => {
     const handleDUMSync = (event: CustomEvent<{ date: string }>) => {
       console.log('[CycleContext] DUM synced from manual log:', event.detail.date);
       refreshCycleData();
     };
+    const handleProfileUpdated = () => refreshCycleData();
     
     window.addEventListener('dum-synced', handleDUMSync as EventListener);
-    window.addEventListener('profile-updated', () => refreshCycleData());
+    window.addEventListener('profile-updated', handleProfileUpdated);
     return () => {
       window.removeEventListener('dum-synced', handleDUMSync as EventListener);
-      window.removeEventListener('profile-updated', () => refreshCycleData());
+      window.removeEventListener('profile-updated', handleProfileUpdated);
     };
   }, [refreshCycleData]);
 
