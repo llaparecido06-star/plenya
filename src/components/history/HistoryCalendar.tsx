@@ -44,7 +44,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
   const [newlyAddedDates, setNewlyAddedDates] = useState<string[]>([]);
   const [menstruationDialogOpen, setMenstruationDialogOpen] = useState(false);
   const [selectedDayForMenstruation, setSelectedDayForMenstruation] = useState<Date | null>(null);
-  const [menstruationAction, setMenstruationAction] = useState<'add' | 'remove'>('add');
+  const [menstruationAction, setMenstruationAction] = useState<'add' | 'remove' | 'remove_expected'>('add');
   
   // Use ref to track previous dates for comparison without causing re-renders
   const previousDatesRef = React.useRef<string[]>([]);
@@ -265,14 +265,18 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
 
     const dateStr = `${viewMonth.getFullYear()}-${String(viewMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const isAlreadyMarked = menstruationDates.includes(dateStr);
+    const isExpected = expectedPeriodDays.includes(dateStr);
 
     if (isAlreadyMarked) {
-      // Directly remove — no dialog needed
       setSelectedDayForMenstruation(date);
       setMenstruationAction('remove');
       setMenstruationDialogOpen(true);
+    } else if (isExpected) {
+      // Remove expected continuation day — shorten period from this day onward
+      setSelectedDayForMenstruation(date);
+      setMenstruationAction('remove_expected');
+      setMenstruationDialogOpen(true);
     } else {
-      // Mark new menstruation — check if there's an existing one within 14 days to replace
       setSelectedDayForMenstruation(date);
       setMenstruationAction('add');
       setMenstruationDialogOpen(true);
@@ -295,7 +299,6 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
         return diffDays <= 14 && diffDays > 0;
       });
 
-      // Remove old dates within 14-day window
       for (const dateStr of datesToRemove) {
         await supabase
           .from('menstruation_logs')
@@ -304,10 +307,47 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
           .eq('log_date', dateStr);
       }
 
-      // Now toggle (add) the new date
       await toggleMenstruation(selectedDayForMenstruation);
+    } else if (menstruationAction === 'remove_expected') {
+      // Find the period start for this expected day and calculate new duration
+      const sortedDates = [...menstruationDates].sort();
+      let periodStartDate: string | null = null;
+
+      // Walk backwards from the expected day to find the period start
+      const expectedDate = new Date(selectedDayForMenstruation);
+      for (let i = 1; i <= periodDuration; i++) {
+        const checkDate = new Date(expectedDate);
+        checkDate.setDate(expectedDate.getDate() - i);
+        const checkStr = checkDate.toISOString().split('T')[0];
+        if (menstruationDates.includes(checkStr)) {
+          // Check if this is a period start (no previous consecutive day)
+          const prevDay = new Date(checkDate);
+          prevDay.setDate(prevDay.getDate() - 1);
+          const prevStr = prevDay.toISOString().split('T')[0];
+          if (!menstruationDates.includes(prevStr)) {
+            periodStartDate = checkStr;
+          }
+        }
+      }
+
+      if (periodStartDate) {
+        // Calculate new duration: days from period start to the day BEFORE the removed one
+        const start = new Date(periodStartDate);
+        const diffDays = Math.round((expectedDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        const newDuration = Math.max(1, diffDays); // At least 1 day
+
+        // Update period duration in profile
+        await supabase
+          .from('profiles')
+          .update({ period_duration: newDuration })
+          .eq('user_id', user.id);
+
+        // Dispatch event to refresh
+        window.dispatchEvent(new CustomEvent('profile-updated'));
+        window.dispatchEvent(new CustomEvent('menstruation-log-updated'));
+      }
     } else {
-      // Remove
+      // Remove manually marked day
       await toggleMenstruation(selectedDayForMenstruation);
     }
 
@@ -577,8 +617,8 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Droplets className="w-5 h-5 text-red-500" />
-              {menstruationAction === 'remove' 
-                ? 'Remover Menstruação' 
+              {menstruationAction === 'remove' || menstruationAction === 'remove_expected'
+                ? 'Encurtar Menstruação' 
                 : 'Registrar Menstruação'}
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -588,7 +628,9 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
                   <br />
                   {menstruationAction === 'remove'
                     ? 'Deseja remover este dia como menstruação?'
-                    : 'Deseja marcar este dia como início da menstruação? Datas próximas (até 14 dias) serão substituídas.'}
+                    : menstruationAction === 'remove_expected'
+                      ? 'A menstruação terminou antes deste dia? A duração será ajustada automaticamente.'
+                      : 'Deseja marcar este dia como início da menstruação? Datas próximas (até 14 dias) serão substituídas.'}
                 </>
               )}
             </AlertDialogDescription>
@@ -599,7 +641,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
               onClick={handleMenstruationConfirm}
               className="bg-red-500 hover:bg-red-600"
             >
-              {menstruationAction === 'remove' ? 'Remover' : 'Marcar'}
+              {menstruationAction === 'remove' || menstruationAction === 'remove_expected' ? 'Remover' : 'Marcar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
