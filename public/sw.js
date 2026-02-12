@@ -6,6 +6,7 @@ const NOTIFICATION_TAGS = {
   FERTILE: 'fertile-window',
   INJECTION: 'injection-reminder',
   PERIOD: 'period-prediction',
+  TRIAL_EXPIRATION: 'trial-expiration',
 };
 
 // Install event
