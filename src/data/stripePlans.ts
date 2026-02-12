@@ -47,8 +47,8 @@ export const STRIPE_PLANS = {
     price: 119.90,
     priceLabel: 'R$119,90/ano',
     priceMonthly: 'R$9,99/mês',
-    price_id: 'price_1T01ReBY8FNRl6PsBtyoDLjr',
-    product_id: 'prod_TxxMucqxpJbsLV',
+    price_id: 'price_1T029NBY8FNRl6PsiS6eWuSu',
+    product_id: 'prod_Txy5Of5Md1YTxN',
     description: '50% de desconto!',
     features: [
       'Registro de ciclo menstrual',
