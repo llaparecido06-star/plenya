@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Sparkles, Check, X, Loader2 } from 'lucide-react';
+import { Camera, Upload, Sparkles, Check, X, Loader2, Crown, Lock } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useNutrition } from '@/hooks/useNutrition';
 import { useAIBrain } from '@/hooks/useAIBrain';
 import { useCycle } from '@/contexts/CycleContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ScanResult {
   meal_name: string;
@@ -27,10 +28,12 @@ interface ScanResult {
 
 const MealScanner: React.FC = () => {
   const { addMeal, saving, isAuthenticated } = useNutrition();
-  const { scanMeal, loading: aiLoading } = useAIBrain();
-  const { getPhaseInfo, currentPhase } = useCycle();
+  const { scanMeal } = useAIBrain();
+  const { currentPhase } = useCycle();
   const { diet_type } = useProfile();
-  
+  const { subscribed } = useAuth();
+  const navigate = useNavigate();
+
   const [isOpen, setIsOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -53,33 +56,27 @@ const MealScanner: React.FC = () => {
   const startScanning = async (imageBase64: string) => {
     setIsScanning(true);
     setScanResult(null);
-    
     const result = await scanMeal({
       image: imageBase64,
       phase: currentPhase,
       diet_type: diet_type || undefined,
     });
-
     setIsScanning(false);
-
     if (result) {
       setScanResult(result);
     } else {
-      // Reset if AI failed
       setImagePreview(null);
     }
   };
 
   const handleConfirm = async () => {
     if (!scanResult) return;
-
     const success = await addMeal('lanche', scanResult.meal_name, {
       calories: scanResult.macros.calories,
       protein: scanResult.macros.protein,
       carbs: scanResult.macros.carbs,
       fat: scanResult.macros.fat,
     });
-
     if (success) {
       setSaved(true);
       setTimeout(() => {
@@ -98,206 +95,173 @@ const MealScanner: React.FC = () => {
     setIsScanning(false);
   };
 
+  const isPremiumLocked = !subscribed;
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <motion.button
-          className="fixed bottom-36 right-4 z-40 w-14 h-14 rounded-full phase-gradient shadow-glow flex items-center justify-center"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-        >
-          <Camera className="w-6 h-6 text-white" />
-        </motion.button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-xl phase-gradient">
-              <Camera className="w-4 h-4 text-white" />
-            </div>
-            Scan de Refeição com IA
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <motion.button
+        className={`fixed bottom-36 right-4 z-40 w-14 h-14 rounded-full shadow-glow flex items-center justify-center ${
+          isPremiumLocked ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'phase-gradient'
+        }`}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+        onClick={() => setIsOpen(true)}
+      >
+        <Camera className="w-6 h-6 text-white" />
+        {isPremiumLocked && (
+          <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center">
+            <Lock className="w-3 h-3 text-white" />
+          </div>
+        )}
+      </motion.button>
 
-        <AnimatePresence mode="wait">
-          {!imagePreview && !isScanning && !scanResult && (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-md">
+          {isPremiumLocked ? (
             <motion.div
-              key="upload"
+              className="text-center space-y-4 py-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-4"
             >
-              <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center bg-secondary/30">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="p-4 rounded-full bg-phase-secondary/50">
-                    <Upload className="w-8 h-8 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">Tire uma foto da refeição</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Nossa IA vai identificar os alimentos e calcular os macros
-                    </p>
-                  </div>
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full phase-gradient text-white font-medium">
-                      <Camera className="w-4 h-4" />
-                      Tirar Foto
-                    </span>
-                  </label>
-                </div>
+              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                <Crown className="w-8 h-8 text-white" />
               </div>
+              <h3 className="font-bold text-foreground text-lg">Scan de Refeição com IA</h3>
+              <p className="text-sm text-muted-foreground px-4">
+                O scanner de refeições com IA é exclusivo para assinantes Premium.
+                Tire fotos das suas refeições e receba os macros calculados automaticamente!
+              </p>
+              <Button
+                onClick={() => { setIsOpen(false); navigate('/planos'); }}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Ver Planos Premium
+              </Button>
             </motion.div>
-          )}
-
-          {isScanning && (
-            <motion.div
-              key="scanning"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="py-8"
-            >
-              <div className="flex flex-col items-center gap-4">
-                {imagePreview && (
-                  <div className="w-full h-40 rounded-xl overflow-hidden mb-2">
-                    <img
-                      src={imagePreview}
-                      alt="Refeição"
-                      className="w-full h-full object-cover"
-                    />
+          ) : (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-2 font-semibold">
+                  <div className="p-2 rounded-xl phase-gradient">
+                    <Camera className="w-4 h-4 text-white" />
                   </div>
+                  Scan de Refeição com IA
+                </div>
+              </DialogHeader>
+
+              <AnimatePresence mode="wait">
+                {!imagePreview && !isScanning && !scanResult && (
+                  <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-4">
+                    <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center bg-secondary/30">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="p-4 rounded-full bg-phase-secondary/50">
+                          <Upload className="w-8 h-8 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">Tire uma foto da refeição</p>
+                          <p className="text-sm text-muted-foreground mt-1">Nossa IA vai identificar os alimentos e calcular os macros</p>
+                        </div>
+                        <label className="cursor-pointer">
+                          <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" />
+                          <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full phase-gradient text-white font-medium">
+                            <Camera className="w-4 h-4" />
+                            Tirar Foto
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  </motion.div>
                 )}
-                <motion.div
-                  className="relative"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                >
-                  <div className="w-16 h-16 rounded-full phase-gradient flex items-center justify-center">
-                    <Sparkles className="w-8 h-8 text-white" />
-                  </div>
-                </motion.div>
-                <motion.p
-                  className="text-lg font-semibold text-foreground"
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  Analisando com IA...
-                </motion.p>
-                <p className="text-sm text-muted-foreground text-center">
-                  Identificando alimentos e calculando macros
-                  {diet_type && <span className="block mt-1">Considerando sua dieta: {diet_type}</span>}
-                </p>
-              </div>
-            </motion.div>
-          )}
 
-          {scanResult && (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-4"
-            >
-              {imagePreview && (
-                <div className="w-full h-40 rounded-xl overflow-hidden">
-                  <img
-                    src={imagePreview}
-                    alt="Refeição"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              
-              <div className="glass-card p-4 border-2 border-primary/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg phase-gradient">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="font-semibold text-foreground">Prato Identificado</span>
-                </div>
-                
-                <h3 className="text-lg font-bold text-foreground mb-3">
-                  {scanResult.meal_name}
-                </h3>
-                
-                <div className="grid grid-cols-4 gap-2 mb-3">
-                  <div className="text-center p-2 rounded-xl bg-secondary">
-                    <p className="text-lg font-bold text-primary">{scanResult.macros.calories}</p>
-                    <p className="text-xs text-muted-foreground">kcal</p>
-                  </div>
-                  <div className="text-center p-2 rounded-xl bg-secondary">
-                    <p className="text-lg font-bold text-menstrual">{scanResult.macros.protein}g</p>
-                    <p className="text-xs text-muted-foreground">Proteína</p>
-                  </div>
-                  <div className="text-center p-2 rounded-xl bg-secondary">
-                    <p className="text-lg font-bold text-folicular">{scanResult.macros.carbs}g</p>
-                    <p className="text-xs text-muted-foreground">Carbs</p>
-                  </div>
-                  <div className="text-center p-2 rounded-xl bg-secondary">
-                    <p className="text-lg font-bold text-ovulatoria">{scanResult.macros.fat}g</p>
-                    <p className="text-xs text-muted-foreground">Gordura</p>
-                  </div>
-                </div>
-
-                {/* AI Advice */}
-                {scanResult.advice && (
-                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-primary">💡 Dica:</span> {scanResult.advice}
-                    </p>
-                  </div>
+                {isScanning && (
+                  <motion.div key="scanning" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="py-8">
+                    <div className="flex flex-col items-center gap-4">
+                      {imagePreview && (
+                        <div className="w-full h-40 rounded-xl overflow-hidden mb-2">
+                          <img src={imagePreview} alt="Refeição" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <motion.div className="relative" animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}>
+                        <div className="w-16 h-16 rounded-full phase-gradient flex items-center justify-center">
+                          <Sparkles className="w-8 h-8 text-white" />
+                        </div>
+                      </motion.div>
+                      <motion.p className="text-lg font-semibold text-foreground" animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                        Analisando com IA...
+                      </motion.p>
+                      <p className="text-sm text-muted-foreground text-center">
+                        Identificando alimentos e calculando macros
+                        {diet_type && <span className="block mt-1">Considerando sua dieta: {diet_type}</span>}
+                      </p>
+                    </div>
+                  </motion.div>
                 )}
-              </div>
 
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleClose}
-                  className="flex-1"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleConfirm}
-                  className="flex-1 phase-gradient text-white"
-                  disabled={saving || saved || !isAuthenticated}
-                >
-                  {saving ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Salvando...
-                    </span>
-                  ) : saved ? (
-                    <span className="flex items-center gap-2">
-                      <Check className="w-4 h-4" />
-                      Salvo!
-                    </span>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4 mr-2" />
-                      Confirmar e Registrar
-                    </>
-                  )}
-                </Button>
-              </div>
-            </motion.div>
+                {scanResult && (
+                  <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-4">
+                    {imagePreview && (
+                      <div className="w-full h-40 rounded-xl overflow-hidden">
+                        <img src={imagePreview} alt="Refeição" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="glass-card p-4 border-2 border-primary/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-1.5 rounded-lg phase-gradient"><Check className="w-4 h-4 text-white" /></div>
+                        <span className="font-semibold text-foreground">Prato Identificado</span>
+                      </div>
+                      <h3 className="text-lg font-bold text-foreground mb-3">{scanResult.meal_name}</h3>
+                      <div className="grid grid-cols-4 gap-2 mb-3">
+                        <div className="text-center p-2 rounded-xl bg-secondary">
+                          <p className="text-lg font-bold text-primary">{scanResult.macros.calories}</p>
+                          <p className="text-xs text-muted-foreground">kcal</p>
+                        </div>
+                        <div className="text-center p-2 rounded-xl bg-secondary">
+                          <p className="text-lg font-bold text-menstrual">{scanResult.macros.protein}g</p>
+                          <p className="text-xs text-muted-foreground">Proteína</p>
+                        </div>
+                        <div className="text-center p-2 rounded-xl bg-secondary">
+                          <p className="text-lg font-bold text-folicular">{scanResult.macros.carbs}g</p>
+                          <p className="text-xs text-muted-foreground">Carbs</p>
+                        </div>
+                        <div className="text-center p-2 rounded-xl bg-secondary">
+                          <p className="text-lg font-bold text-ovulatoria">{scanResult.macros.fat}g</p>
+                          <p className="text-xs text-muted-foreground">Gordura</p>
+                        </div>
+                      </div>
+                      {scanResult.advice && (
+                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                          <p className="text-sm text-muted-foreground">
+                            <span className="font-medium text-primary">💡 Dica:</span> {scanResult.advice}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={handleClose} className="flex-1">
+                        <X className="w-4 h-4 mr-2" />Cancelar
+                      </Button>
+                      <Button onClick={handleConfirm} className="flex-1 phase-gradient text-white" disabled={saving || saved || !isAuthenticated}>
+                        {saving ? (
+                          <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Salvando...</span>
+                        ) : saved ? (
+                          <span className="flex items-center gap-2"><Check className="w-4 h-4" />Salvo!</span>
+                        ) : (
+                          <><Check className="w-4 h-4 mr-2" />Confirmar e Registrar</>
+                        )}
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
           )}
-        </AnimatePresence>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
