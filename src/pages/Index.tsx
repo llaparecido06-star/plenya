@@ -12,6 +12,7 @@ import QuickLog from '@/components/cycle/QuickLog';
 import ChefSuggestion from '@/components/cycle/ChefSuggestion';
 import HistoryCalendar from '@/components/history/HistoryCalendar';
 import DayDataSummary from '@/components/history/DayDataSummary';
+import IntimacyLog from '@/components/cycle/IntimacyLog';
 import GardenStreak from '@/components/home/GardenStreak';
 import AdaptiveHomeCard from '@/components/home/AdaptiveHomeCard';
 import SOSPartnerButton from '@/components/home/SOSPartnerButton';
@@ -160,6 +161,9 @@ const Index: React.FC = () => {
 
         {/* Show historical data summary when viewing past dates */}
         {!isToday && <DayDataSummary />}
+        
+        {/* IntimacyLog drawer - always rendered so it can receive events from DayDataSummary */}
+        {!isToday && <IntimacyLog hideTrigger />}
         
         {/* Show current day components when viewing today */}
         {isToday && (

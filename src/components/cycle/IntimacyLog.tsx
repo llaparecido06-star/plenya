@@ -67,9 +67,10 @@ const aftercareTags: TagOption[] = [
 interface IntimacyLogProps {
   showAlert?: boolean;
   alertOnly?: boolean;
+  hideTrigger?: boolean;
 }
 
-const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly = false }) => {
+const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly = false, hideTrigger = false }) => {
   const { selectedDate: contextDate, isToday: isContextToday } = useSelectedDate();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dateOption, setDateOption] = useState<DateOption>('today');
@@ -275,20 +276,22 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
 
   return (
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-      <DrawerTrigger asChild>
-        <motion.button
-          className="flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl glass-card hover:shadow-soft transition-all"
-          whileTap={{ scale: 0.95 }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-        >
-          <div className={`p-3 rounded-xl ${hasIntimacyData ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-600'}`}>
-            <Flame className="w-5 h-5" fill={hasIntimacyData ? 'currentColor' : 'none'} />
-          </div>
-          <span className="text-xs font-medium text-foreground text-center">Sexo & Libido</span>
-        </motion.button>
-      </DrawerTrigger>
+      {!hideTrigger && (
+        <DrawerTrigger asChild>
+          <motion.button
+            className="flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl glass-card hover:shadow-soft transition-all"
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            <div className={`p-3 rounded-xl ${hasIntimacyData ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-600'}`}>
+              <Flame className="w-5 h-5" fill={hasIntimacyData ? 'currentColor' : 'none'} />
+            </div>
+            <span className="text-xs font-medium text-foreground text-center">Sexo & Libido</span>
+          </motion.button>
+        </DrawerTrigger>
+      )}
       <DrawerContent className="max-h-[85vh]">
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-2">
