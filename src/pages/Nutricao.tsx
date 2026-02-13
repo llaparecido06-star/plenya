@@ -13,8 +13,10 @@ import { nutritionTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { useNutrition } from '@/hooks/useNutrition';
 import { useProfile } from '@/hooks/useProfile';
+import { useTranslation } from 'react-i18next';
 
 const Nutricao: React.FC = () => {
+  const { t } = useTranslation();
   const { totals } = useNutrition();
   const { macro_protein_goal, macro_carbs_goal, macro_fat_goal } = useProfile();
 
@@ -26,12 +28,11 @@ const Nutricao: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          Nutrição
+          {t('nutrition.title')}
         </motion.h1>
-        <p className="text-muted-foreground">Acompanhe sua alimentação</p>
+        <p className="text-muted-foreground">{t('nutrition.subtitle')}</p>
       </div>
 
-      {/* Chef IA Premium Card */}
       <div className="px-4 -mt-2 mb-4">
         <ChefIACard />
       </div>
@@ -43,7 +44,7 @@ const Nutricao: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">Macros do Dia</h3>
+            <h3 className="font-semibold text-foreground">{t('nutrition.macros_today')}</h3>
             <MacroGoalEditor />
           </div>
           <MacroRings
@@ -62,20 +63,15 @@ const Nutricao: React.FC = () => {
         <AddMealDrawer />
       </div>
 
-      {/* Monthly Summary */}
       <div className="mt-6">
         <MonthlySummaryCard />
       </div>
 
-      {/* Recent Meals with Mood Correlation */}
       <div className="mt-6">
         <RecentMealsHistory />
       </div>
 
-      {/* Floating AI Scanner Button */}
       <MealScanner />
-
-      {/* Tutorial Overlay */}
       <TutorialOverlay tutorialKey="nutrition" steps={nutritionTutorialSteps} />
     </PageLayout>
   );

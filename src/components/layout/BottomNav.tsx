@@ -3,22 +3,24 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, Apple, Dumbbell, Brain, User } from 'lucide-react';
 import { useCycle } from '@/contexts/CycleContext';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   path: string;
   icon: React.ElementType;
-  label: string;
+  labelKey: string;
 }
 
 const navItems: NavItem[] = [
-  { path: '/', icon: Home, label: 'Hoje' },
-  { path: '/nutricao', icon: Apple, label: 'Nutrição' },
-  { path: '/corpo', icon: Dumbbell, label: 'Corpo' },
-  { path: '/mente', icon: Brain, label: 'Mente' },
-  { path: '/perfil', icon: User, label: 'Perfil' },
+  { path: '/', icon: Home, labelKey: 'nav.home' },
+  { path: '/nutricao', icon: Apple, labelKey: 'nav.nutrition' },
+  { path: '/corpo', icon: Dumbbell, labelKey: 'nav.body' },
+  { path: '/mente', icon: Brain, labelKey: 'nav.mind' },
+  { path: '/perfil', icon: User, labelKey: 'nav.profile' },
 ];
 
 const BottomNav: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { currentPhase } = useCycle();
@@ -38,7 +40,6 @@ const BottomNav: React.FC = () => {
                 className="relative flex flex-col items-center justify-center py-2 px-4 rounded-xl transition-colors"
                 whileTap={{ scale: 0.95 }}
               >
-                {/* Active indicator - subtle underline only, no background */}
                 <Icon
                   className={`w-6 h-6 transition-colors ${
                     isActive ? 'text-primary' : 'text-muted-foreground'
@@ -50,7 +51,7 @@ const BottomNav: React.FC = () => {
                     isActive ? 'text-primary' : 'text-muted-foreground'
                   }`}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
               </motion.button>
             );

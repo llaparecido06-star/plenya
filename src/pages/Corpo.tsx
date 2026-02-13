@@ -9,8 +9,10 @@ import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { bodyTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { useCycle } from '@/contexts/CycleContext';
+import { useTranslation } from 'react-i18next';
 
 const Corpo: React.FC = () => {
+  const { t } = useTranslation();
   const { getPhaseInfo } = useCycle();
   const phaseInfo = getPhaseInfo();
 
@@ -22,34 +24,28 @@ const Corpo: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          Corpo
+          {t('body.title')}
         </motion.h1>
         <p className="text-muted-foreground">
-          Treino ideal para a fase {phaseInfo.name}
+          {t('body.subtitle', { phase: phaseInfo.name })}
         </p>
       </div>
 
-      {/* Last Workout Card */}
       <LastWorkoutCard />
 
       <div className="mt-4">
         <WorkoutCard />
       </div>
 
-      {/* Monthly Workout Summary */}
       <div className="mt-4 px-4">
         <MonthlyWorkoutSummary />
       </div>
 
-      {/* Workout History Calendar */}
       <div className="mt-4 px-4">
         <WorkoutHistoryCalendar />
       </div>
 
-      {/* Gym Log FAB */}
       <GymLogFAB />
-
-      {/* Tutorial Overlay */}
       <TutorialOverlay tutorialKey="body" steps={bodyTutorialSteps} />
     </PageLayout>
   );
