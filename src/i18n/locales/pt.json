@@ -24,7 +24,8 @@
     "back": "Voltar",
     "next": "Próximo",
     "send": "Enviar",
-    "loading": "Carregando..."
+    "loading": "Carregando...",
+    "sign_out": "Sair"
   },
   "onboarding": {
     "name_question": "Como você quer ser chamada?",
@@ -33,7 +34,7 @@
     "lets_start": "Vamos começar"
   },
   "nav": {
-    "home": "Início",
+    "home": "Hoje",
     "nutrition": "Nutrição",
     "body": "Corpo",
     "mind": "Mente",
@@ -50,6 +51,8 @@
   },
   "nutrition": {
     "title": "Nutrição",
+    "subtitle": "Acompanhe sua alimentação",
+    "macros_today": "Macros do Dia",
     "calories": "Calorias",
     "protein": "Proteína",
     "carbs": "Carboidratos",
@@ -59,19 +62,56 @@
     "dinner": "Jantar",
     "snack": "Lanche"
   },
+  "body": {
+    "title": "Corpo",
+    "subtitle": "Treino ideal para a fase {{phase}}"
+  },
+  "mind": {
+    "title": "Mente",
+    "subtitle": "Cuide do seu bem-estar emocional",
+    "checkin_tab": "Check-in",
+    "chat_tab": "Chat"
+  },
+  "profile": {
+    "title": "Perfil",
+    "member": "Membro Plenya",
+    "goals": "Objetivos",
+    "view_plans": "Ver Planos e Assinatura",
+    "contraceptive_title": "🛡️ Método Contraceptivo",
+    "privacy_policy": "Política de Privacidade",
+    "terms": "Termos de Uso",
+    "language": "Idioma",
+    "settings": "Configurações",
+    "medication": "Medicação",
+    "contraceptive": "Contraceptivo",
+    "life_phase": "Fase de Vida"
+  },
+  "goals": {
+    "lose_weight": "Perder Peso",
+    "gain_muscle": "Ganhar Massa",
+    "pms_relief": "Alívio de TPM",
+    "get_pregnant": "Engravidar",
+    "health_monitor": "Monitorar Saúde"
+  },
+  "diet": {
+    "omnivore": "Onívora",
+    "vegetarian": "Vegetariana",
+    "vegan": "Vegana",
+    "low_carb": "Low Carb",
+    "lactose_free": "Sem Lactose"
+  },
+  "fitness": {
+    "sedentary": "Sedentária",
+    "light": "Leve",
+    "moderate": "Moderada",
+    "intense": "Intensa/Atleta"
+  },
   "workout": {
     "title": "Treino",
     "sets": "séries",
     "reps": "reps",
     "duration": "Duração",
     "intensity": "Intensidade"
-  },
-  "profile": {
-    "title": "Perfil",
-    "settings": "Configurações",
-    "medication": "Medicação",
-    "contraceptive": "Contraceptivo",
-    "life_phase": "Fase de Vida"
   },
   "errors": {
     "ai_error": "Erro na IA",

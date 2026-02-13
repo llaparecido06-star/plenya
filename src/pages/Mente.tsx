@@ -7,8 +7,11 @@ import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { mindTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from 'react-i18next';
 
 const Mente: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <PageLayout>
       <div className="hero-gradient pt-12 pb-4 px-4">
@@ -17,20 +20,19 @@ const Mente: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          Mente
+          {t('mind.title')}
         </motion.h1>
-        <p className="text-muted-foreground">Cuide do seu bem-estar emocional</p>
+        <p className="text-muted-foreground">{t('mind.subtitle')}</p>
       </div>
 
-      {/* Breathing Card */}
       <div className="px-4 mb-4">
         <BreathingCard />
       </div>
 
       <Tabs defaultValue="checkin" className="px-4">
         <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="checkin">Check-in</TabsTrigger>
-          <TabsTrigger value="chat">Chat</TabsTrigger>
+          <TabsTrigger value="checkin">{t('mind.checkin_tab')}</TabsTrigger>
+          <TabsTrigger value="chat">{t('mind.chat_tab')}</TabsTrigger>
         </TabsList>
         <TabsContent value="checkin">
           <EmotionalCheckin />
@@ -40,7 +42,6 @@ const Mente: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Tutorial Overlay */}
       <TutorialOverlay tutorialKey="mind" steps={mindTutorialSteps} />
     </PageLayout>
   );
