@@ -303,6 +303,8 @@ export type Database = {
           macro_carbs_goal: number | null
           macro_fat_goal: number | null
           macro_protein_goal: number | null
+          medication_frequency_days: number | null
+          medication_last_taken: string | null
           medication_name: string | null
           medication_type: string | null
           onboarding_completed: boolean
@@ -336,6 +338,8 @@ export type Database = {
           macro_carbs_goal?: number | null
           macro_fat_goal?: number | null
           macro_protein_goal?: number | null
+          medication_frequency_days?: number | null
+          medication_last_taken?: string | null
           medication_name?: string | null
           medication_type?: string | null
           onboarding_completed?: boolean
@@ -369,6 +373,8 @@ export type Database = {
           macro_carbs_goal?: number | null
           macro_fat_goal?: number | null
           macro_protein_goal?: number | null
+          medication_frequency_days?: number | null
+          medication_last_taken?: string | null
           medication_name?: string | null
           medication_type?: string | null
           onboarding_completed?: boolean

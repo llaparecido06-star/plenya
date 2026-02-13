@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import ProfileSettingsEditor from '@/components/profile/ProfileSettingsEditor';
 import AvatarUpload from '@/components/profile/AvatarUpload';
 import DeleteAccountButton from '@/components/profile/DeleteAccountButton';
+import MedicationTracker from '@/components/profile/MedicationTracker';
 
 // Goal configuration for badges
 const goalConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -202,6 +203,9 @@ const Perfil: React.FC = () => {
           </h3>
           <ContraceptiveConfig />
         </motion.div>
+
+        {/* Medication Tracker */}
+        <MedicationTracker />
 
         {/* Patterns Card - Cycle Insights */}
         <motion.div
