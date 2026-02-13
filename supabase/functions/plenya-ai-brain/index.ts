@@ -46,6 +46,7 @@ interface ChefPayload {
 type RequestPayload = {
   mode: 'chat' | 'trainer' | 'nutrition_scanner' | 'chef' | 'estimate_macros';
   payload: ChatPayload | TrainerPayload | NutritionScannerPayload | ChefPayload | EstimateMacrosPayload;
+  language?: string;
 };
 
 function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null): string {
@@ -272,7 +273,10 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const { mode, payload } = await req.json() as RequestPayload;
+    const { mode, payload, language } = await req.json() as RequestPayload;
+    const langCode = language || 'pt';
+    const langMap: Record<string, string> = { pt: 'Português', es: 'Español', en: 'English' };
+    const langInstruction = `\n\nIMPORTANTE: RESPONDA OBRIGATORIAMENTE NO IDIOMA: ${langMap[langCode] || langMap['pt']}.`;
 
     let systemPrompt = '';
     let userContent: any = '';
@@ -281,7 +285,7 @@ serve(async (req) => {
     switch (mode) {
       case 'chat': {
         const chatPayload = payload as ChatPayload;
-        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks);
+        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks) + langInstruction;
         
         // Build messages with history
         const messages: Array<{ role: string; content: string }> = [
@@ -334,7 +338,7 @@ serve(async (req) => {
 
       case 'trainer': {
         const trainerPayload = payload as TrainerPayload;
-        systemPrompt = getTrainerSystemPrompt(trainerPayload.phase, trainerPayload.cycle_day, trainerPayload.fitness_level);
+        systemPrompt = getTrainerSystemPrompt(trainerPayload.phase, trainerPayload.cycle_day, trainerPayload.fitness_level) + langInstruction;
         
         let userMessage = `Crie um treino para hoje.
 Nível de energia: ${trainerPayload.energy_level}/5
@@ -395,7 +399,7 @@ Fase do ciclo: ${trainerPayload.phase}`;
 
       case 'nutrition_scanner': {
         const scanPayload = payload as NutritionScannerPayload;
-        systemPrompt = getNutritionScannerSystemPrompt(scanPayload.phase, scanPayload.diet_type);
+        systemPrompt = getNutritionScannerSystemPrompt(scanPayload.phase, scanPayload.diet_type) + langInstruction;
         
         // Use vision model for image analysis
         model = 'google/gemini-2.5-flash';
@@ -451,7 +455,7 @@ Fase do ciclo: ${trainerPayload.phase}`;
 
       case 'chef': {
         const chefPayload = payload as ChefPayload;
-        systemPrompt = getChefSystemPrompt(chefPayload.phase, chefPayload.cycle_day, chefPayload.diet_type);
+        systemPrompt = getChefSystemPrompt(chefPayload.phase, chefPayload.cycle_day, chefPayload.diet_type) + langInstruction;
         
         let messages: any[] = [{ role: 'system', content: systemPrompt }];
         
@@ -532,7 +536,7 @@ RESPONDA APENAS COM JSON VÁLIDO:
   "advice": "Dica nutricional breve"
 }
 
-Seja realista nas estimativas. Não inclua texto fora do JSON.`;
+Seja realista nas estimativas. Não inclua texto fora do JSON.` + langInstruction;
 
         const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',

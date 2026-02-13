@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, Sparkles, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from 'react-i18next';
 import { useCycle } from '@/contexts/CycleContext';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useChatMessages } from '@/hooks/useChatMessages';
@@ -9,6 +10,7 @@ import { useAIBrain } from '@/hooks/useAIBrain';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 const ChatInterface: React.FC = () => {
+  const { t } = useTranslation();
   const { messages, loading, addMessage } = useChatMessages();
   const { chat, loading: aiLoading } = useAIBrain();
   const [input, setInput] = useState('');
@@ -58,7 +60,7 @@ const ChatInterface: React.FC = () => {
       await addMessage('assistant', response);
     } else {
       // Fallback response if AI fails
-      await addMessage('assistant', 'Desculpe, estou tendo dificuldades para responder agora. Pode tentar novamente? 💜');
+      await addMessage('assistant', t('chat.error_fallback'));
     }
   };
 
@@ -85,13 +87,13 @@ const ChatInterface: React.FC = () => {
           <Sparkles className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Plenya - Assistente de Bem-estar</h3>
+          <h3 className="font-semibold text-foreground">{t('chat.title')}</h3>
           <p className="text-xs text-muted-foreground">
             {lifePhase === 'pregnant' 
-              ? `Cuidando de você e do bebê 🤰`
+              ? t('chat.subtitle_pregnant')
               : lifePhase === 'menopause'
-              ? 'Apoio no climatério 🌸'
-              : 'Sempre aqui para você 💜'}
+              ? t('chat.subtitle_menopause')
+              : t('chat.subtitle_default')}
           </p>
         </div>
       </div>
@@ -138,7 +140,7 @@ const ChatInterface: React.FC = () => {
             </div>
             <div className="chat-bubble-assistant">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Plenya está digitando</span>
+                <span className="text-sm text-muted-foreground">{t('chat.typing')}</span>
                 <div className="flex gap-1">
                   <motion.div
                     className="w-2 h-2 rounded-full bg-primary"
@@ -171,7 +173,7 @@ const ChatInterface: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Digite sua mensagem..."
+            placeholder={t('chat.placeholder')}
             className="flex-1 rounded-full bg-secondary border-none"
             disabled={aiLoading}
           />

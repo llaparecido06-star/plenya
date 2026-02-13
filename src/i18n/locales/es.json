@@ -1,0 +1,85 @@
+{
+  "home": {
+    "subtitle_menstruating": "Siéntete en casa en tu cuerpo",
+    "subtitle_pregnant": "Siguiendo tu embarazo",
+    "subtitle_menopause": "Tu bienestar es lo primero",
+    "subtitle_history": "Viendo historial",
+    "battery_low": "Batería Social Baja",
+    "battery_high": "Batería Social Alta",
+    "phase_menstrual": "Fase Menstrual",
+    "phase_follicular": "Fase Folicular",
+    "phase_ovulatory": "Fase Ovulatoria",
+    "phase_luteal": "Fase Lútea"
+  },
+  "actions": {
+    "scan_meal": "📸 Escanear Comida",
+    "fridge": "📸 Ver Refrigerador",
+    "generate_workout": "Generar Entrenamiento",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "send": "Enviar",
+    "loading": "Cargando..."
+  },
+  "onboarding": {
+    "name_question": "¿Cómo quieres que te llamen?",
+    "birth_question": "¿Cuál es tu fecha de nacimiento?",
+    "welcome": "Bienvenida a Plenya",
+    "lets_start": "Empecemos"
+  },
+  "nav": {
+    "home": "Inicio",
+    "nutrition": "Nutrición",
+    "body": "Cuerpo",
+    "mind": "Mente",
+    "profile": "Perfil"
+  },
+  "chat": {
+    "title": "Plenya - Asistente de Bienestar",
+    "subtitle_pregnant": "Cuidando de ti y del bebé 🤰",
+    "subtitle_menopause": "Apoyo en la menopausia 🌸",
+    "subtitle_default": "Siempre aquí para ti 💜",
+    "placeholder": "Escribe tu mensaje...",
+    "typing": "Plenya está escribiendo",
+    "error_fallback": "Lo siento, estoy teniendo dificultades para responder ahora. ¿Puedes intentar de nuevo? 💜"
+  },
+  "nutrition": {
+    "title": "Nutrición",
+    "calories": "Calorías",
+    "protein": "Proteína",
+    "carbs": "Carbohidratos",
+    "fat": "Grasas",
+    "breakfast": "Desayuno",
+    "lunch": "Almuerzo",
+    "dinner": "Cena",
+    "snack": "Merienda"
+  },
+  "workout": {
+    "title": "Entrenamiento",
+    "sets": "series",
+    "reps": "reps",
+    "duration": "Duración",
+    "intensity": "Intensidad"
+  },
+  "profile": {
+    "title": "Perfil",
+    "settings": "Configuración",
+    "medication": "Medicación",
+    "contraceptive": "Anticonceptivo",
+    "life_phase": "Fase de Vida"
+  },
+  "errors": {
+    "ai_error": "Error de IA",
+    "ai_error_description": "No se pudo procesar tu solicitud.",
+    "connection_error": "Error de conexión",
+    "connection_error_description": "No se pudo conectar al servidor.",
+    "generic_error": "Error",
+    "rate_limit": "Límite de solicitudes excedido. Intenta de nuevo en unos minutos.",
+    "insufficient_credits": "Créditos insuficientes. Por favor, agrega créditos a tu cuenta."
+  }
+}

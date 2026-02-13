@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import i18n from '@/i18n/config';
 
 type AIMode = 'chat' | 'trainer' | 'nutrition_scanner' | 'chef' | 'estimate_macros';
 
@@ -82,8 +83,9 @@ export const useAIBrain = () => {
     setLoading(true);
     
     try {
+      const language = i18n.language?.substring(0, 2) || 'pt';
       const { data, error } = await supabase.functions.invoke('plenya-ai-brain', {
-        body: { mode, payload },
+        body: { mode, payload, language },
       });
 
       if (error) {
