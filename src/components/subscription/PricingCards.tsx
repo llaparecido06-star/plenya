@@ -54,9 +54,9 @@ const PricingCards: React.FC = () => {
   };
 
   const plans: { key: PlanKey; highlight?: boolean }[] = [
-    { key: 'free' },
-    { key: 'premium_monthly' },
     { key: 'premium_annual', highlight: true },
+    { key: 'premium_monthly' },
+    { key: 'free' },
   ];
 
   return (
