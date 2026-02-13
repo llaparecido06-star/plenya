@@ -11,6 +11,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useAIBrain } from '@/hooks/useAIBrain';
 import { useAuth } from '@/contexts/AuthContext';
 import PremiumGate from '@/components/subscription/PremiumGate';
+import { useTranslation } from 'react-i18next';
 
 interface Exercise {
   id: string;
@@ -105,15 +106,16 @@ const exerciseAlternatives: Record<string, string[]> = {
   'Supino': ['Crucifixo', 'Push-up com peso', 'Floor press'],
 };
 
-// Activity level intensity modifiers
-const activityIntensityLabel: Record<string, string> = {
-  sedentary: 'Comece devagar - seu corpo está se adaptando',
-  light: 'Ritmo leve - consistência é a chave',
-  moderate: 'Bom ritmo - continue assim!',
-  intense: 'Modo atleta - maximize seu potencial',
+// Activity level intensity key mapping
+const activityIntensityKeys: Record<string, string> = {
+  sedentary: 'workout.activity_sedentary',
+  light: 'workout.activity_light',
+  moderate: 'workout.activity_moderate',
+  intense: 'workout.activity_intense',
 };
 
 const WorkoutCard: React.FC = () => {
+  const { t } = useTranslation();
   const { workout: savedWorkout, loading, saving, saveExercises, completeExercise, workoutPhase, isToday } = useWorkouts();
   const { fitness_level, goals } = useProfile();
   const { subscribed } = useAuth();
@@ -130,7 +132,7 @@ const WorkoutCard: React.FC = () => {
 
   const defaultPlan = workoutPlans[workoutPhase];
   const Icon = aiWorkout ? Sparkles : defaultPlan.icon;
-  const intensityTip = fitness_level ? activityIntensityLabel[fitness_level] : null;
+  const intensityTip = fitness_level && activityIntensityKeys[fitness_level] ? t(activityIntensityKeys[fitness_level]) : null;
 
   // Load saved exercises or use defaults for the phase
   useEffect(() => {
@@ -186,7 +188,7 @@ const WorkoutCard: React.FC = () => {
       }
 
       toast({
-        title: 'Treino Gerado! ⚡',
+        title: t('workout.workout_generated'),
         description: `${result.title} - ${result.duration}`,
       });
     }
@@ -232,15 +234,15 @@ const WorkoutCard: React.FC = () => {
     const alternatives = exerciseAlternatives[exerciseName];
     if (!alternatives || alternatives.length === 0) {
       toast({
-        title: 'Sem alternativas',
-        description: 'Não há alternativas disponíveis para este exercício.',
+        title: t('workout.no_alternatives'),
+        description: t('workout.no_alternatives_desc'),
       });
       return;
     }
 
     toast({
-      title: 'Buscando alternativa...',
-      description: 'Encontrando um exercício equivalente.',
+      title: t('workout.finding_alternative'),
+      description: t('workout.finding_alternative_desc'),
     });
 
     // Simulate loading
@@ -261,8 +263,8 @@ const WorkoutCard: React.FC = () => {
     }
 
     toast({
-      title: 'Exercício trocado! 🔄',
-      description: `Agora você fará ${randomAlternative}`,
+      title: t('workout.exercise_swapped'),
+      description: t('workout.now_doing', { name: randomAlternative }),
     });
   };
 
@@ -294,12 +296,12 @@ const WorkoutCard: React.FC = () => {
             <Moon className="w-6 h-6 text-muted-foreground" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-foreground">Dia de Descanso</h3>
-            <p className="text-sm text-muted-foreground">Nenhum treino registrado nesta data</p>
+            <h3 className="text-xl font-bold text-foreground">{t('workout.rest_day')}</h3>
+            <p className="text-sm text-muted-foreground">{t('workout.no_workout_recorded')}</p>
           </div>
         </div>
         <p className="text-sm text-muted-foreground text-center py-4">
-          O treino planejado para esta fase seria: <span className="font-medium text-foreground">{defaultPlan.title}</span>
+          {t('workout.planned_workout')} <span className="font-medium text-foreground">{defaultPlan.title}</span>
         </p>
       </motion.div>
     );
@@ -318,17 +320,17 @@ const WorkoutCard: React.FC = () => {
             <Sparkles className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-foreground">Treino do Dia</h3>
+            <h3 className="text-xl font-bold text-foreground">{t('workout.workout_of_day')}</h3>
             <p className="text-sm text-muted-foreground">
-              Fase {defaultPlan.title.toLowerCase()} — {defaultPlan.intensity}
+              {t('workout.phase_info', { title: defaultPlan.title.toLowerCase(), intensity: defaultPlan.intensity })}
             </p>
           </div>
         </div>
 
-        <PremiumGate feature="Gerar Treino do Dia" mode="banner">
+        <PremiumGate feature={t('workout.generate_feature')} mode="banner">
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">Energia hoje:</span>
+              <span className="text-sm font-medium text-foreground">{t('workout.energy_today')}</span>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((level) => (
                   <button
@@ -353,12 +355,12 @@ const WorkoutCard: React.FC = () => {
               {aiLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Gerando treino...
+                  {t('workout.generating')}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Gerar Treino do Dia ⚡
+                  {t('workout.generate_workout')}
                 </>
               )}
             </Button>
@@ -387,7 +389,7 @@ const WorkoutCard: React.FC = () => {
                 {aiWorkout ? aiWorkout.title : defaultPlan.title}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {aiWorkout ? 'Treino personalizado pela IA' : defaultPlan.subtitle}
+                {aiWorkout ? t('workout.ai_personalized') : defaultPlan.subtitle}
               </p>
             </div>
           </div>
@@ -425,7 +427,7 @@ const WorkoutCard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">Energia hoje:</span>
+              <span className="text-sm font-medium text-foreground">{t('workout.energy_today')}</span>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((level) => (
                   <button
@@ -450,12 +452,12 @@ const WorkoutCard: React.FC = () => {
               {aiLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Gerando treino...
+                  {t('workout.generating')}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Gerar Treino do Dia ⚡
+                  {t('workout.generate_workout')}
                 </>
               )}
             </Button>
@@ -473,7 +475,7 @@ const WorkoutCard: React.FC = () => {
         {/* Progress bar */}
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-muted-foreground">Progresso</span>
+            <span className="text-muted-foreground">{t('workout.progress')}</span>
             <span className="font-medium text-foreground">
               {completedSets}/{totalSets} sets
             </span>
@@ -492,7 +494,7 @@ const WorkoutCard: React.FC = () => {
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-primary"
         >
-          {isExpanded ? 'Ocultar exercícios' : 'Ver exercícios'}
+          {isExpanded ? t('workout.hide_exercises') : t('workout.show_exercises')}
           <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
             <ChevronDown className="w-4 h-4" />
           </motion.div>
@@ -535,7 +537,7 @@ const WorkoutCard: React.FC = () => {
                             handleSwapExercise(exercise.id, exercise.name);
                           }}
                           className="p-2 rounded-full hover:bg-secondary/80 transition-colors"
-                          title="Trocar exercício"
+                          title={t('workout.swap_exercise')}
                         >
                           <Shuffle className="w-4 h-4 text-muted-foreground" />
                         </button>

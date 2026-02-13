@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface MacroData {
   name: string;
+  nameKey: string;
   current: number;
   goal: number;
   unit: string;
@@ -16,10 +18,12 @@ interface MacroRingsProps {
 }
 
 const MacroRings: React.FC<MacroRingsProps> = ({ protein, carbs, fat }) => {
+  const { t } = useTranslation();
+
   const macros: MacroData[] = [
-    { name: 'Proteína', current: protein.current, goal: protein.goal, unit: 'g', color: '#E07A5F' },
-    { name: 'Carboidrato', current: carbs.current, goal: carbs.goal, unit: 'g', color: '#81B29A' },
-    { name: 'Gordura', current: fat.current, goal: fat.goal, unit: 'g', color: '#F4A261' },
+    { name: t('nutrition.protein'), nameKey: 'protein', current: protein.current, goal: protein.goal, unit: 'g', color: '#E07A5F' },
+    { name: t('nutrition.carbs'), nameKey: 'carbs', current: carbs.current, goal: carbs.goal, unit: 'g', color: '#81B29A' },
+    { name: t('nutrition.fat'), nameKey: 'fat', current: fat.current, goal: fat.goal, unit: 'g', color: '#F4A261' },
   ];
 
   const size = 100;
@@ -35,7 +39,7 @@ const MacroRings: React.FC<MacroRingsProps> = ({ protein, carbs, fat }) => {
 
         return (
           <motion.div
-            key={macro.name}
+            key={macro.nameKey}
             className="flex flex-col items-center"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -43,7 +47,6 @@ const MacroRings: React.FC<MacroRingsProps> = ({ protein, carbs, fat }) => {
           >
             <div className="macro-ring">
               <svg width={size} height={size}>
-                {/* Background circle */}
                 <circle
                   cx={size / 2}
                   cy={size / 2}
@@ -52,7 +55,6 @@ const MacroRings: React.FC<MacroRingsProps> = ({ protein, carbs, fat }) => {
                   stroke="hsl(var(--border))"
                   strokeWidth={strokeWidth}
                 />
-                {/* Progress circle */}
                 <motion.circle
                   cx={size / 2}
                   cy={size / 2}

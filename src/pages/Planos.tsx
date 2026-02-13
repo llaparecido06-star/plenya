@@ -9,24 +9,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
+import { useTranslation } from 'react-i18next';
 
 const planKeys: PlanKey[] = ['free', 'premium_monthly', 'premium_annual'];
 
 const Planos: React.FC = () => {
+  const { t } = useTranslation();
   const { subscribed, currentPlan, checkSubscription } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  // Handle success/cancel redirects
   useEffect(() => {
     const status = searchParams.get('subscription');
     if (status === 'success') {
-      toast({ title: '🎉 Assinatura ativada!', description: 'Bem-vinda ao Premium!' });
+      toast({ title: t('plans.subscription_activated'), description: t('plans.welcome_premium') });
       checkSubscription();
     } else if (status === 'canceled') {
-      toast({ title: 'Checkout cancelado', description: 'Você pode assinar quando quiser.' });
+      toast({ title: t('plans.checkout_canceled'), description: t('plans.checkout_canceled_desc') });
     }
   }, [searchParams]);
 
@@ -39,7 +40,7 @@ const Planos: React.FC = () => {
       if (error) throw error;
       if (data?.url) window.open(data.url, '_blank');
     } catch (err: any) {
-      toast({ title: 'Erro', description: err.message || 'Erro ao iniciar checkout', variant: 'destructive' });
+      toast({ title: t('auth.error'), description: err.message || t('plans.error_checkout'), variant: 'destructive' });
     } finally {
       setLoadingPlan(null);
     }
@@ -52,7 +53,7 @@ const Planos: React.FC = () => {
       if (error) throw error;
       if (data?.url) window.open(data.url, '_blank');
     } catch (err: any) {
-      toast({ title: 'Erro', description: err.message || 'Erro ao abrir portal', variant: 'destructive' });
+      toast({ title: t('auth.error'), description: err.message || t('plans.error_portal'), variant: 'destructive' });
     } finally {
       setLoadingPlan(null);
     }
@@ -60,6 +61,12 @@ const Planos: React.FC = () => {
 
   const hasPlanFeature = (planKey: PlanKey, featureLabel: string) => {
     return (STRIPE_PLANS[planKey].features as readonly string[]).includes(featureLabel);
+  };
+
+  const planLabel = (key: PlanKey) => {
+    if (key === 'free') return t('plans.free');
+    if (key === 'premium_monthly') return t('plans.monthly');
+    return t('plans.annual');
   };
 
   return (
@@ -75,13 +82,12 @@ const Planos: React.FC = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              Planos Plenya
+              {t('plans.title')}
             </motion.h1>
-            <p className="text-sm text-muted-foreground">Escolha o melhor para você</p>
+            <p className="text-sm text-muted-foreground">{t('plans.subtitle')}</p>
           </div>
         </div>
 
-        {/* Trial Banner */}
         {!subscribed && (
           <motion.div
             className="rounded-2xl p-4 mb-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white"
@@ -93,14 +99,13 @@ const Planos: React.FC = () => {
                 <Gift className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold">7 dias grátis de Premium!</h3>
-                <p className="text-sm text-white/80">Experimente tudo sem compromisso. Cancele quando quiser.</p>
+                <h3 className="font-bold">{t('plans.trial_title')}</h3>
+                <p className="text-sm text-white/80">{t('plans.trial_desc')}</p>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* Plan Cards */}
         <div className="space-y-4 mb-8">
           {planKeys.map((key, index) => {
             const plan = STRIPE_PLANS[key];
@@ -108,6 +113,7 @@ const Planos: React.FC = () => {
             const isPremium = key !== 'free';
             const isAnnual = key === 'premium_annual';
             const priceId = 'price_id' in plan ? plan.price_id : null;
+            const isLoading = loadingPlan === priceId;
 
             return (
               <motion.div
@@ -122,14 +128,14 @@ const Planos: React.FC = () => {
                 {isAnnual && (
                   <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground">
                     <Sparkles className="w-3 h-3 mr-1" />
-                    Melhor Valor
+                    {t('plans.best_value')}
                   </Badge>
                 )}
 
                 {isCurrentPlan && subscribed && (
                   <Badge className="absolute top-3 left-3 bg-leaf-green text-white">
                     <Crown className="w-3 h-3 mr-1" />
-                    Seu Plano
+                    {t('plans.your_plan')}
                   </Badge>
                 )}
 
@@ -147,7 +153,7 @@ const Planos: React.FC = () => {
                   <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
                   {isPremium && !subscribed && (
                     <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
-                      ✨ Inclui 7 dias grátis
+                      {t('plans.includes_trial')}
                     </p>
                   )}
                 </div>
@@ -161,7 +167,7 @@ const Planos: React.FC = () => {
                       disabled={loadingPlan === 'manage'}
                     >
                       {loadingPlan === 'manage' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                      Gerenciar Assinatura
+                      {t('plans.manage_subscription')}
                     </Button>
                   ) : isPremium ? (
                     <Button
@@ -169,8 +175,14 @@ const Planos: React.FC = () => {
                       onClick={() => priceId && handleSubscribe(priceId)}
                       disabled={!!loadingPlan}
                     >
-                      {loadingPlan === priceId ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                      {subscribed ? 'Trocar Plano' : 'Começar Teste Grátis'}
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          {t('plans.processing')}
+                        </>
+                      ) : (
+                        subscribed ? t('plans.switch_plan') : t('plans.start_trial')
+                      )}
                     </Button>
                   ) : null}
                 </div>
@@ -179,32 +191,29 @@ const Planos: React.FC = () => {
           })}
         </div>
 
-        {/* Feature Comparison Table */}
         <motion.div
           className="glass-card p-5"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <h3 className="text-lg font-bold text-foreground mb-4">Comparação Detalhada</h3>
+          <h3 className="text-lg font-bold text-foreground mb-4">{t('plans.comparison')}</h3>
 
-          {/* Header */}
           <div className="grid grid-cols-4 gap-2 mb-3 pb-3 border-b border-border">
-            <div className="text-sm font-medium text-muted-foreground">Recurso</div>
+            <div className="text-sm font-medium text-muted-foreground">{t('plans.feature')}</div>
             {planKeys.map((key) => (
               <div key={key} className="text-center">
                 <span className="text-xs font-bold text-foreground">
-                  {key === 'free' ? 'Grátis' : key === 'premium_monthly' ? 'Mensal' : 'Anual'}
+                  {planLabel(key)}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Feature rows grouped by category */}
           {['Básico', 'Premium', 'Exclusivo'].map((category) => (
             <div key={category} className="mb-4">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 mt-3">
-                {category}
+                {category === 'Básico' ? t('plans.basic') : category === 'Premium' ? t('plans.premium') : t('plans.exclusive')}
               </p>
               {ALL_FEATURES
                 .filter((f) => f.category === category)
@@ -236,7 +245,7 @@ const Planos: React.FC = () => {
             className="w-full mt-4 text-muted-foreground"
             onClick={checkSubscription}
           >
-            Atualizar status da assinatura
+            {t('plans.refresh_status')}
           </Button>
         )}
 
