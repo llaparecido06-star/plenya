@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS premium_override boolean NOT NULL DEFAULT false;
