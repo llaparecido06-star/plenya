@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/home/ThemeToggle';
 import PageLayout from '@/components/layout/PageLayout';
@@ -38,6 +39,7 @@ import { useLifePhase } from '@/hooks/useLifePhase';
 import { isPillMethod, hasExpirationDate, isHormonalMethod } from '@/data/contraceptiveMethods';
 
 const Index: React.FC = () => {
+  const { t } = useTranslation();
   const {
     getPhaseInfo,
     hasDUM,
@@ -90,11 +92,11 @@ const Index: React.FC = () => {
           <p className="text-sm text-muted-foreground mt-1">
             {isToday
               ? isPregnant
-                ? 'Acompanhando sua gestação'
+                ? t('home.subtitle_pregnant')
                 : isMenopause
-                  ? 'Seu bem-estar em primeiro lugar'
-                  : 'Sinta-se em casa no seu corpo'
-              : 'Visualizando histórico'}
+                  ? t('home.subtitle_menopause')
+                  : t('home.subtitle_menstruating')
+              : t('home.subtitle_history')}
           </p>
         </motion.div>
 
