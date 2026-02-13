@@ -25,14 +25,14 @@ export const useMenstruationLog = () => {
     }
 
     try {
-      const threeMonthsAgo = new Date();
-      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      const twelveMonthsAgo = new Date();
+      twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
       const { data, error } = await supabase
         .from('menstruation_logs')
         .select('log_date, is_menstruating, emergency_contraception')
         .eq('user_id', user.id)
-        .gte('log_date', toLocalDateString(threeMonthsAgo));
+        .gte('log_date', toLocalDateString(twelveMonthsAgo));
 
       if (error) throw error;
 
