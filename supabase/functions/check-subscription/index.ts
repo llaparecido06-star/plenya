@@ -28,6 +28,20 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !userData.user?.email) throw new Error("User not authenticated");
 
+    // Check for premium override in profile
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('premium_override')
+      .eq('user_id', userData.user.id)
+      .single();
+
+    if (profile?.premium_override) {
+      return new Response(JSON.stringify({ subscribed: true, product_id: 'premium_override', subscription_end: null }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
 
