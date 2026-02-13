@@ -461,6 +461,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       workouts: {
         Row: {
           completed: boolean | null
@@ -503,8 +521,16 @@ export type Database = {
     }
     Functions: {
       complete_tutorial: { Args: { tutorial_key: string }; Returns: undefined }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       cycle_phase: "menstrual" | "folicular" | "ovulatoria" | "lutea"
       meal_type: "cafe" | "almoco" | "jantar" | "lanche"
       workout_type: "hiit" | "forca" | "yoga" | "mobilidade" | "cardio"
@@ -635,6 +661,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       cycle_phase: ["menstrual", "folicular", "ovulatoria", "lutea"],
       meal_type: ["cafe", "almoco", "jantar", "lanche"],
       workout_type: ["hiit", "forca", "yoga", "mobilidade", "cardio"],
