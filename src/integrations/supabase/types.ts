@@ -311,6 +311,7 @@ export type Database = {
           period_duration: number | null
           pill_reminder_time: string | null
           pregnancy_start_date: string | null
+          premium_override: boolean
           trial_end_date: string | null
           trial_reminder_sent: boolean | null
           tutorial_progress: Json | null
@@ -346,6 +347,7 @@ export type Database = {
           period_duration?: number | null
           pill_reminder_time?: string | null
           pregnancy_start_date?: string | null
+          premium_override?: boolean
           trial_end_date?: string | null
           trial_reminder_sent?: boolean | null
           tutorial_progress?: Json | null
@@ -381,6 +383,7 @@ export type Database = {
           period_duration?: number | null
           pill_reminder_time?: string | null
           pregnancy_start_date?: string | null
+          premium_override?: boolean
           trial_end_date?: string | null
           trial_reminder_sent?: boolean | null
           tutorial_progress?: Json | null
