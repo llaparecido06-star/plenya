@@ -3,15 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Wind, X, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useTranslation } from 'react-i18next';
 
 const BreathingCard: React.FC = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [phase, setPhase] = useState<'inhale' | 'exhale'>('inhale');
   const [cycles, setCycles] = useState(0);
 
-  const INHALE_DURATION = 4000; // 4 seconds
-  const EXHALE_DURATION = 4000; // 4 seconds
+  const INHALE_DURATION = 4000;
+  const EXHALE_DURATION = 4000;
 
   const togglePlay = useCallback(() => {
     setIsPlaying(prev => !prev);
@@ -46,7 +48,6 @@ const BreathingCard: React.FC = () => {
 
   return (
     <>
-      {/* Card Trigger */}
       <motion.div
         className="glass-card p-5 cursor-pointer hover:shadow-md transition-shadow"
         initial={{ opacity: 0, y: 20 }}
@@ -59,20 +60,18 @@ const BreathingCard: React.FC = () => {
             <Wind className="w-6 h-6 text-leaf-green" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-foreground">Respire Agora</h3>
+            <h3 className="font-semibold text-foreground">{t('mind.breathe_now')}</h3>
             <p className="text-sm text-muted-foreground">
-              Técnica 4-4 para acalmar o sistema nervoso
+              {t('mind.breathe_technique')}
             </p>
           </div>
           <Play className="w-5 h-5 text-primary" />
         </div>
       </motion.div>
 
-      {/* Breathing Modal */}
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-gradient-to-b from-background to-muted">
           <div className="relative min-h-[400px] flex flex-col items-center justify-center p-8">
-            {/* Close Button */}
             <button
               onClick={handleClose}
               className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10"
@@ -80,37 +79,21 @@ const BreathingCard: React.FC = () => {
               <X className="w-6 h-6" />
             </button>
 
-            {/* Breathing Circle */}
             <div className="relative flex items-center justify-center mb-8">
               <motion.div
                 className="w-48 h-48 rounded-full bg-gradient-to-br from-leaf-green/30 to-primary/20 flex items-center justify-center"
-                animate={{
-                  scale: isPlaying ? (phase === 'inhale' ? 1.4 : 1) : 1,
-                }}
-                transition={{
-                  duration: phase === 'inhale' ? INHALE_DURATION / 1000 : EXHALE_DURATION / 1000,
-                  ease: 'easeInOut',
-                }}
+                animate={{ scale: isPlaying ? (phase === 'inhale' ? 1.4 : 1) : 1 }}
+                transition={{ duration: phase === 'inhale' ? INHALE_DURATION / 1000 : EXHALE_DURATION / 1000, ease: 'easeInOut' }}
               >
                 <motion.div
                   className="w-32 h-32 rounded-full bg-gradient-to-br from-leaf-green/50 to-primary/30 flex items-center justify-center"
-                  animate={{
-                    scale: isPlaying ? (phase === 'inhale' ? 1.3 : 1) : 1,
-                  }}
-                  transition={{
-                    duration: phase === 'inhale' ? INHALE_DURATION / 1000 : EXHALE_DURATION / 1000,
-                    ease: 'easeInOut',
-                  }}
+                  animate={{ scale: isPlaying ? (phase === 'inhale' ? 1.3 : 1) : 1 }}
+                  transition={{ duration: phase === 'inhale' ? INHALE_DURATION / 1000 : EXHALE_DURATION / 1000, ease: 'easeInOut' }}
                 >
                   <motion.div
                     className="w-20 h-20 rounded-full phase-gradient flex items-center justify-center shadow-glow"
-                    animate={{
-                      scale: isPlaying ? (phase === 'inhale' ? 1.2 : 1) : 1,
-                    }}
-                    transition={{
-                      duration: phase === 'inhale' ? INHALE_DURATION / 1000 : EXHALE_DURATION / 1000,
-                      ease: 'easeInOut',
-                    }}
+                    animate={{ scale: isPlaying ? (phase === 'inhale' ? 1.2 : 1) : 1 }}
+                    transition={{ duration: phase === 'inhale' ? INHALE_DURATION / 1000 : EXHALE_DURATION / 1000, ease: 'easeInOut' }}
                   >
                     <Wind className="w-8 h-8 text-white" />
                   </motion.div>
@@ -118,7 +101,6 @@ const BreathingCard: React.FC = () => {
               </motion.div>
             </div>
 
-            {/* Instruction Text */}
             <AnimatePresence mode="wait">
               <motion.p
                 key={phase}
@@ -127,15 +109,18 @@ const BreathingCard: React.FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 className="text-2xl font-semibold text-foreground mb-2"
               >
-                {isPlaying ? (phase === 'inhale' ? 'Inspire...' : 'Solte...') : 'Pronto?'}
+                {isPlaying ? (phase === 'inhale' ? t('mind.inhale') : t('mind.exhale')) : t('mind.ready')}
               </motion.p>
             </AnimatePresence>
 
             <p className="text-muted-foreground mb-6">
-              {isPlaying ? `${cycles} ciclo${cycles !== 1 ? 's' : ''} completo${cycles !== 1 ? 's' : ''}` : '4 segundos inspirar, 4 segundos soltar'}
+              {isPlaying
+                ? (cycles === 1
+                    ? t('mind.cycles_complete', { count: cycles })
+                    : t('mind.cycles_complete_plural', { count: cycles }))
+                : t('mind.breathe_instruction')}
             </p>
 
-            {/* Control Button */}
             <Button
               onClick={togglePlay}
               size="lg"
@@ -144,12 +129,12 @@ const BreathingCard: React.FC = () => {
               {isPlaying ? (
                 <>
                   <Pause className="w-5 h-5" />
-                  Pausar
+                  {t('mind.pause')}
                 </>
               ) : (
                 <>
                   <Play className="w-5 h-5" />
-                  Começar
+                  {t('mind.start')}
                 </>
               )}
             </Button>

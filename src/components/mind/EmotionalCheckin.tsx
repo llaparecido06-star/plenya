@@ -3,30 +3,31 @@ import { motion } from 'framer-motion';
 import { Battery, Zap, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useDailyLog } from '@/hooks/useDailyLog';
-
-const stressLabels = [
-  { value: 1, emoji: '😌', text: 'Tranquila' },
-  { value: 2, emoji: '😐', text: 'Leve tensão' },
-  { value: 3, emoji: '😓', text: 'Moderado' },
-  { value: 4, emoji: '😰', text: 'Elevado' },
-  { value: 5, emoji: '🤯', text: 'Muito alto' },
-];
-
-const energyLabels = [
-  { value: 1, emoji: '😴', text: 'Esgotada' },
-  { value: 2, emoji: '🥱', text: 'Baixa' },
-  { value: 3, emoji: '😐', text: 'Neutra' },
-  { value: 4, emoji: '😊', text: 'Boa' },
-  { value: 5, emoji: '⚡', text: 'Energizada' },
-];
+import { useTranslation } from 'react-i18next';
 
 const EmotionalCheckin: React.FC = () => {
+  const { t } = useTranslation();
   const { data, loading, saving, saveLog, isAuthenticated } = useDailyLog();
   const [stress, setStress] = useState(3);
   const [energy, setEnergy] = useState(3);
   const [saved, setSaved] = useState(false);
 
-  // Load saved values
+  const stressLabels = [
+    { value: 1, emoji: '😌', textKey: 'mind.stress_calm' },
+    { value: 2, emoji: '😐', textKey: 'mind.stress_light' },
+    { value: 3, emoji: '😓', textKey: 'mind.stress_moderate' },
+    { value: 4, emoji: '😰', textKey: 'mind.stress_high' },
+    { value: 5, emoji: '🤯', textKey: 'mind.stress_very_high' },
+  ];
+
+  const energyLabels = [
+    { value: 1, emoji: '😴', textKey: 'mind.energy_exhausted' },
+    { value: 2, emoji: '🥱', textKey: 'mind.energy_low' },
+    { value: 3, emoji: '😐', textKey: 'mind.energy_neutral' },
+    { value: 4, emoji: '😊', textKey: 'mind.energy_good' },
+    { value: 5, emoji: '⚡', textKey: 'mind.energy_high' },
+  ];
+
   useEffect(() => {
     if (data.stress !== null) setStress(data.stress);
     if (data.energy !== null) setEnergy(data.energy);
@@ -62,21 +63,20 @@ const EmotionalCheckin: React.FC = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <h3 className="font-semibold text-foreground mb-6">Check-in Emocional</h3>
+      <h3 className="font-semibold text-foreground mb-6">{t('mind.emotional_checkin')}</h3>
 
       <div className="space-y-8">
-        {/* Stress selector */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-rose-100">
                 <Battery className="w-4 h-4 text-rose-600" />
               </div>
-              <span className="font-medium text-foreground">Nível de Estresse</span>
+              <span className="font-medium text-foreground">{t('mind.stress_level')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">{stressInfo.emoji}</span>
-              <span className="text-sm text-muted-foreground">{stressInfo.text}</span>
+              <span className="text-sm text-muted-foreground">{t(stressInfo.textKey)}</span>
             </div>
           </div>
           <div className="flex justify-between gap-2">
@@ -97,18 +97,17 @@ const EmotionalCheckin: React.FC = () => {
           </div>
         </div>
 
-        {/* Energy selector */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-amber-100">
                 <Zap className="w-4 h-4 text-amber-600" />
               </div>
-              <span className="font-medium text-foreground">Nível de Energia</span>
+              <span className="font-medium text-foreground">{t('mind.energy_level')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">{energyInfo.emoji}</span>
-              <span className="text-sm text-muted-foreground">{energyInfo.text}</span>
+              <span className="text-sm text-muted-foreground">{t(energyInfo.textKey)}</span>
             </div>
           </div>
           <div className="flex justify-between gap-2">
@@ -138,17 +137,17 @@ const EmotionalCheckin: React.FC = () => {
         {saving ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
-            Salvando...
+            {t('mind.saving')}
           </span>
         ) : saved ? (
           <span className="flex items-center gap-2">
             <Check className="w-4 h-4" />
-            Salvo!
+            {t('mind.saved')}
           </span>
         ) : !isAuthenticated ? (
-          'Faça login para salvar'
+          t('mind.login_to_save')
         ) : (
-          'Salvar Check-in'
+          t('mind.save_checkin')
         )}
       </Button>
     </motion.div>
