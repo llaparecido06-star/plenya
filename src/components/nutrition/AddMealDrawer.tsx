@@ -101,12 +101,28 @@ const AddMealDrawer: React.FC = () => {
   const handleSave = async () => {
     if (!selectedMeal || selectedFoods.length === 0) return;
 
+    // Auto-estimate macros if not already done
+    let macros = estimatedMacros;
+    if (!macros) {
+      setEstimating(true);
+      const result = await estimateMacros({
+        foods: selectedFoods.join(', '),
+        phase: currentPhase,
+        diet_type: diet_type || undefined,
+      });
+      if (result?.macros) {
+        macros = result.macros;
+        setEstimatedMacros(macros);
+      }
+      setEstimating(false);
+    }
+
     const mealName = selectedFoods.join(', ');
-    const success = await addMeal(selectedMeal, mealName, estimatedMacros ? {
-      calories: estimatedMacros.calories,
-      protein: estimatedMacros.protein,
-      carbs: estimatedMacros.carbs,
-      fat: estimatedMacros.fat,
+    const success = await addMeal(selectedMeal, mealName, macros ? {
+      calories: macros.calories,
+      protein: macros.protein,
+      carbs: macros.carbs,
+      fat: macros.fat,
     } : undefined);
     
     if (success) {
@@ -229,27 +245,7 @@ const AddMealDrawer: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* AI Macro Estimation */}
-                  {!estimatedMacros && (
-                    <Button
-                      variant="outline"
-                      className="w-full border-primary/30 text-primary"
-                      onClick={handleEstimateMacros}
-                      disabled={estimating || aiLoading}
-                    >
-                      {estimating || aiLoading ? (
-                        <span className="flex items-center gap-2">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Calculando macros...
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <Sparkles className="w-4 h-4" />
-                          Calcular macros com IA
-                        </span>
-                      )}
-                    </Button>
-                  )}
+                  {/* Macros are now auto-calculated on save */}
 
                   {estimatedMacros && (
                     <motion.div
@@ -281,9 +277,14 @@ const AddMealDrawer: React.FC = () => {
               <Button 
                 className="w-full phase-gradient text-white mt-4"
                 onClick={handleSave}
-                disabled={saving || saved || !isAuthenticated || selectedFoods.length === 0}
+                disabled={saving || saved || estimating || !isAuthenticated || selectedFoods.length === 0}
               >
-                {saving ? (
+                {estimating ? (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 animate-pulse" />
+                    Calculando macros...
+                  </span>
+                ) : saving ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Salvando...
@@ -296,7 +297,7 @@ const AddMealDrawer: React.FC = () => {
                 ) : !isAuthenticated ? (
                   'Faça login para salvar'
                 ) : (
-                  `Salvar Refeição${estimatedMacros ? ' com Macros' : ''}`
+                  'Salvar Refeição'
                 )}
               </Button>
             </div>
