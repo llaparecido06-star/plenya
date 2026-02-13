@@ -438,14 +438,14 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose, onDaySelect 
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {!isToday && (
             <Button variant="outline" size="sm" onClick={goToToday}>
               Hoje
             </Button>
           )}
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
           )}
