@@ -29,9 +29,10 @@ const MONTHS = [
 
 interface HistoryCalendarProps {
   onClose?: () => void;
+  onDaySelect?: () => void;
 }
 
-const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
+const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose, onDaySelect }) => {
   const { selectedDate, setSelectedDate, isToday, goToToday } = useSelectedDate();
   const { datesWithData } = useHistoricalData();
   const { getPredictedPeriodDates, cycleLength, lastPeriodStart, periodDuration } = useCycle();
@@ -252,6 +253,7 @@ const HistoryCalendar: React.FC<HistoryCalendarProps> = ({ onClose }) => {
     const newDate = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), day);
     if (newDate <= new Date()) {
       setSelectedDate(newDate);
+      onDaySelect?.();
     }
   };
 

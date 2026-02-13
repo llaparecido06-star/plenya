@@ -104,7 +104,7 @@ const Index: React.FC = () => {
         <AnimatePresence>
           {showCalendar && (
             <div className="px-4 mb-4">
-              <HistoryCalendar onClose={() => setShowCalendar(false)} />
+              <HistoryCalendar onClose={() => setShowCalendar(false)} onDaySelect={() => setShowCalendar(false)} />
             </div>
           )}
         </AnimatePresence>

@@ -20,6 +20,7 @@ import {
 import { useIntimacyLog } from '@/hooks/useIntimacyLog';
 import { useCycle } from '@/contexts/CycleContext';
 import { useMenstruationLog } from '@/hooks/useMenstruationLog';
+import { useSelectedDate } from '@/contexts/SelectedDateContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -69,9 +70,20 @@ interface IntimacyLogProps {
 }
 
 const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly = false }) => {
+  const { selectedDate: contextDate, isToday: isContextToday } = useSelectedDate();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dateOption, setDateOption] = useState<DateOption>('today');
   const [calendarOpen, setCalendarOpen] = useState(false);
+
+  // Sync with context date when it changes (user picks a day in the calendar)
+  React.useEffect(() => {
+    setSelectedDate(contextDate);
+    if (isContextToday) {
+      setDateOption('today');
+    } else {
+      setDateOption('custom');
+    }
+  }, [contextDate, isContextToday]);
   
   const { existingLog, loading, saving, saveLog, isAuthenticated, yesterdayRiskDetected } = useIntimacyLog(selectedDate);
   const { currentPhase } = useCycle();
