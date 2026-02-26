@@ -19,6 +19,7 @@ import ProfileSettingsEditor from '@/components/profile/ProfileSettingsEditor';
 import AvatarUpload from '@/components/profile/AvatarUpload';
 import DeleteAccountButton from '@/components/profile/DeleteAccountButton';
 import MedicationTracker from '@/components/profile/MedicationTracker';
+import ChangePasswordCard from '@/components/profile/ChangePasswordCard';
 import { useTranslation } from 'react-i18next';
 
 // Goal configuration for badges
@@ -270,6 +271,9 @@ const Perfil: React.FC = () => {
         >
           <NotificationSettings />
         </motion.div>
+
+        {/* Change Password */}
+        <ChangePasswordCard />
 
         {/* Medical Report Button */}
         <MedicalReportButton />
