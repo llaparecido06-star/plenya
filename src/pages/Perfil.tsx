@@ -7,7 +7,7 @@ import AuthForm from '@/components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
 import {
   LogOut, Target, Dumbbell, Heart, Baby, Activity, Utensils, Zap, Crown, Globe,
-  Lock, Bell, CalendarDays, Settings, Trash2, ChevronRight, Pill
+  Lock, Bell, CalendarDays, Settings, Trash2, ChevronRight, Pill, FileText
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import DUMPicker from '@/components/profile/DUMPicker';
@@ -230,20 +230,28 @@ const Perfil: React.FC = () => {
             <DUMPicker />
           </MenuItem>
 
-          <MenuItem icon={Pill} label={t('profile.contraceptive_title')} sublabel="Método contraceptivo atual" iconClassName="bg-pink-100 text-pink-600">
+          <MenuItem icon={Pill} label={t('profile.contraceptive_title')} sublabel="Contraceptivo e medicação" iconClassName="bg-pink-100 text-pink-600">
             <ContraceptiveConfig />
+            <div className="mt-6 pt-6 border-t border-border">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Medicação contínua</h3>
+              <MedicationTracker />
+            </div>
           </MenuItem>
 
           <MenuItem icon={Bell} label="Notificações" sublabel="Configure seus alertas" iconClassName="bg-emerald-100 text-emerald-600">
             <NotificationSettings />
           </MenuItem>
+
+          <MenuItem icon={FileText} label="Relatório Médico" sublabel="Gere e compartilhe em PDF" iconClassName="bg-amber-100 text-amber-600">
+            <MedicalReportButton />
+          </MenuItem>
+
+          <MenuItem icon={Trash2} label="Excluir conta" sublabel="Ação irreversível" iconClassName="bg-red-100 text-red-600">
+            <DeleteAccountButton />
+          </MenuItem>
         </motion.div>
 
         {/* Quick Info Cards */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <MedicationTracker />
-        </motion.div>
-
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <PatternsCard />
         </motion.div>
@@ -252,21 +260,9 @@ const Perfil: React.FC = () => {
           <WeeklySummaryCard />
         </motion.div>
 
-        <MedicalReportButton />
-
-        <Button onClick={signOut} variant="outline" className="w-full mt-6">
+        <Button onClick={signOut} variant="outline" className="w-full mt-6 mb-4">
           <LogOut className="w-4 h-4 mr-2" /> {t('actions.sign_out')}
         </Button>
-
-        {/* Danger Zone */}
-        <motion.div
-          className="glass-card overflow-hidden mb-24"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <DeleteAccountButton />
-        </motion.div>
 
         <div className="flex justify-center gap-4 text-xs text-muted-foreground mb-8">
           <a href="/privacidade" className="hover:underline">{t('profile.privacy_policy')}</a>
