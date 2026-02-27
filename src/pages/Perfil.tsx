@@ -61,10 +61,11 @@ interface MenuItemProps {
   sublabel?: string;
   onClick?: () => void;
   variant?: 'default' | 'danger';
+  iconClassName?: string;
   children?: React.ReactNode;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, label, sublabel, onClick, variant = 'default', children }) => {
+const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, label, sublabel, onClick, variant = 'default', iconClassName, children }) => {
   const content = (
     <button
       onClick={onClick}
@@ -74,7 +75,9 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon: Icon, label, sublabel, onClic
           : 'text-foreground hover:bg-muted/50'
       }`}
     >
-      <Icon className={`w-5 h-5 ${variant === 'danger' ? 'text-destructive' : 'text-muted-foreground'}`} />
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconClassName || 'bg-muted text-muted-foreground'}`}>
+        <Icon className="w-[18px] h-[18px]" />
+      </div>
       <div className="flex-1 text-left">
         <span className="text-sm font-medium">{label}</span>
         {sublabel && <p className="text-xs text-muted-foreground">{sublabel}</p>}
@@ -194,9 +197,9 @@ const Perfil: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <MenuItem icon={Crown} label={t('profile.view_plans')} sublabel="Gerencie sua assinatura" onClick={() => navigate('/planos')} />
+          <MenuItem icon={Crown} label={t('profile.view_plans')} sublabel="Gerencie sua assinatura" iconClassName="bg-amber-100 text-amber-600" onClick={() => navigate('/planos')} />
 
-          <MenuItem icon={Globe} label={t('profile.language')} sublabel={currentLang ? `${currentLang.flag} ${currentLang.label}` : ''}>
+          <MenuItem icon={Globe} label={t('profile.language')} sublabel={currentLang ? `${currentLang.flag} ${currentLang.label}` : ''} iconClassName="bg-sky-100 text-sky-600">
             <div className="flex flex-col gap-2">
               {languages.map((lang) => (
                 <button
@@ -215,23 +218,23 @@ const Perfil: React.FC = () => {
             </div>
           </MenuItem>
 
-          <MenuItem icon={Lock} label="Alterar senha" sublabel="Atualize sua senha de acesso">
+          <MenuItem icon={Lock} label="Alterar senha" sublabel="Atualize sua senha de acesso" iconClassName="bg-violet-100 text-violet-600">
             <ChangePasswordCard />
           </MenuItem>
 
-          <MenuItem icon={Settings} label="Minhas preferências" sublabel="Objetivos, dieta e exercícios">
+          <MenuItem icon={Settings} label="Minhas preferências" sublabel="Objetivos, dieta e exercícios" iconClassName="bg-slate-100 text-slate-600">
             <ProfileSettingsEditor currentGoals={goals} currentDiet={diet_type} currentFitness={fitness_level} onUpdate={refetch} />
           </MenuItem>
 
-          <MenuItem icon={CalendarDays} label="DUM" sublabel="Data da Última Menstruação">
+          <MenuItem icon={CalendarDays} label="DUM" sublabel="Data da Última Menstruação" iconClassName="bg-rose-100 text-rose-600">
             <DUMPicker />
           </MenuItem>
 
-          <MenuItem icon={Pill} label={t('profile.contraceptive_title')} sublabel="Método contraceptivo atual">
+          <MenuItem icon={Pill} label={t('profile.contraceptive_title')} sublabel="Método contraceptivo atual" iconClassName="bg-pink-100 text-pink-600">
             <ContraceptiveConfig />
           </MenuItem>
 
-          <MenuItem icon={Bell} label="Notificações" sublabel="Configure seus alertas">
+          <MenuItem icon={Bell} label="Notificações" sublabel="Configure seus alertas" iconClassName="bg-emerald-100 text-emerald-600">
             <NotificationSettings />
           </MenuItem>
         </motion.div>
