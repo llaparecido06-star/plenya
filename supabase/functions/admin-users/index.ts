@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,7 +55,6 @@ serve(async (req) => {
         .select("*", { count: "exact", head: true })
         .eq("premium_override", true);
 
-      // Active users (logged in last 7 days)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const { count: activeUsers } = await supabase
@@ -83,7 +83,6 @@ serve(async (req) => {
       const page = parseInt(url.searchParams.get("page") || "0");
       const pageSize = 20;
 
-      // Get all users from auth
       const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({
         page: page + 1,
         perPage: pageSize,
@@ -93,10 +92,9 @@ serve(async (req) => {
 
       const userIds = authUsers.users.map((u) => u.id);
 
-      // Get profiles for these users
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, full_name, premium_override, onboarding_completed, created_at, life_phase")
+        .select("user_id, full_name, premium_override, onboarding_completed, created_at, life_phase, goal, diet_type, fitness_level, contraceptive_type, last_period_start")
         .in("user_id", userIds);
 
       const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
@@ -110,11 +108,16 @@ serve(async (req) => {
           premium_override: profile?.premium_override || false,
           onboarding_completed: profile?.onboarding_completed || false,
           life_phase: profile?.life_phase || null,
+          goal: profile?.goal || null,
+          diet_type: profile?.diet_type || null,
+          fitness_level: profile?.fitness_level || null,
+          contraceptive_type: profile?.contraceptive_type || null,
+          last_period_start: profile?.last_period_start || null,
           created_at: profile?.created_at || u.created_at,
+          last_sign_in_at: u.last_sign_in_at || null,
         };
       });
 
-      // Filter by search
       if (search) {
         const s = search.toLowerCase();
         users = users.filter(
@@ -125,6 +128,68 @@ serve(async (req) => {
       }
 
       return new Response(JSON.stringify({ users, total: authUsers.total }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // GET user subscription info from Stripe
+    if (action === "user-subscription") {
+      const targetEmail = url.searchParams.get("email");
+      if (!targetEmail) throw new Error("email required");
+
+      const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+      if (!stripeKey) {
+        return new Response(JSON.stringify({ subscribed: false, message: "Stripe not configured" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+      const customers = await stripe.customers.list({ email: targetEmail, limit: 1 });
+
+      if (customers.data.length === 0) {
+        return new Response(JSON.stringify({ subscribed: false, customer: null }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const customer = customers.data[0];
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customer.id,
+        limit: 5,
+      });
+
+      const payments = await stripe.paymentIntents.list({
+        customer: customer.id,
+        limit: 10,
+      });
+
+      const subData = subscriptions.data.map((sub) => ({
+        id: sub.id,
+        status: sub.status,
+        current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
+        current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+        plan_amount: sub.items.data[0]?.price?.unit_amount ?? 0,
+        plan_currency: sub.items.data[0]?.price?.currency ?? 'brl',
+        plan_interval: sub.items.data[0]?.price?.recurring?.interval ?? null,
+        product_id: sub.items.data[0]?.price?.product ?? null,
+        cancel_at_period_end: sub.cancel_at_period_end,
+      }));
+
+      const paymentData = payments.data.map((pi) => ({
+        id: pi.id,
+        amount: pi.amount,
+        currency: pi.currency,
+        status: pi.status,
+        created: new Date(pi.created * 1000).toISOString(),
+      }));
+
+      return new Response(JSON.stringify({
+        subscribed: subData.some(s => s.status === 'active'),
+        customer_id: customer.id,
+        subscriptions: subData,
+        payments: paymentData,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -140,6 +205,36 @@ serve(async (req) => {
         .eq("user_id", user_id);
 
       if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // POST delete user
+    if (action === "delete-user" && req.method === "POST") {
+      const { user_id } = await req.json();
+      if (!user_id) throw new Error("user_id required");
+
+      // Prevent self-deletion
+      if (user_id === userData.user.id) {
+        throw new Error("Cannot delete your own admin account");
+      }
+
+      // Delete all user data from tables
+      const tables = [
+        'daily_logs', 'menstruation_logs', 'intimacy_logs', 'nutrition_intake',
+        'workouts', 'pill_logs', 'chat_messages', 'login_streaks',
+        'contraceptive_history', 'recipe_history', 'push_tokens', 'profiles'
+      ];
+
+      for (const table of tables) {
+        await supabase.from(table).delete().eq('user_id', user_id);
+      }
+
+      // Delete from auth
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(user_id);
+      if (deleteError) throw deleteError;
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
