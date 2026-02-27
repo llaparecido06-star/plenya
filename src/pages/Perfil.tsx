@@ -190,12 +190,21 @@ const Perfil: React.FC = () => {
           )}
         </motion.div>
 
+        {/* Quick Info Cards */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <PatternsCard />
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <WeeklySummaryCard />
+        </motion.div>
+
         {/* Settings Menu */}
         <motion.div
           className="glass-card overflow-hidden divide-y divide-border"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.2 }}
         >
           <MenuItem icon={Crown} label={t('profile.view_plans')} sublabel="Gerencie sua assinatura" iconClassName="bg-amber-100 text-amber-600" onClick={() => navigate('/planos')} />
 
@@ -249,15 +258,6 @@ const Perfil: React.FC = () => {
           <MenuItem icon={Trash2} label="Excluir conta" sublabel="Ação irreversível" iconClassName="bg-red-100 text-red-600">
             <DeleteAccountButton />
           </MenuItem>
-        </motion.div>
-
-        {/* Quick Info Cards */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <PatternsCard />
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <WeeklySummaryCard />
         </motion.div>
 
         <Button onClick={signOut} variant="outline" className="w-full mt-6 mb-4">

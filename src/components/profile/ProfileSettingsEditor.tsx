@@ -47,7 +47,6 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   
   const [selectedGoals, setSelectedGoals] = useState<string[]>(currentGoals);
@@ -98,7 +97,6 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
         description: "Suas configurações foram salvas com sucesso.",
       });
       
-      setIsEditing(false);
       onUpdate();
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -112,71 +110,8 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
     }
   };
 
-  const handleCancel = () => {
-    setSelectedGoals(currentGoals);
-    setSelectedDiet(currentDiet || 'omnivore');
-    setSelectedFitness(currentFitness || 'moderate');
-    setIsEditing(false);
-  };
-
-  if (!isEditing) {
-    return (
-      <motion.div
-        className="glass-card p-5"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-foreground">Minhas Preferências</h3>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsEditing(true)}
-          >
-            Editar
-          </Button>
-        </div>
-        <p className="text-sm text-muted-foreground mt-2">
-          Objetivos, dieta e frequência de exercícios
-        </p>
-      </motion.div>
-    );
-  }
-
   return (
-    <motion.div
-      className="glass-card p-5 space-y-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Settings className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-foreground">Editar Preferências</h3>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleCancel}
-            disabled={saving}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-          <Button 
-            size="sm"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            <Check className="w-4 h-4 mr-1" />
-            {saving ? 'Salvando...' : 'Salvar'}
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6">
 
       {/* Goals Section */}
       <div className="space-y-3">
@@ -269,7 +204,12 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
           ))}
         </RadioGroup>
       </div>
-    </motion.div>
+
+      <Button onClick={handleSave} disabled={saving} className="w-full">
+        <Check className="w-4 h-4 mr-1" />
+        {saving ? 'Salvando...' : 'Salvar preferências'}
+      </Button>
+    </div>
   );
 };
 
