@@ -81,53 +81,131 @@ serve(async (req) => {
     if (action === "list") {
       const search = url.searchParams.get("search") || "";
       const page = parseInt(url.searchParams.get("page") || "0");
+      const filterPremium = url.searchParams.get("premium"); // "true" or "false"
+      const filterActive = url.searchParams.get("active"); // "true"
+      const filterLifePhase = url.searchParams.get("life_phase"); // e.g. "menstruating"
       const pageSize = 20;
 
-      const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({
-        page: page + 1,
-        perPage: pageSize,
-      });
-
-      if (listError) throw listError;
-
-      const userIds = authUsers.users.map((u) => u.id);
-
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, premium_override, onboarding_completed, created_at, life_phase, goal, diet_type, fitness_level, contraceptive_type, last_period_start")
-        .in("user_id", userIds);
-
-      const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
-
-      let users = authUsers.users.map((u) => {
-        const profile = profileMap.get(u.id);
-        return {
-          id: u.id,
-          email: u.email,
-          full_name: profile?.full_name || null,
-          premium_override: profile?.premium_override || false,
-          onboarding_completed: profile?.onboarding_completed || false,
-          life_phase: profile?.life_phase || null,
-          goal: profile?.goal || null,
-          diet_type: profile?.diet_type || null,
-          fitness_level: profile?.fitness_level || null,
-          contraceptive_type: profile?.contraceptive_type || null,
-          last_period_start: profile?.last_period_start || null,
-          created_at: profile?.created_at || u.created_at,
-          last_sign_in_at: u.last_sign_in_at || null,
-        };
-      });
-
-      if (search) {
-        const s = search.toLowerCase();
-        users = users.filter(
-          (u) =>
-            u.email?.toLowerCase().includes(s) ||
-            u.full_name?.toLowerCase().includes(s)
-        );
+      // If filtering by active, get active user IDs first
+      let activeUserIds: Set<string> | null = null;
+      if (filterActive === "true") {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const { data: activeLogins } = await supabase
+          .from("login_streaks")
+          .select("user_id")
+          .gte("login_date", sevenDaysAgo.toISOString().split("T")[0]);
+        activeUserIds = new Set((activeLogins || []).map((l: any) => l.user_id));
       }
 
-      return new Response(JSON.stringify({ users, total: authUsers.total }), {
+      // Build profile query with filters for server-side filtering
+      let profileQuery = supabase
+        .from("profiles")
+        .select("user_id, full_name, premium_override, onboarding_completed, created_at, life_phase, goal, diet_type, fitness_level, contraceptive_type, last_period_start");
+
+      if (filterPremium === "true") {
+        profileQuery = profileQuery.eq("premium_override", true);
+      }
+      if (filterLifePhase) {
+        profileQuery = profileQuery.eq("life_phase", filterLifePhase);
+      }
+
+      const { data: profiles } = await profileQuery;
+      const profileMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
+
+      // When using filters, we get all auth users and filter in memory
+      const hasFilters = filterPremium || filterActive || filterLifePhase;
+
+      let allUsers: any[] = [];
+      let totalCount = 0;
+
+      if (hasFilters) {
+        // Fetch more users for filtering (up to 1000)
+        const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({
+          page: 1,
+          perPage: 1000,
+        });
+        if (listError) throw listError;
+
+        let users = authUsers.users.map((u: any) => {
+          const profile = profileMap.get(u.id);
+          return {
+            id: u.id,
+            email: u.email,
+            full_name: profile?.full_name || null,
+            premium_override: profile?.premium_override || false,
+            onboarding_completed: profile?.onboarding_completed || false,
+            life_phase: profile?.life_phase || null,
+            goal: profile?.goal || null,
+            diet_type: profile?.diet_type || null,
+            fitness_level: profile?.fitness_level || null,
+            contraceptive_type: profile?.contraceptive_type || null,
+            last_period_start: profile?.last_period_start || null,
+            created_at: profile?.created_at || u.created_at,
+            last_sign_in_at: u.last_sign_in_at || null,
+          };
+        });
+
+        // Apply filters
+        if (filterPremium === "true") {
+          users = users.filter((u: any) => u.premium_override);
+        }
+        if (filterLifePhase) {
+          users = users.filter((u: any) => u.life_phase === filterLifePhase);
+        }
+        if (activeUserIds) {
+          users = users.filter((u: any) => activeUserIds!.has(u.id));
+        }
+        if (search) {
+          const s = search.toLowerCase();
+          users = users.filter((u: any) => u.email?.toLowerCase().includes(s) || u.full_name?.toLowerCase().includes(s));
+        }
+
+        totalCount = users.length;
+        allUsers = users.slice(page * pageSize, (page + 1) * pageSize);
+      } else {
+        // No filters - use paginated auth list
+        const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({
+          page: page + 1,
+          perPage: pageSize,
+        });
+        if (listError) throw listError;
+
+        const userIds = authUsers.users.map((u: any) => u.id);
+        const { data: unfilteredProfiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, premium_override, onboarding_completed, created_at, life_phase, goal, diet_type, fitness_level, contraceptive_type, last_period_start")
+          .in("user_id", userIds);
+        const unfilteredMap = new Map(unfilteredProfiles?.map((p: any) => [p.user_id, p]) || []);
+
+        allUsers = authUsers.users.map((u: any) => {
+          const profile = unfilteredMap.get(u.id);
+          return {
+            id: u.id,
+            email: u.email,
+            full_name: profile?.full_name || null,
+            premium_override: profile?.premium_override || false,
+            onboarding_completed: profile?.onboarding_completed || false,
+            life_phase: profile?.life_phase || null,
+            goal: profile?.goal || null,
+            diet_type: profile?.diet_type || null,
+            fitness_level: profile?.fitness_level || null,
+            contraceptive_type: profile?.contraceptive_type || null,
+            last_period_start: profile?.last_period_start || null,
+            created_at: profile?.created_at || u.created_at,
+            last_sign_in_at: u.last_sign_in_at || null,
+          };
+        });
+
+        if (search) {
+          const s = search.toLowerCase();
+          allUsers = allUsers.filter((u: any) => u.email?.toLowerCase().includes(s) || u.full_name?.toLowerCase().includes(s));
+        }
+
+        totalCount = authUsers.total;
+      }
+
+      return new Response(JSON.stringify({ users: allUsers, total: totalCount }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
