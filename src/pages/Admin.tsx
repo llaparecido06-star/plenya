@@ -16,8 +16,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   Users, Crown, Activity, CheckCircle, Search, Shield, ArrowLeft, Loader2,
-  Trash2, Eye, CreditCard, Calendar, Dumbbell, Utensils, Heart, ChevronRight
+  Trash2, Eye, CreditCard, Calendar, Dumbbell, Utensils, Heart, ChevronRight,
+  Filter, X
 } from 'lucide-react';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
@@ -97,6 +101,9 @@ const Admin: React.FC = () => {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [filterPremium, setFilterPremium] = useState(false);
+  const [filterActive, setFilterActive] = useState(false);
+  const [filterLifePhase, setFilterLifePhase] = useState<string>('');
 
   // Detail drawer
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
@@ -130,13 +137,16 @@ const Admin: React.FC = () => {
     setLoadingUsers(true);
     const params = new URLSearchParams({ action: 'list', page: page.toString() });
     if (search) params.set('search', search);
+    if (filterPremium) params.set('premium', 'true');
+    if (filterActive) params.set('active', 'true');
+    if (filterLifePhase) params.set('life_phase', filterLifePhase);
     const { data, error } = await supabase.functions.invoke(`admin-users?${params.toString()}`);
     if (!error && data) {
       setUsers(data.users || []);
       setTotalUsers(data.total || 0);
     }
     setLoadingUsers(false);
-  }, [page, search]);
+  }, [page, search, filterPremium, filterActive, filterLifePhase]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -260,15 +270,62 @@ const Admin: React.FC = () => {
           ))}
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome ou email..."
-            className="pl-10"
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-          />
+        {/* Search & Filters */}
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome ou email..."
+              className="pl-10"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+            />
+          </div>
+
+          {/* Filter chips */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <Button
+              variant={filterPremium ? 'default' : 'outline'}
+              size="sm"
+              className="h-7 text-xs rounded-full"
+              onClick={() => { setFilterPremium(!filterPremium); setPage(0); }}
+            >
+              <Crown className="w-3 h-3 mr-1" />
+              Premium
+            </Button>
+            <Button
+              variant={filterActive ? 'default' : 'outline'}
+              size="sm"
+              className="h-7 text-xs rounded-full"
+              onClick={() => { setFilterActive(!filterActive); setPage(0); }}
+            >
+              <Activity className="w-3 h-3 mr-1" />
+              Ativas (7d)
+            </Button>
+            <Select value={filterLifePhase} onValueChange={(v) => { setFilterLifePhase(v === 'all' ? '' : v); setPage(0); }}>
+              <SelectTrigger className="h-7 text-xs rounded-full w-auto min-w-[120px]">
+                <SelectValue placeholder="Fase de vida" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as fases</SelectItem>
+                <SelectItem value="menstruating">Menstruando</SelectItem>
+                <SelectItem value="pregnant">Gestante</SelectItem>
+                <SelectItem value="menopause">Menopausa</SelectItem>
+              </SelectContent>
+            </Select>
+            {(filterPremium || filterActive || filterLifePhase) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs rounded-full text-muted-foreground"
+                onClick={() => { setFilterPremium(false); setFilterActive(false); setFilterLifePhase(''); setPage(0); }}
+              >
+                <X className="w-3 h-3 mr-1" />
+                Limpar
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Users List */}
