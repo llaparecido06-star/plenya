@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Settings, Target, Utensils, Zap, Check, X } from 'lucide-react';
+import { Target, Utensils, Zap, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -8,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileSettingsEditorProps {
   currentGoals: string[];
@@ -17,26 +17,26 @@ interface ProfileSettingsEditorProps {
 }
 
 const goalOptions = [
-  { id: 'lose_weight', label: 'Perder Peso', icon: '🎯' },
-  { id: 'gain_muscle', label: 'Ganhar Massa', icon: '💪' },
-  { id: 'pms_relief', label: 'Alívio de TPM', icon: '💗' },
-  { id: 'get_pregnant', label: 'Engravidar', icon: '👶' },
-  { id: 'health_monitor', label: 'Monitorar Saúde', icon: '📊' },
+  { id: 'lose_weight', labelKey: 'goals.lose_weight', icon: '🎯' },
+  { id: 'gain_muscle', labelKey: 'goals.gain_muscle', icon: '💪' },
+  { id: 'pms_relief', labelKey: 'goals.pms_relief', icon: '💗' },
+  { id: 'get_pregnant', labelKey: 'goals.get_pregnant', icon: '👶' },
+  { id: 'health_monitor', labelKey: 'goals.health_monitor', icon: '📊' },
 ];
 
 const dietOptions = [
-  { id: 'omnivore', label: 'Onívora', icon: '🍖' },
-  { id: 'vegetarian', label: 'Vegetariana', icon: '🥗' },
-  { id: 'vegan', label: 'Vegana', icon: '🌱' },
-  { id: 'low_carb', label: 'Low Carb', icon: '🥑' },
-  { id: 'lactose_free', label: 'Sem Lactose', icon: '🥛' },
+  { id: 'omnivore', labelKey: 'diet.omnivore', icon: '🍖' },
+  { id: 'vegetarian', labelKey: 'diet.vegetarian', icon: '🥗' },
+  { id: 'vegan', labelKey: 'diet.vegan', icon: '🌱' },
+  { id: 'low_carb', labelKey: 'diet.low_carb', icon: '🥑' },
+  { id: 'lactose_free', labelKey: 'diet.lactose_free', icon: '🥛' },
 ];
 
 const fitnessOptions = [
-  { id: 'sedentary', label: 'Sedentária', description: 'Pouco ou nenhum exercício' },
-  { id: 'light', label: 'Leve', description: '1-2x por semana' },
-  { id: 'moderate', label: 'Moderada', description: '3-4x por semana' },
-  { id: 'intense', label: 'Intensa/Atleta', description: '5+ vezes por semana' },
+  { id: 'sedentary', labelKey: 'fitness.sedentary', descKey: 'settings.fitness_sedentary_desc' },
+  { id: 'light', labelKey: 'fitness.light', descKey: 'settings.fitness_light_desc' },
+  { id: 'moderate', labelKey: 'fitness.moderate', descKey: 'settings.fitness_moderate_desc' },
+  { id: 'intense', labelKey: 'fitness.intense', descKey: 'settings.fitness_intense_desc' },
 ];
 
 const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
@@ -45,6 +45,7 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
   currentFitness,
   onUpdate,
 }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
@@ -71,10 +72,7 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
     if (!user) return;
     
     if (selectedGoals.length === 0) {
-      toast({
-        title: "Selecione ao menos um objetivo",
-        variant: "destructive",
-      });
+      toast({ title: t('settings.select_goal'), variant: 'destructive' });
       return;
     }
 
@@ -93,17 +91,17 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
       if (error) throw error;
 
       toast({
-        title: "Preferências atualizadas!",
-        description: "Suas configurações foram salvas com sucesso.",
+        title: t('settings.updated_success'),
+        description: t('settings.updated_desc'),
       });
       
       onUpdate();
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
-        title: "Erro ao salvar",
-        description: "Tente novamente.",
-        variant: "destructive",
+        title: t('settings.save_error'),
+        description: t('settings.save_error_desc'),
+        variant: 'destructive',
       });
     } finally {
       setSaving(false);
@@ -112,12 +110,10 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
 
   return (
     <div className="space-y-6">
-
-      {/* Goals Section */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Target className="w-4 h-4 text-terracotta" />
-          <Label className="font-medium">Objetivos</Label>
+          <Label className="font-medium">{t('settings.goals_label')}</Label>
         </div>
         <div className="grid grid-cols-1 gap-2">
           {goalOptions.map((goal) => (
@@ -135,17 +131,16 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
                 onCheckedChange={() => handleGoalToggle(goal.id)}
               />
               <span className="text-lg">{goal.icon}</span>
-              <span className="text-sm font-medium">{goal.label}</span>
+              <span className="text-sm font-medium">{t(goal.labelKey)}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Diet Section */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Utensils className="w-4 h-4 text-amber-500" />
-          <Label className="font-medium">Estilo Alimentar</Label>
+          <Label className="font-medium">{t('settings.diet_label')}</Label>
         </div>
         <RadioGroup
           value={selectedDiet}
@@ -165,18 +160,17 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
               <RadioGroupItem value={diet.id} id={diet.id} />
               <span className="text-lg">{diet.icon}</span>
               <Label htmlFor={diet.id} className="text-sm font-medium cursor-pointer">
-                {diet.label}
+                {t(diet.labelKey)}
               </Label>
             </div>
           ))}
         </RadioGroup>
       </div>
 
-      {/* Fitness Section */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-blue-500" />
-          <Label className="font-medium">Frequência de Exercícios</Label>
+          <Label className="font-medium">{t('settings.fitness_label')}</Label>
         </div>
         <RadioGroup
           value={selectedFitness}
@@ -196,9 +190,9 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
               <RadioGroupItem value={fitness.id} id={fitness.id} />
               <div className="flex-1">
                 <Label htmlFor={fitness.id} className="text-sm font-medium cursor-pointer">
-                  {fitness.label}
+                  {t(fitness.labelKey)}
                 </Label>
-                <p className="text-xs text-muted-foreground">{fitness.description}</p>
+                <p className="text-xs text-muted-foreground">{t(fitness.descKey)}</p>
               </div>
             </div>
           ))}
@@ -207,7 +201,7 @@ const ProfileSettingsEditor: React.FC<ProfileSettingsEditorProps> = ({
 
       <Button onClick={handleSave} disabled={saving} className="w-full">
         <Check className="w-4 h-4 mr-1" />
-        {saving ? 'Salvando...' : 'Salvar preferências'}
+        {saving ? t('actions.loading') : t('settings.save_preferences')}
       </Button>
     </div>
   );
