@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const ChangePasswordCard: React.FC = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,22 +17,22 @@ const ChangePasswordCard: React.FC = () => {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword.length < 6) {
-      toast({ title: 'Erro', description: 'A senha deve ter no mínimo 6 caracteres.', variant: 'destructive' });
+      toast({ title: t('errors.generic_error'), description: t('password.min_length'), variant: 'destructive' });
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast({ title: 'Erro', description: 'As senhas não coincidem.', variant: 'destructive' });
+      toast({ title: t('errors.generic_error'), description: t('password.mismatch'), variant: 'destructive' });
       return;
     }
     setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      toast({ title: 'Senha alterada! 🔒', description: 'Sua senha foi atualizada com sucesso.' });
+      toast({ title: t('password.changed_success'), description: t('password.changed_desc') });
       setNewPassword('');
       setConfirmPassword('');
     } catch (error: any) {
-      toast({ title: 'Erro', description: error.message || 'Não foi possível alterar a senha.', variant: 'destructive' });
+      toast({ title: t('errors.generic_error'), description: error.message || t('password.change_error'), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -41,7 +43,7 @@ const ChangePasswordCard: React.FC = () => {
       <div className="relative">
         <Input
           type={showPassword ? 'text' : 'password'}
-          placeholder="Nova senha (mín. 6 caracteres)"
+          placeholder={t('password.new_placeholder')}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           className="pr-10 h-11"
@@ -58,7 +60,7 @@ const ChangePasswordCard: React.FC = () => {
       </div>
       <Input
         type={showPassword ? 'text' : 'password'}
-        placeholder="Confirmar nova senha"
+        placeholder={t('password.confirm_placeholder')}
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         className="h-11"
@@ -66,7 +68,7 @@ const ChangePasswordCard: React.FC = () => {
         required
       />
       <Button type="submit" className="w-full phase-gradient text-white" disabled={loading}>
-        {loading ? 'Salvando...' : 'Alterar senha'}
+        {loading ? t('actions.loading') : t('password.change_button')}
       </Button>
     </form>
   );

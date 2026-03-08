@@ -17,19 +17,21 @@ import {
 import { Input } from '@/components/ui/input';
 import { Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const DeleteAccountButton: React.FC = () => {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [confirmation, setConfirmation] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const confirmWord = t('delete_account.confirm_word');
+
   const handleDelete = async () => {
-    if (!user || confirmation !== 'DELETAR') return;
+    if (!user || confirmation !== confirmWord) return;
     setLoading(true);
     try {
-      // Delete user data from all tables
-      // Delete user data from all tables
       await supabase.from('daily_logs').delete().eq('user_id', user.id);
       await supabase.from('menstruation_logs').delete().eq('user_id', user.id);
       await supabase.from('intimacy_logs').delete().eq('user_id', user.id);
@@ -42,12 +44,11 @@ const DeleteAccountButton: React.FC = () => {
       await supabase.from('recipe_history').delete().eq('user_id', user.id);
       await supabase.from('profiles').delete().eq('user_id', user.id);
 
-      // Sign out (account deletion from auth requires admin, so we clear data + sign out)
       await signOut();
-      toast.success('Conta e dados excluídos com sucesso');
+      toast.success(t('delete_account.success'));
       navigate('/auth');
     } catch (error) {
-      toast.error('Erro ao excluir conta. Tente novamente.');
+      toast.error(t('delete_account.error'));
     } finally {
       setLoading(false);
     }
@@ -58,40 +59,40 @@ const DeleteAccountButton: React.FC = () => {
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="w-full gap-2">
           <Trash2 className="w-4 h-4" />
-          Excluir Minha Conta
+          {t('delete_account.button')}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Excluir conta permanentemente?</AlertDialogTitle>
+          <AlertDialogTitle>{t('delete_account.title')}</AlertDialogTitle>
           <AlertDialogDescription className="space-y-3">
-            <p>Esta ação é <strong>irreversível</strong>. Todos os seus dados serão permanentemente excluídos:</p>
+            <p>{t('delete_account.warning')}</p>
             <ul className="list-disc pl-5 text-sm space-y-1">
-              <li>Histórico de ciclo e sintomas</li>
-              <li>Registros de nutrição e treinos</li>
-              <li>Conversas com a IA</li>
-              <li>Configurações e preferências</li>
+              <li>{t('delete_account.data_cycle')}</li>
+              <li>{t('delete_account.data_nutrition')}</li>
+              <li>{t('delete_account.data_chat')}</li>
+              <li>{t('delete_account.data_settings')}</li>
             </ul>
             <p className="pt-2">
-              Digite <strong>DELETAR</strong> para confirmar:
+              {t('delete_account.type_confirm', { word: confirmWord })}
             </p>
             <Input
               value={confirmation}
               onChange={(e) => setConfirmation(e.target.value)}
-              placeholder="DELETAR"
+              placeholder={confirmWord}
               className="mt-2"
             />
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setConfirmation('')}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setConfirmation('')}>{t('actions.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            disabled={confirmation !== 'DELETAR' || loading}
+            disabled={confirmation !== confirmWord || loading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
-            Excluir Permanentemente
+            {t('delete_account.confirm_button')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
