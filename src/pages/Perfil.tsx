@@ -198,6 +198,12 @@ const Perfil: React.FC = () => {
           <PatternsCard />
         </motion.div>
 
+        {isPregnant && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+            <BellyPhotoGallery />
+          </motion.div>
+        )}
+
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <WeeklySummaryCard />
         </motion.div>
