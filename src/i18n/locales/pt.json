@@ -640,6 +640,10 @@
     "bp_breastfeed_first": "Amamentação na primeira hora",
     "bp_low_light": "Ambiente com luz baixa",
     "bp_music": "Música ambiente",
-    "bp_disclaimer": "Converse com seu médico sobre suas preferências. Este plano é um guia, não substitui orientação profissional."
+    "bp_disclaimer": "Converse com seu médico sobre suas preferências. Este plano é um guia, não substitui orientação profissional.",
+    "bp_export_pdf": "Baixar PDF",
+    "bp_share": "Compartilhar",
+    "bp_pdf_exported": "PDF exportado!",
+    "bp_pdf_exported_desc": "Seu plano de parto foi salvo como PDF."
   }
 }
