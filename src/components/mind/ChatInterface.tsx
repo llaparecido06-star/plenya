@@ -7,6 +7,7 @@ import { useCycle } from '@/contexts/CycleContext';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useAIBrain } from '@/hooks/useAIBrain';
+import { usePregnancyDiarySymptoms } from '@/hooks/usePregnancyDiarySymptoms';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 const ChatInterface: React.FC = () => {
