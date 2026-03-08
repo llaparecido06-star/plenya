@@ -114,6 +114,8 @@ const Perfil: React.FC = () => {
   const { user, signOut } = useAuth();
   const { goals, diet_type, fitness_level, full_name, loading, refetch } = useProfile();
   const { avatarUrl, updateAvatarUrl } = useAvatar();
+  const { lifePhase } = useLifePhase();
+  const isPregnant = lifePhase === 'pregnant';
 
   if (!user) {
     return (
