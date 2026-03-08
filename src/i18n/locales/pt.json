@@ -241,7 +241,10 @@
   },
   "body": {
     "title": "Corpo",
-    "subtitle": "Treino ideal para a fase {{phase}}"
+    "subtitle": "Treino ideal para a fase {{phase}}",
+    "subtitle_menopause": "Exercícios para bem-estar e saúde óssea",
+    "menopause_tip_title": "Exercícios na Menopausa",
+    "menopause_tip_desc": "Priorize fortalecimento ósseo, equilíbrio e mobilidade. Exercícios de baixo impacto são ideais."
   },
   "mind": {
     "title": "Mente",
