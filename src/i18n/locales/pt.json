@@ -234,7 +234,10 @@
     "preg_tri2_title": "Crescimento & Fortalecimento",
     "preg_tri2_desc": "Cálcio e ômega-3 para os ossos e cérebro do bebê. Aumente proteínas.",
     "preg_tri3_title": "Preparação & Energia",
-    "preg_tri3_desc": "Reforce ferro para o parto e fibras para o intestino. Mantenha energia estável."
+    "preg_tri3_desc": "Reforce ferro para o parto e fibras para o intestino. Mantenha energia estável.",
+    "meno_title": "Equilíbrio Hormonal Natural",
+    "meno_desc": "Fitoestrógenos, cálcio e ômega-3 ajudam a aliviar sintomas e proteger ossos e coração.",
+    "menopause_suggestion": "Nutrição para Menopausa"
   },
   "body": {
     "title": "Corpo",
