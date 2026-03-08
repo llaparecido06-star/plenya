@@ -164,6 +164,36 @@ export type Database = {
         }
         Relationships: []
       }
+      kick_logs: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          kick_count: number
+          log_date: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          kick_count?: number
+          log_date?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          kick_count?: number
+          log_date?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       login_streaks: {
         Row: {
           created_at: string
@@ -278,6 +308,93 @@ export type Database = {
           skipped?: boolean | null
           taken_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      pregnancy_appointments: {
+        Row: {
+          appointment_date: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_completed: boolean
+          is_custom: boolean
+          notes: string | null
+          recommended_week: number | null
+          title: string
+          trimester: number
+          user_id: string
+        }
+        Insert: {
+          appointment_date?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          is_custom?: boolean
+          notes?: string | null
+          recommended_week?: number | null
+          title: string
+          trimester?: number
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          is_custom?: boolean
+          notes?: string | null
+          recommended_week?: number | null
+          title?: string
+          trimester?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pregnancy_diary: {
+        Row: {
+          belly_photo_url: string | null
+          created_at: string
+          entry_date: string
+          id: string
+          mood: number | null
+          notes: string | null
+          symptoms: string[] | null
+          updated_at: string
+          user_id: string
+          week_number: number | null
+          weight: number | null
+        }
+        Insert: {
+          belly_photo_url?: string | null
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: number | null
+          notes?: string | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id: string
+          week_number?: number | null
+          weight?: number | null
+        }
+        Update: {
+          belly_photo_url?: string | null
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: number | null
+          notes?: string | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id?: string
+          week_number?: number | null
+          weight?: number | null
         }
         Relationships: []
       }
