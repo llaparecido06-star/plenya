@@ -163,6 +163,8 @@ const WorkoutCard: React.FC = () => {
       phase: workoutPhase,
       goal: goalText,
       fitness_level: fitness_level || 'moderate',
+      life_phase: lifePhase || undefined,
+      pregnancy_weeks: pregnancyWeeks || undefined,
     });
 
     if (result) {
