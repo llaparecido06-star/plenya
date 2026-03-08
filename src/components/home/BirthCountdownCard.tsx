@@ -26,9 +26,9 @@ const BirthCountdownCard: React.FC = () => {
   const { pregnancyStartDate, pregnancyWeeks } = useLifePhase();
   const { permission, showNotification } = useNotifications();
 
-  if (!pregnancyStartDate || pregnancyWeeks === null) return null;
-
-  const daysPregnant = Math.floor((Date.now() - pregnancyStartDate.getTime()) / (86400000));
+  const daysPregnant = pregnancyStartDate
+    ? Math.floor((Date.now() - pregnancyStartDate.getTime()) / 86400000)
+    : 0;
   const totalDays = 280;
   const daysRemaining = Math.max(0, totalDays - daysPregnant);
   const progressPercent = Math.min(100, (daysPregnant / totalDays) * 100);
@@ -38,9 +38,9 @@ const BirthCountdownCard: React.FC = () => {
   const nextMilestone = milestones.filter(m => daysRemaining > m.days).sort((a, b) => b.days - a.days)[0];
   const currentMilestone = passedMilestones.length > 0 ? passedMilestones[passedMilestones.length - 1] : null;
 
-  // Milestone notification trigger (once per milestone, stored in localStorage)
+  // Milestone notification trigger
   useEffect(() => {
-    if (permission !== 'granted') return;
+    if (permission !== 'granted' || !pregnancyStartDate) return;
     
     const notifiedKey = `plenya_milestone_notified`;
     const notified = JSON.parse(localStorage.getItem(notifiedKey) || '[]') as number[];
