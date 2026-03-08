@@ -22,6 +22,8 @@ interface TrainerPayload {
   goal: string | null;
   injuries?: string[];
   fitness_level?: string;
+  life_phase?: string;
+  pregnancy_weeks?: number;
 }
 
 interface NutritionScannerPayload {

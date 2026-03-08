@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Wind, Clock, ChevronDown, Check, Loader2, Timer, Shuffle, Moon, Info, Sparkles, Zap } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -119,6 +120,7 @@ const WorkoutCard: React.FC = () => {
   const { workout: savedWorkout, loading, saving, saveExercises, completeExercise, workoutPhase, isToday } = useWorkouts();
   const { fitness_level, goals } = useProfile();
   const { subscribed } = useAuth();
+  const { lifePhase, pregnancyWeeks } = useLifePhase();
   const { toast } = useToast();
   const { generateWorkout, loading: aiLoading } = useAIBrain();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -161,6 +163,8 @@ const WorkoutCard: React.FC = () => {
       phase: workoutPhase,
       goal: goalText,
       fitness_level: fitness_level || 'moderate',
+      life_phase: lifePhase || undefined,
+      pregnancy_weeks: pregnancyWeeks || undefined,
     });
 
     if (result) {

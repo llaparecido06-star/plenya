@@ -640,6 +640,10 @@
     "bp_breastfeed_first": "Breastfeeding in the first hour",
     "bp_low_light": "Low-light environment",
     "bp_music": "Background music",
-    "bp_disclaimer": "Discuss your preferences with your doctor. This plan is a guide, not a substitute for professional advice."
+    "bp_disclaimer": "Discuss your preferences with your doctor. This plan is a guide, not a substitute for professional advice.",
+    "bp_export_pdf": "Download PDF",
+    "bp_share": "Share",
+    "bp_pdf_exported": "PDF exported!",
+    "bp_pdf_exported_desc": "Your birth plan has been saved as PDF."
   }
 }
