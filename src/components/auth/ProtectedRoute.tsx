@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
