@@ -152,7 +152,7 @@ const Index: React.FC = () => {
         {isToday && isPregnant && <PregnancyDiaryCard />}
 
         {/* === MENOPAUSE MODE === */}
-        {isToday && isMenopause && <MenopauseCard age={age} />}
+        {isToday && isMenopause && <MenopauseWellnessHub age={age} />}
 
         {/* === MENSTRUATING MODE === */}
         {isToday && isMenstruating && (
