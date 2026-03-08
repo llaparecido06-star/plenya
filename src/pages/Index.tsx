@@ -146,12 +146,16 @@ const Index: React.FC = () => {
         {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 20 && (
           <KickCounterCard />
         )}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 36 && (
+          <ContractionTimerCard />
+        )}
         {isToday && isPregnant && <BirthCountdownCard />}
         {isToday && isPregnant && <WeeklyPregnancyInsight />}
-        {isToday && isPregnant && <BirthPlanCard />}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 28 && <BirthPlanCard />}
         {isToday && isPregnant && <GestationalWeightTracker />}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 34 && <HospitalBagCard />}
         {isToday && isPregnant && <BabyRegistryCard />}
-        {isToday && isPregnant && <BirthPlaylistCard />}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 32 && <BirthPlaylistCard />}
         {isToday && isPregnant && <AppointmentChecklist />}
         {isToday && isPregnant && <PregnancyDiaryCard />}
 
