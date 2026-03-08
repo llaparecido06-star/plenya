@@ -562,6 +562,11 @@
     "apt_birth_plan": "Birth plan",
     "apt_birth_plan_desc": "Discuss preferences with your doctor",
     "apt_ctg": "Cardiotocography (CTG)",
-    "apt_ctg_desc": "Monitor heartbeat and contractions"
+    "apt_ctg_desc": "Monitor heartbeat and contractions",
+    "belly_photo": "Belly Photo",
+    "belly_photo_add": "Tap to add a belly photo",
+    "photo_invalid": "Please select a valid image file",
+    "photo_too_large": "Image must be under 10MB",
+    "photo_upload_error": "Error uploading photo. Try again."
   }
 }

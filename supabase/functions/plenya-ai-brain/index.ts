@@ -51,20 +51,36 @@ type RequestPayload = {
   language?: string;
 };
 
-function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null): string {
+function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null, pregnancyTrimester?: number | null, pregnancySymptoms?: string[] | null): string {
   let basePrompt = `Você é a Plenya, uma assistente empática de saúde e bem-estar feminino. 
 Responda de forma curta (máximo 3 frases), acolhedora e prática. 
 Use emojis ocasionalmente para tornar a conversa mais leve.
 Nunca faça diagnósticos médicos - sugira consultar profissionais quando apropriado.`;
 
   if (lifePhase === 'pregnant') {
+    const trimesterLabel = pregnancyTrimester ? `${pregnancyTrimester}º trimestre` : '';
+    const weeksLabel = pregnancyWeeks ? `${pregnancyWeeks} semanas` : '';
+    const contextParts = [weeksLabel, trimesterLabel].filter(Boolean).join(', ');
+    
+    let symptomContext = '';
+    if (pregnancySymptoms && pregnancySymptoms.length > 0) {
+      const symptomMap: Record<string, string> = {
+        nausea: 'náusea', heartburn: 'azia', swelling: 'inchaço', back_pain: 'dor nas costas',
+        insomnia: 'insônia', fatigue: 'fadiga', cramps: 'cólica', headache: 'dor de cabeça',
+        dizziness: 'tontura', cravings: 'desejos alimentares', constipation: 'constipação',
+        anxiety: 'ansiedade', contractions: 'contrações', shortness_breath: 'falta de ar',
+      };
+      const translated = pregnancySymptoms.map(s => symptomMap[s] || s).join(', ');
+      symptomContext = `\n- Sintomas recentes registrados no diário: ${translated}. Considere esses sintomas ao responder, oferecendo dicas de alívio quando relevante.`;
+    }
+
     return `${basePrompt}
 
-CONTEXTO IMPORTANTE: A usuária está grávida${pregnancyWeeks ? ` (${pregnancyWeeks} semanas)` : ''}.
+CONTEXTO IMPORTANTE: A usuária está grávida${contextParts ? ` (${contextParts})` : ''}.
 - NUNCA fale sobre menstruação, ciclo menstrual ou fases do ciclo
 - Foque na saúde da gestação e do bebê
 - Priorize segurança alimentar e descanso
-- Seja extra cuidadosa com recomendações de exercícios`;
+- Seja extra cuidadosa com recomendações de exercícios${symptomContext}`;
   }
 
   if (lifePhase === 'menopause') {

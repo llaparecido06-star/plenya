@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Smile, Scale, PenLine, Loader2, Check } from 'lucide-react';
+import { BookOpen, Smile, Scale, PenLine, Loader2, Check, Camera, X, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useTranslation } from 'react-i18next';
 import { toLocalDateString } from '@/lib/dateUtils';
+import { useToast } from '@/hooks/use-toast';
 import {
   Drawer,
   DrawerContent,
@@ -40,6 +41,7 @@ const moods = [
 const PregnancyDiaryCard: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { pregnancyWeeks } = useLifePhase();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -49,6 +51,9 @@ const PregnancyDiaryCard: React.FC = () => {
   const [mood, setMood] = useState(3);
   const [weight, setWeight] = useState<number[]>([65]);
   const [existingEntry, setExistingEntry] = useState<any>(null);
+  const [bellyPhotoUrl, setBellyPhotoUrl] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const today = toLocalDateString(new Date());
 
@@ -67,6 +72,7 @@ const PregnancyDiaryCard: React.FC = () => {
         setSelectedSymptoms(data.symptoms || []);
         if (data.mood) setMood(data.mood);
         if (data.weight) setWeight([data.weight]);
+        if (data.belly_photo_url) setBellyPhotoUrl(data.belly_photo_url);
       }
     };
     load();
@@ -74,6 +80,67 @@ const PregnancyDiaryCard: React.FC = () => {
 
   const toggleSymptom = (s: string) => {
     setSelectedSymptoms(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  };
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ variant: 'destructive', title: t('pregnancy.photo_invalid') });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ variant: 'destructive', title: t('pregnancy.photo_too_large') });
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const filePath = `${user.id}/${today}-belly.${ext}`;
+
+      // Delete old photo if exists
+      if (bellyPhotoUrl) {
+        const oldPath = bellyPhotoUrl.split('/belly-photos/')[1]?.split('?')[0];
+        if (oldPath) {
+          await supabase.storage.from('belly-photos').remove([decodeURIComponent(oldPath)]);
+        }
+      }
+
+      const { error: uploadError } = await supabase.storage
+        .from('belly-photos')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: signedData } = await supabase.storage
+        .from('belly-photos')
+        .createSignedUrl(filePath, 365 * 24 * 60 * 60);
+
+      if (signedData?.signedUrl) {
+        setBellyPhotoUrl(signedData.signedUrl);
+      }
+    } catch (err) {
+      console.error('Photo upload error:', err);
+      toast({ variant: 'destructive', title: t('pregnancy.photo_upload_error') });
+    } finally {
+      setUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (!user || !bellyPhotoUrl) return;
+    try {
+      const oldPath = bellyPhotoUrl.split('/belly-photos/')[1]?.split('?')[0];
+      if (oldPath) {
+        await supabase.storage.from('belly-photos').remove([decodeURIComponent(oldPath)]);
+      }
+      setBellyPhotoUrl(null);
+    } catch (err) {
+      console.error('Photo remove error:', err);
+    }
   };
 
   const handleSave = async () => {
@@ -88,6 +155,7 @@ const PregnancyDiaryCard: React.FC = () => {
         weight: weight[0],
         symptoms: selectedSymptoms,
         notes: notes || null,
+        belly_photo_url: bellyPhotoUrl || null,
       };
 
       if (existingEntry) {
@@ -127,6 +195,51 @@ const PregnancyDiaryCard: React.FC = () => {
             </DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-8 space-y-6 max-h-[70vh] overflow-auto">
+            {/* Belly Photo */}
+            <div>
+              <p className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Camera className="w-4 h-4" /> {t('pregnancy.belly_photo')}
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handlePhotoSelect}
+              />
+              {bellyPhotoUrl ? (
+                <div className="relative w-full max-w-[200px] mx-auto">
+                  <img
+                    src={bellyPhotoUrl}
+                    alt={t('pregnancy.belly_photo')}
+                    className="w-full h-48 object-cover rounded-xl border border-border"
+                  />
+                  <button
+                    onClick={handleRemovePhoto}
+                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  className="w-full h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 transition-colors"
+                >
+                  {uploadingPhoto ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <>
+                      <Image className="w-8 h-8" />
+                      <span className="text-xs">{t('pregnancy.belly_photo_add')}</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+
             {/* Mood */}
             <div>
               <p className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
