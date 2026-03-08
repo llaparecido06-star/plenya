@@ -26,6 +26,9 @@ import AwaitingPeriodCard from '@/components/home/AwaitingPeriodCard';
 import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
 import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
 import MenopauseCard from '@/components/home/MenopauseCard';
+import KickCounterCard from '@/components/home/KickCounterCard';
+import AppointmentChecklist from '@/components/home/AppointmentChecklist';
+import PregnancyDiaryCard from '@/components/home/PregnancyDiaryCard';
 import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
@@ -130,6 +133,11 @@ const Index: React.FC = () => {
         {isToday && isPregnant && pregnancyWeeks !== null && pregnancyStartDate && (
           <PregnancyWeeksCard weeks={pregnancyWeeks} pregnancyStartDate={pregnancyStartDate} />
         )}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 20 && (
+          <KickCounterCard />
+        )}
+        {isToday && isPregnant && <AppointmentChecklist />}
+        {isToday && isPregnant && <PregnancyDiaryCard />}
 
         {/* === MENOPAUSE MODE === */}
         {isToday && isMenopause && <MenopauseCard age={age} />}
