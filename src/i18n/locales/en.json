@@ -604,6 +604,19 @@
     "gallery_subtitle": "Your photos week by week",
     "gallery_count": "{{count}} photos recorded",
     "gallery_empty": "No photos yet",
-    "gallery_empty_hint": "Add photos in the Pregnancy Diary"
+    "gallery_empty_hint": "Add photos in the Pregnancy Diary",
+    "countdown_title": "Birth Countdown",
+    "countdown_subtitle": "Each day closer to your baby",
+    "days_to_go": "days to go",
+    "milestone_200": "200 days to go",
+    "milestone_150": "150 days to go",
+    "milestone_100": "100 days to go",
+    "milestone_50": "50 days to go",
+    "milestone_30": "30 days to go",
+    "milestone_14": "2 weeks to go",
+    "milestone_7": "7 days to go",
+    "milestone_reached": "Milestone reached! 🎉",
+    "milestone_in_days": "in {{days}} days",
+    "milestone_notification": "{{days}} days until you meet your baby! 💜"
   }
 }
