@@ -13,6 +13,7 @@ import { nutritionTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { useNutrition } from '@/hooks/useNutrition';
 import { useProfile } from '@/hooks/useProfile';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { useTranslation } from 'react-i18next';
 
 const Nutricao: React.FC = () => {
