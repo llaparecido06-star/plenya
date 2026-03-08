@@ -20,6 +20,8 @@ const Nutricao: React.FC = () => {
   const { t } = useTranslation();
   const { totals } = useNutrition();
   const { macro_protein_goal, macro_carbs_goal, macro_fat_goal } = useProfile();
+  const { lifePhase } = useLifePhase();
+  const isPregnant = lifePhase === 'pregnant';
 
   return (
     <PageLayout>
