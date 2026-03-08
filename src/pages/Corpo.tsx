@@ -19,12 +19,17 @@ const Corpo: React.FC = () => {
   const { lifePhase, pregnancyWeeks } = useLifePhase();
   const phaseInfo = getPhaseInfo();
   const isPregnant = lifePhase === 'pregnant';
+  const isMenopause = lifePhase === 'menopause';
 
-  const getPregnancySubtitle = () => {
-    if (!pregnancyWeeks) return t('pregnancy.workout_subtitle');
-    if (pregnancyWeeks < 13) return t('pregnancy.workout_trimester_1');
-    if (pregnancyWeeks < 27) return t('pregnancy.workout_trimester_2');
-    return t('pregnancy.workout_trimester_3');
+  const getSubtitle = () => {
+    if (isPregnant) {
+      if (!pregnancyWeeks) return t('pregnancy.workout_subtitle');
+      if (pregnancyWeeks < 13) return t('pregnancy.workout_trimester_1');
+      if (pregnancyWeeks < 27) return t('pregnancy.workout_trimester_2');
+      return t('pregnancy.workout_trimester_3');
+    }
+    if (isMenopause) return t('body.subtitle_menopause');
+    return t('body.subtitle', { phase: phaseInfo.name });
   };
 
   return (
@@ -37,9 +42,7 @@ const Corpo: React.FC = () => {
         >
           {t('body.title')}
         </motion.h1>
-        <p className="text-muted-foreground">
-          {isPregnant ? getPregnancySubtitle() : t('body.subtitle', { phase: phaseInfo.name })}
-        </p>
+        <p className="text-muted-foreground">{getSubtitle()}</p>
       </div>
 
       {/* Pregnancy safety alert */}
