@@ -9,12 +9,23 @@ import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { bodyTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { useCycle } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { useTranslation } from 'react-i18next';
+import { AlertTriangle } from 'lucide-react';
 
 const Corpo: React.FC = () => {
   const { t } = useTranslation();
   const { getPhaseInfo } = useCycle();
+  const { lifePhase, pregnancyWeeks } = useLifePhase();
   const phaseInfo = getPhaseInfo();
+  const isPregnant = lifePhase === 'pregnant';
+
+  const getPregnancySubtitle = () => {
+    if (!pregnancyWeeks) return t('pregnancy.workout_subtitle');
+    if (pregnancyWeeks < 13) return t('pregnancy.workout_trimester_1');
+    if (pregnancyWeeks < 27) return t('pregnancy.workout_trimester_2');
+    return t('pregnancy.workout_trimester_3');
+  };
 
   return (
     <PageLayout>
@@ -27,9 +38,26 @@ const Corpo: React.FC = () => {
           {t('body.title')}
         </motion.h1>
         <p className="text-muted-foreground">
-          {t('body.subtitle', { phase: phaseInfo.name })}
+          {isPregnant ? getPregnancySubtitle() : t('body.subtitle', { phase: phaseInfo.name })}
         </p>
       </div>
+
+      {/* Pregnancy safety alert */}
+      {isPregnant && (
+        <motion.div
+          className="mx-4 mb-4 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">{t('pregnancy.workout_safety_title')}</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{t('pregnancy.workout_safety_desc')}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       <LastWorkoutCard />
 
