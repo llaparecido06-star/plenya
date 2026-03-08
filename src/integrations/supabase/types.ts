@@ -215,6 +215,42 @@ export type Database = {
         }
         Relationships: []
       }
+      menopause_diary: {
+        Row: {
+          created_at: string
+          entry_date: string
+          id: string
+          mood: number | null
+          notes: string | null
+          symptoms: string[] | null
+          updated_at: string
+          user_id: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: number | null
+          notes?: string | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: number | null
+          notes?: string | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
       menstruation_logs: {
         Row: {
           created_at: string
