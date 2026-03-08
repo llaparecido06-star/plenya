@@ -25,7 +25,7 @@ import LatePeriodCard from '@/components/home/LatePeriodCard';
 import AwaitingPeriodCard from '@/components/home/AwaitingPeriodCard';
 import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
 import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
-import MenopauseCard from '@/components/home/MenopauseCard';
+import MenopauseWellnessHub from '@/components/home/MenopauseWellnessHub';
 import KickCounterCard from '@/components/home/KickCounterCard';
 import AppointmentChecklist from '@/components/home/AppointmentChecklist';
 import PregnancyDiaryCard from '@/components/home/PregnancyDiaryCard';
