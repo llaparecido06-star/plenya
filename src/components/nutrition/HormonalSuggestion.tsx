@@ -136,6 +136,19 @@ const pregnancySuggestions: Record<number, PregnancyTrimesterSuggestion> = {
   },
 };
 
+const menopauseSuggestion = {
+  titleKey: 'nutrition.meno_title',
+  descKey: 'nutrition.meno_desc',
+  nutrientKeys: ['nutrition.calcium', 'nutrition.phytoestrogens', 'nutrition.omega3', 'nutrition.magnesium'],
+  foods: {
+    default: ['Soja / Tofu', 'Linhaça', 'Salmão', 'Espinafre', 'Castanhas'],
+    vegetarian: ['Soja / Tofu', 'Linhaça', 'Espinafre', 'Castanhas', 'Brócolis'],
+    vegan: ['Soja / Tofu', 'Linhaça', 'Espinafre', 'Castanhas', 'Sementes de chia'],
+    low_carb: ['Salmão', 'Castanhas', 'Abacate', 'Espinafre', 'Ovos'],
+    lactose_free: ['Soja / Tofu', 'Linhaça', 'Salmão', 'Espinafre', 'Castanhas'],
+  },
+};
+
 const HormonalSuggestion: React.FC = () => {
   const { t } = useTranslation();
   const { currentPhase, getPhaseInfo } = useCycle();
@@ -144,10 +157,20 @@ const HormonalSuggestion: React.FC = () => {
   const phaseInfo = getPhaseInfo();
 
   const isPregnant = lifePhase === 'pregnant';
+  const isMenopause = lifePhase === 'menopause';
   const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
 
   const suggestion = useMemo((): PhaseSuggestion => {
     const dietKey = (diet_type as 'default' | 'vegetarian' | 'vegan' | 'low_carb' | 'lactose_free') || 'default';
+
+    if (isMenopause) {
+      return {
+        title: t(menopauseSuggestion.titleKey),
+        description: t(menopauseSuggestion.descKey),
+        nutrients: menopauseSuggestion.nutrientKeys.map(k => t(k)),
+        foods: menopauseSuggestion.foods[dietKey] || menopauseSuggestion.foods.default,
+      };
+    }
 
     if (isPregnant) {
       const base = pregnancySuggestions[trimester];
@@ -166,10 +189,12 @@ const HormonalSuggestion: React.FC = () => {
       nutrients: base.nutrientKeys.map(k => t(k)),
       foods: base.foods[dietKey] || base.foods.default,
     };
-  }, [currentPhase, diet_type, isPregnant, trimester, t]);
+  }, [currentPhase, diet_type, isPregnant, isMenopause, trimester, t]);
 
   const contextLabel = isPregnant
     ? `${t('pregnancy.trimester_' + trimester)} — ${t('pregnancy.week')} ${pregnancyWeeks || '?'}`
+    : isMenopause
+    ? t('menopause.title')
     : phaseInfo.name;
 
   return (
