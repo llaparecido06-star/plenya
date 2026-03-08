@@ -49,7 +49,8 @@ const RecipeOfTheDayCard: React.FC = () => {
 
   const handleGenerateQuick = async () => {
     setIsGenerating(true);
-    const recipePhase = lifePhase === 'pregnant' ? 'folicular' : currentPhase;
+    const isPregnant = lifePhase === 'pregnant';
+    const recipePhase = isPregnant ? 'folicular' : currentPhase;
     
     const result = await getRecipes({
       phase: recipePhase,
