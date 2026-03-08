@@ -8,9 +8,12 @@ import { mindTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
+import { useLifePhase } from '@/hooks/useLifePhase';
 
 const Mente: React.FC = () => {
   const { t } = useTranslation();
+  const { lifePhase } = useLifePhase();
+  const isPregnant = lifePhase === 'pregnant';
 
   return (
     <PageLayout>
@@ -22,7 +25,7 @@ const Mente: React.FC = () => {
         >
           {t('mind.title')}
         </motion.h1>
-        <p className="text-muted-foreground">{t('mind.subtitle')}</p>
+        <p className="text-muted-foreground">{isPregnant ? t('mind.subtitle_pregnant') : t('mind.subtitle')}</p>
       </div>
 
       <div className="px-4 mb-4">

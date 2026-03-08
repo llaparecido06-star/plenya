@@ -13,12 +13,15 @@ import { nutritionTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
 import { useNutrition } from '@/hooks/useNutrition';
 import { useProfile } from '@/hooks/useProfile';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { useTranslation } from 'react-i18next';
 
 const Nutricao: React.FC = () => {
   const { t } = useTranslation();
   const { totals } = useNutrition();
   const { macro_protein_goal, macro_carbs_goal, macro_fat_goal } = useProfile();
+  const { lifePhase } = useLifePhase();
+  const isPregnant = lifePhase === 'pregnant';
 
   return (
     <PageLayout>
@@ -30,7 +33,7 @@ const Nutricao: React.FC = () => {
         >
           {t('nutrition.title')}
         </motion.h1>
-        <p className="text-muted-foreground">{t('nutrition.subtitle')}</p>
+        <p className="text-muted-foreground">{isPregnant ? t('nutrition.subtitle_pregnant') : t('nutrition.subtitle')}</p>
       </div>
 
       <div className="px-4 -mt-2 mb-4">

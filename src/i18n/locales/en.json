@@ -193,6 +193,7 @@
   "nutrition": {
     "title": "Nutrition",
     "subtitle": "Track your meals",
+    "subtitle_pregnant": "Nutrition for you and your baby",
     "macros_today": "Today's Macros",
     "calories": "Calories",
     "protein": "Protein",
@@ -201,7 +202,37 @@
     "breakfast": "Breakfast",
     "lunch": "Lunch",
     "dinner": "Dinner",
-    "snack": "Snack"
+    "snack": "Snack",
+    "hormonal_suggestion": "Hormonal Suggestion",
+    "pregnancy_suggestion": "Pregnancy Nutrition",
+    "recommended_foods": "Recommended Foods",
+    "key_nutrients": "Key Nutrients",
+    "iron": "Iron",
+    "vitamin_c": "Vitamin C",
+    "magnesium": "Magnesium",
+    "vitamin_e": "Vitamin E",
+    "omega3": "Omega 3",
+    "zinc": "Zinc",
+    "antioxidants": "Antioxidants",
+    "fiber": "Fiber",
+    "vitamin_b6": "Vitamin B6",
+    "tryptophan": "Tryptophan",
+    "folic_acid": "Folic Acid",
+    "calcium": "Calcium",
+    "phase_menstrual_title": "Replenish & Comfort",
+    "phase_menstrual_desc": "Focus on iron-rich foods to replenish losses and provide comfort.",
+    "phase_follicular_title": "Energy & Renewal",
+    "phase_follicular_desc": "Prioritize foods that support estrogen production.",
+    "phase_ovulatory_title": "Performance & Vitality",
+    "phase_ovulatory_desc": "Maximize your energy with antioxidant-rich foods.",
+    "phase_luteal_title": "Balance & Satiety",
+    "phase_luteal_desc": "Foods that help stabilize mood and reduce PMS.",
+    "preg_tri1_title": "Formation & Protection",
+    "preg_tri1_desc": "Folic acid and iron are essential for baby's formation. Ginger helps with nausea.",
+    "preg_tri2_title": "Growth & Strengthening",
+    "preg_tri2_desc": "Calcium and omega-3 for baby's bones and brain. Increase protein intake.",
+    "preg_tri3_title": "Preparation & Energy",
+    "preg_tri3_desc": "Boost iron for delivery and fiber for digestion. Maintain steady energy."
   },
   "body": {
     "title": "Body",
@@ -210,6 +241,7 @@
   "mind": {
     "title": "Mind",
     "subtitle": "Take care of your emotional well-being",
+    "subtitle_pregnant": "Mental health during pregnancy",
     "checkin_tab": "Check-in",
     "chat_tab": "Chat",
     "emotional_checkin": "Emotional Check-in",
@@ -567,6 +599,11 @@
     "belly_photo_add": "Tap to add a belly photo",
     "photo_invalid": "Please select a valid image file",
     "photo_too_large": "Image must be under 10MB",
-    "photo_upload_error": "Error uploading photo. Try again."
+    "photo_upload_error": "Error uploading photo. Try again.",
+    "gallery_title": "Belly Evolution",
+    "gallery_subtitle": "Your photos week by week",
+    "gallery_count": "{{count}} photos recorded",
+    "gallery_empty": "No photos yet",
+    "gallery_empty_hint": "Add photos in the Pregnancy Diary"
   }
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import PageLayout from '@/components/layout/PageLayout';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,6 +25,7 @@ import AvatarUpload from '@/components/profile/AvatarUpload';
 import DeleteAccountButton from '@/components/profile/DeleteAccountButton';
 import MedicationTracker from '@/components/profile/MedicationTracker';
 import ChangePasswordCard from '@/components/profile/ChangePasswordCard';
+import BellyPhotoGallery from '@/components/home/BellyPhotoGallery';
 import { useTranslation } from 'react-i18next';
 
 const goalConfig: Record<string, { labelKey: string; icon: React.ElementType; color: string }> = {
@@ -112,6 +114,8 @@ const Perfil: React.FC = () => {
   const { user, signOut } = useAuth();
   const { goals, diet_type, fitness_level, full_name, loading, refetch } = useProfile();
   const { avatarUrl, updateAvatarUrl } = useAvatar();
+  const { lifePhase } = useLifePhase();
+  const isPregnant = lifePhase === 'pregnant';
 
   if (!user) {
     return (
@@ -193,6 +197,12 @@ const Perfil: React.FC = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <PatternsCard />
         </motion.div>
+
+        {isPregnant && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+            <BellyPhotoGallery />
+          </motion.div>
+        )}
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <WeeklySummaryCard />

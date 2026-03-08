@@ -193,6 +193,7 @@
   "nutrition": {
     "title": "Nutrição",
     "subtitle": "Acompanhe sua alimentação",
+    "subtitle_pregnant": "Nutrição para você e seu bebê",
     "macros_today": "Macros do Dia",
     "calories": "Calorias",
     "protein": "Proteína",
@@ -201,7 +202,37 @@
     "breakfast": "Café da manhã",
     "lunch": "Almoço",
     "dinner": "Jantar",
-    "snack": "Lanche"
+    "snack": "Lanche",
+    "hormonal_suggestion": "Sugestão Hormonal",
+    "pregnancy_suggestion": "Nutrição Gestacional",
+    "recommended_foods": "Alimentos Recomendados",
+    "key_nutrients": "Nutrientes Chave",
+    "iron": "Ferro",
+    "vitamin_c": "Vitamina C",
+    "magnesium": "Magnésio",
+    "vitamin_e": "Vitamina E",
+    "omega3": "Ômega 3",
+    "zinc": "Zinco",
+    "antioxidants": "Antioxidantes",
+    "fiber": "Fibras",
+    "vitamin_b6": "Vitamina B6",
+    "tryptophan": "Triptofano",
+    "folic_acid": "Ácido Fólico",
+    "calcium": "Cálcio",
+    "phase_menstrual_title": "Reposição & Conforto",
+    "phase_menstrual_desc": "Foco em alimentos ricos em ferro para repor as perdas e conforto.",
+    "phase_follicular_title": "Energia & Renovação",
+    "phase_follicular_desc": "Priorize alimentos que suportam a produção de estrogênio.",
+    "phase_ovulatory_title": "Performance & Vitalidade",
+    "phase_ovulatory_desc": "Maximize sua energia com alimentos antioxidantes.",
+    "phase_luteal_title": "Equilíbrio & Saciedade",
+    "phase_luteal_desc": "Alimentos que ajudam a estabilizar o humor e reduzir a TPM.",
+    "preg_tri1_title": "Formação & Proteção",
+    "preg_tri1_desc": "Ácido fólico e ferro são essenciais para a formação do bebê. Gengibre ajuda com enjoos.",
+    "preg_tri2_title": "Crescimento & Fortalecimento",
+    "preg_tri2_desc": "Cálcio e ômega-3 para os ossos e cérebro do bebê. Aumente proteínas.",
+    "preg_tri3_title": "Preparação & Energia",
+    "preg_tri3_desc": "Reforce ferro para o parto e fibras para o intestino. Mantenha energia estável."
   },
   "body": {
     "title": "Corpo",
@@ -210,6 +241,7 @@
   "mind": {
     "title": "Mente",
     "subtitle": "Cuide do seu bem-estar emocional",
+    "subtitle_pregnant": "Saúde mental na gestação",
     "checkin_tab": "Check-in",
     "chat_tab": "Chat",
     "emotional_checkin": "Check-in Emocional",
@@ -567,6 +599,11 @@
     "belly_photo_add": "Toque para adicionar foto da barriga",
     "photo_invalid": "Selecione um arquivo de imagem válido",
     "photo_too_large": "A imagem deve ter no máximo 10MB",
-    "photo_upload_error": "Erro ao enviar foto. Tente novamente."
+    "photo_upload_error": "Erro ao enviar foto. Tente novamente.",
+    "gallery_title": "Evolução da Barriga",
+    "gallery_subtitle": "Suas fotos semana a semana",
+    "gallery_count": "{{count}} fotos registradas",
+    "gallery_empty": "Nenhuma foto ainda",
+    "gallery_empty_hint": "Adicione fotos no Diário da Gestação"
   }
 }
