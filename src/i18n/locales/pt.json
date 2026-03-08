@@ -599,6 +599,11 @@
     "belly_photo_add": "Toque para adicionar foto da barriga",
     "photo_invalid": "Selecione um arquivo de imagem válido",
     "photo_too_large": "A imagem deve ter no máximo 10MB",
-    "photo_upload_error": "Erro ao enviar foto. Tente novamente."
+    "photo_upload_error": "Erro ao enviar foto. Tente novamente.",
+    "gallery_title": "Evolução da Barriga",
+    "gallery_subtitle": "Suas fotos semana a semana",
+    "gallery_count": "{{count}} fotos registradas",
+    "gallery_empty": "Nenhuma foto ainda",
+    "gallery_empty_hint": "Adicione fotos no Diário da Gestação"
   }
 }
