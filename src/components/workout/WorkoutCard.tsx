@@ -120,6 +120,7 @@ const WorkoutCard: React.FC = () => {
   const { workout: savedWorkout, loading, saving, saveExercises, completeExercise, workoutPhase, isToday } = useWorkouts();
   const { fitness_level, goals } = useProfile();
   const { subscribed } = useAuth();
+  const { lifePhase, pregnancyWeeks } = useLifePhase();
   const { toast } = useToast();
   const { generateWorkout, loading: aiLoading } = useAIBrain();
   const [isExpanded, setIsExpanded] = useState(false);
