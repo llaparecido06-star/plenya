@@ -13,6 +13,7 @@ import { Slider } from '@/components/ui/slider';
 import { useDailyLog } from '@/hooks/useDailyLog';
 import { useMedication } from '@/hooks/useMedication';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import MedicationEffectBadge from '@/components/profile/MedicationEffectBadge';
 import IntimacyLog from './IntimacyLog';
 
