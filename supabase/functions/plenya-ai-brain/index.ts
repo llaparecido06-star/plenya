@@ -405,7 +405,7 @@ serve(async (req) => {
 
       case 'trainer': {
         const trainerPayload = payload as TrainerPayload;
-        systemPrompt = getTrainerSystemPrompt(trainerPayload.phase, trainerPayload.cycle_day, trainerPayload.fitness_level) + langInstruction;
+        systemPrompt = getTrainerSystemPrompt(trainerPayload.phase, trainerPayload.cycle_day, trainerPayload.fitness_level, trainerPayload.life_phase, trainerPayload.pregnancy_weeks) + langInstruction;
         
         let userMessage = `Crie um treino para hoje.
 Nível de energia: ${trainerPayload.energy_level}/5
