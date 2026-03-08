@@ -234,7 +234,10 @@
     "preg_tri2_title": "Growth & Strengthening",
     "preg_tri2_desc": "Calcium and omega-3 for baby's bones and brain. Increase protein intake.",
     "preg_tri3_title": "Preparation & Energy",
-    "preg_tri3_desc": "Boost iron for delivery and fiber for digestion. Maintain steady energy."
+    "preg_tri3_desc": "Boost iron for delivery and fiber for digestion. Maintain steady energy.",
+    "meno_title": "Natural Hormonal Balance",
+    "meno_desc": "Phytoestrogens, calcium and omega-3 help relieve symptoms and protect bones and heart.",
+    "menopause_suggestion": "Menopause Nutrition"
   },
   "body": {
     "title": "Body",
