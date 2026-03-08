@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedRouteProps {
@@ -8,6 +9,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
@@ -52,7 +54,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-muted-foreground text-sm">Carregando...</span>
+          <span className="text-muted-foreground text-sm">{t('common.loading')}</span>
         </div>
       </div>
     );

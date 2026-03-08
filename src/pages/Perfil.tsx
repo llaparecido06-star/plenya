@@ -190,7 +190,6 @@ const Perfil: React.FC = () => {
           )}
         </motion.div>
 
-        {/* Quick Info Cards */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <PatternsCard />
         </motion.div>
@@ -206,7 +205,7 @@ const Perfil: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <MenuItem icon={Crown} label={t('profile.view_plans')} sublabel="Gerencie sua assinatura" iconClassName="bg-amber-100 text-amber-600" onClick={() => navigate('/planos')} />
+          <MenuItem icon={Crown} label={t('profile.view_plans')} sublabel={t('profile.view_plans_sub')} iconClassName="bg-amber-100 text-amber-600" onClick={() => navigate('/planos')} />
 
           <MenuItem icon={Globe} label={t('profile.language')} sublabel={currentLang ? `${currentLang.flag} ${currentLang.label}` : ''} iconClassName="bg-sky-100 text-sky-600">
             <div className="flex flex-col gap-2">
@@ -227,35 +226,35 @@ const Perfil: React.FC = () => {
             </div>
           </MenuItem>
 
-          <MenuItem icon={Lock} label="Alterar senha" sublabel="Atualize sua senha de acesso" iconClassName="bg-violet-100 text-violet-600">
+          <MenuItem icon={Lock} label={t('profile.change_password')} sublabel={t('profile.change_password_sub')} iconClassName="bg-violet-100 text-violet-600">
             <ChangePasswordCard />
           </MenuItem>
 
-          <MenuItem icon={Settings} label="Minhas preferências" sublabel="Objetivos, dieta e exercícios" iconClassName="bg-slate-100 text-slate-600">
+          <MenuItem icon={Settings} label={t('profile.preferences')} sublabel={t('profile.preferences_sub')} iconClassName="bg-slate-100 text-slate-600">
             <ProfileSettingsEditor currentGoals={goals} currentDiet={diet_type} currentFitness={fitness_level} onUpdate={refetch} />
           </MenuItem>
 
-          <MenuItem icon={CalendarDays} label="DUM" sublabel="Data da Última Menstruação" iconClassName="bg-rose-100 text-rose-600">
+          <MenuItem icon={CalendarDays} label={t('profile.dum')} sublabel={t('profile.dum_sub')} iconClassName="bg-rose-100 text-rose-600">
             <DUMPicker />
           </MenuItem>
 
-          <MenuItem icon={Pill} label={t('profile.contraceptive_title')} sublabel="Contraceptivo e medicação" iconClassName="bg-pink-100 text-pink-600">
+          <MenuItem icon={Pill} label={t('profile.contraceptive_title')} sublabel={t('profile.contraceptive_sub')} iconClassName="bg-pink-100 text-pink-600">
             <ContraceptiveConfig />
             <div className="mt-6 pt-6 border-t border-border">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Medicação contínua</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3">{t('profile.continuous_medication')}</h3>
               <MedicationTracker />
             </div>
           </MenuItem>
 
-          <MenuItem icon={Bell} label="Notificações" sublabel="Configure seus alertas" iconClassName="bg-emerald-100 text-emerald-600">
+          <MenuItem icon={Bell} label={t('profile.notifications')} sublabel={t('profile.notifications_sub')} iconClassName="bg-emerald-100 text-emerald-600">
             <NotificationSettings />
           </MenuItem>
 
-          <MenuItem icon={FileText} label="Relatório Médico" sublabel="Gere e compartilhe em PDF" iconClassName="bg-amber-100 text-amber-600">
+          <MenuItem icon={FileText} label={t('profile.medical_report')} sublabel={t('profile.medical_report_sub')} iconClassName="bg-amber-100 text-amber-600">
             <MedicalReportButton />
           </MenuItem>
 
-          <MenuItem icon={Trash2} label="Excluir conta" sublabel="Ação irreversível" iconClassName="bg-red-100 text-red-600">
+          <MenuItem icon={Trash2} label={t('profile.delete_account')} sublabel={t('profile.delete_account_sub')} iconClassName="bg-red-100 text-red-600">
             <DeleteAccountButton />
           </MenuItem>
         </motion.div>
