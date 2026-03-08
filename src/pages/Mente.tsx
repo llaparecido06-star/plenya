@@ -25,7 +25,7 @@ const Mente: React.FC = () => {
         >
           {t('mind.title')}
         </motion.h1>
-        <p className="text-muted-foreground">{t('mind.subtitle')}</p>
+        <p className="text-muted-foreground">{isPregnant ? t('mind.subtitle_pregnant') : t('mind.subtitle')}</p>
       </div>
 
       <div className="px-4 mb-4">

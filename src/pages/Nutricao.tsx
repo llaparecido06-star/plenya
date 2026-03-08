@@ -33,7 +33,7 @@ const Nutricao: React.FC = () => {
         >
           {t('nutrition.title')}
         </motion.h1>
-        <p className="text-muted-foreground">{t('nutrition.subtitle')}</p>
+        <p className="text-muted-foreground">{isPregnant ? t('nutrition.subtitle_pregnant') : t('nutrition.subtitle')}</p>
       </div>
 
       <div className="px-4 -mt-2 mb-4">

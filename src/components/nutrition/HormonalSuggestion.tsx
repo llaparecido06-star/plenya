@@ -3,14 +3,16 @@ import { motion } from 'framer-motion';
 import { Leaf, Sparkles } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
-const dietLabels: Record<string, { label: string; emoji: string }> = {
-  vegetarian: { label: 'Vegetariana', emoji: '🌱' },
-  vegan: { label: 'Vegana', emoji: '🌿' },
-  low_carb: { label: 'Low Carb', emoji: '🥩' },
-  lactose_free: { label: 'Sem Lactose', emoji: '🥛' },
-  default: { label: 'Padrão', emoji: '🍽️' },
+const dietLabels: Record<string, { labelKey: string; emoji: string }> = {
+  vegetarian: { labelKey: 'diet.vegetarian', emoji: '🌱' },
+  vegan: { labelKey: 'diet.vegan', emoji: '🌿' },
+  low_carb: { labelKey: 'diet.low_carb', emoji: '🥩' },
+  lactose_free: { labelKey: 'diet.lactose_free', emoji: '🥛' },
+  default: { labelKey: 'diet.omnivore', emoji: '🍽️' },
 };
 
 interface PhaseSuggestion {
@@ -20,11 +22,10 @@ interface PhaseSuggestion {
   nutrients: string[];
 }
 
-// Base suggestions per phase with dietary alternatives
 const phaseSuggestionsBase: Record<CyclePhase, {
-  title: string;
-  description: string;
-  nutrients: string[];
+  titleKey: string;
+  descKey: string;
+  nutrientKeys: string[];
   foods: {
     default: string[];
     vegetarian: string[];
@@ -34,9 +35,9 @@ const phaseSuggestionsBase: Record<CyclePhase, {
   };
 }> = {
   menstrual: {
-    title: 'Reposição & Conforto',
-    description: 'Foco em alimentos ricos em ferro para repor as perdas e conforto.',
-    nutrients: ['Ferro', 'Vitamina C', 'Magnésio'],
+    titleKey: 'nutrition.phase_menstrual_title',
+    descKey: 'nutrition.phase_menstrual_desc',
+    nutrientKeys: ['nutrition.iron', 'nutrition.vitamin_c', 'nutrition.magnesium'],
     foods: {
       default: ['Espinafre', 'Carne vermelha', 'Chocolate amargo', 'Lentilha'],
       vegetarian: ['Espinafre', 'Lentilha', 'Chocolate amargo', 'Feijão preto', 'Beterraba'],
@@ -46,9 +47,9 @@ const phaseSuggestionsBase: Record<CyclePhase, {
     },
   },
   folicular: {
-    title: 'Energia & Renovação',
-    description: 'Priorize alimentos que suportam a produção de estrogênio.',
-    nutrients: ['Vitamina E', 'Ômega 3', 'Zinco'],
+    titleKey: 'nutrition.phase_follicular_title',
+    descKey: 'nutrition.phase_follicular_desc',
+    nutrientKeys: ['nutrition.vitamin_e', 'nutrition.omega3', 'nutrition.zinc'],
     foods: {
       default: ['Abacate', 'Ovos', 'Salmão', 'Sementes de linhaça'],
       vegetarian: ['Abacate', 'Ovos', 'Sementes de linhaça', 'Nozes', 'Tofu'],
@@ -58,9 +59,9 @@ const phaseSuggestionsBase: Record<CyclePhase, {
     },
   },
   ovulatoria: {
-    title: 'Performance & Vitalidade',
-    description: 'Maximize sua energia com alimentos antioxidantes.',
-    nutrients: ['Antioxidantes', 'Fibras', 'Proteína'],
+    titleKey: 'nutrition.phase_ovulatory_title',
+    descKey: 'nutrition.phase_ovulatory_desc',
+    nutrientKeys: ['nutrition.antioxidants', 'nutrition.fiber', 'nutrition.protein'],
     foods: {
       default: ['Frutas vermelhas', 'Vegetais crucíferos', 'Quinoa', 'Amêndoas'],
       vegetarian: ['Frutas vermelhas', 'Brócolis', 'Quinoa', 'Amêndoas', 'Lentilha'],
@@ -70,9 +71,9 @@ const phaseSuggestionsBase: Record<CyclePhase, {
     },
   },
   lutea: {
-    title: 'Equilíbrio & Saciedade',
-    description: 'Alimentos que ajudam a estabilizar o humor e reduzir a TPM.',
-    nutrients: ['Magnésio', 'Vitamina B6', 'Triptofano'],
+    titleKey: 'nutrition.phase_luteal_title',
+    descKey: 'nutrition.phase_luteal_desc',
+    nutrientKeys: ['nutrition.magnesium', 'nutrition.vitamin_b6', 'nutrition.tryptophan'],
     foods: {
       default: ['Banana', 'Batata doce', 'Grão-de-bico', 'Castanhas'],
       vegetarian: ['Banana', 'Batata doce', 'Grão-de-bico', 'Castanhas', 'Queijo'],
@@ -83,25 +84,93 @@ const phaseSuggestionsBase: Record<CyclePhase, {
   },
 };
 
+interface PregnancyTrimesterSuggestion {
+  titleKey: string;
+  descKey: string;
+  nutrientKeys: string[];
+  foods: {
+    default: string[];
+    vegetarian: string[];
+    vegan: string[];
+    low_carb: string[];
+    lactose_free: string[];
+  };
+}
+
+const pregnancySuggestions: Record<number, PregnancyTrimesterSuggestion> = {
+  1: {
+    titleKey: 'nutrition.preg_tri1_title',
+    descKey: 'nutrition.preg_tri1_desc',
+    nutrientKeys: ['nutrition.folic_acid', 'nutrition.iron', 'nutrition.vitamin_b6'],
+    foods: {
+      default: ['Espinafre', 'Feijão', 'Laranja', 'Ovos', 'Gengibre'],
+      vegetarian: ['Espinafre', 'Feijão', 'Laranja', 'Ovos', 'Gengibre'],
+      vegan: ['Espinafre', 'Feijão', 'Laranja', 'Lentilha', 'Gengibre'],
+      low_carb: ['Espinafre', 'Ovos', 'Abacate', 'Brócolis', 'Gengibre'],
+      lactose_free: ['Espinafre', 'Feijão', 'Laranja', 'Ovos', 'Gengibre'],
+    },
+  },
+  2: {
+    titleKey: 'nutrition.preg_tri2_title',
+    descKey: 'nutrition.preg_tri2_desc',
+    nutrientKeys: ['nutrition.calcium', 'nutrition.omega3', 'nutrition.protein'],
+    foods: {
+      default: ['Salmão', 'Iogurte', 'Brócolis', 'Amêndoas', 'Batata doce'],
+      vegetarian: ['Iogurte', 'Brócolis', 'Amêndoas', 'Tofu', 'Batata doce'],
+      vegan: ['Tofu', 'Brócolis', 'Amêndoas', 'Sementes de chia', 'Batata doce'],
+      low_carb: ['Salmão', 'Amêndoas', 'Brócolis', 'Ovos', 'Abacate'],
+      lactose_free: ['Salmão', 'Brócolis', 'Amêndoas', 'Batata doce', 'Sardinha'],
+    },
+  },
+  3: {
+    titleKey: 'nutrition.preg_tri3_title',
+    descKey: 'nutrition.preg_tri3_desc',
+    nutrientKeys: ['nutrition.iron', 'nutrition.vitamin_c', 'nutrition.fiber'],
+    foods: {
+      default: ['Carne vermelha', 'Beterraba', 'Mamão', 'Aveia', 'Castanhas'],
+      vegetarian: ['Lentilha', 'Beterraba', 'Mamão', 'Aveia', 'Castanhas'],
+      vegan: ['Lentilha', 'Beterraba', 'Mamão', 'Aveia', 'Grão-de-bico'],
+      low_carb: ['Carne vermelha', 'Castanhas', 'Abacate', 'Brócolis', 'Ovos'],
+      lactose_free: ['Carne vermelha', 'Beterraba', 'Mamão', 'Aveia', 'Castanhas'],
+    },
+  },
+};
+
 const HormonalSuggestion: React.FC = () => {
+  const { t } = useTranslation();
   const { currentPhase, getPhaseInfo } = useCycle();
   const { diet_type } = useProfile();
+  const { lifePhase, pregnancyWeeks } = useLifePhase();
   const phaseInfo = getPhaseInfo();
 
-  const suggestion = useMemo((): PhaseSuggestion => {
-    const base = phaseSuggestionsBase[currentPhase];
-    
-    // Map diet_type to the correct key
-    const dietKey = (diet_type as keyof typeof base.foods) || 'default';
-    const foods = base.foods[dietKey] || base.foods.default;
+  const isPregnant = lifePhase === 'pregnant';
+  const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
 
+  const suggestion = useMemo((): PhaseSuggestion => {
+    const dietKey = (diet_type as 'default' | 'vegetarian' | 'vegan' | 'low_carb' | 'lactose_free') || 'default';
+
+    if (isPregnant) {
+      const base = pregnancySuggestions[trimester];
+      return {
+        title: t(base.titleKey),
+        description: t(base.descKey),
+        nutrients: base.nutrientKeys.map(k => t(k)),
+        foods: base.foods[dietKey] || base.foods.default,
+      };
+    }
+
+    const base = phaseSuggestionsBase[currentPhase];
     return {
-      title: base.title,
-      description: base.description,
-      nutrients: base.nutrients,
-      foods,
+      title: t(base.titleKey),
+      description: t(base.descKey),
+      nutrients: base.nutrientKeys.map(k => t(k)),
+      foods: base.foods[dietKey] || base.foods.default,
     };
-  }, [currentPhase, diet_type]);
+  }, [currentPhase, diet_type, isPregnant, trimester, t]);
+
+  const contextLabel = isPregnant
+    ? `${t('pregnancy.trimester_' + trimester)} — ${t('pregnancy.week')} ${pregnancyWeeks || '?'}`
+    : phaseInfo.name;
 
   return (
     <motion.div
@@ -117,12 +186,14 @@ const HormonalSuggestion: React.FC = () => {
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Sugestão Hormonal</h3>
-            <p className="text-xs text-muted-foreground">Fase {phaseInfo.name}</p>
+            <h3 className="font-semibold text-foreground">
+              {isPregnant ? t('nutrition.pregnancy_suggestion') : t('nutrition.hormonal_suggestion')}
+            </h3>
+            <p className="text-xs text-muted-foreground">{contextLabel}</p>
           </div>
         </div>
         <Badge variant="secondary" className="text-xs">
-          {dietLabels[diet_type || 'default']?.emoji} {dietLabels[diet_type || 'default']?.label}
+          {dietLabels[diet_type || 'default']?.emoji} {t(dietLabels[diet_type || 'default']?.labelKey)}
         </Badge>
       </div>
 
@@ -132,7 +203,7 @@ const HormonalSuggestion: React.FC = () => {
       <div className="space-y-3">
         <div>
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Alimentos Recomendados
+            {t('nutrition.recommended_foods')}
           </span>
           <div className="flex flex-wrap gap-2 mt-2">
             {suggestion.foods.map((food) => (
@@ -148,7 +219,7 @@ const HormonalSuggestion: React.FC = () => {
 
         <div>
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Nutrientes Chave
+            {t('nutrition.key_nutrients')}
           </span>
           <div className="flex flex-wrap gap-2 mt-2">
             {suggestion.nutrients.map((nutrient) => (
