@@ -31,6 +31,7 @@ import AppointmentChecklist from '@/components/home/AppointmentChecklist';
 import PregnancyDiaryCard from '@/components/home/PregnancyDiaryCard';
 import BirthCountdownCard from '@/components/home/BirthCountdownCard';
 import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
+import BirthPlanCard from '@/components/home/BirthPlanCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
