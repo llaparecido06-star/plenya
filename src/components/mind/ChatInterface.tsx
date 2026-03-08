@@ -46,6 +46,7 @@ const ChatInterface: React.FC = () => {
     }));
 
     const phaseInfo = getPhaseInfo();
+    const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : null;
 
     // Call AI Brain
     const response = await chat({
@@ -53,6 +54,8 @@ const ChatInterface: React.FC = () => {
       history,
       life_phase: lifePhase,
       pregnancy_weeks: pregnancyWeeks,
+      pregnancy_trimester: lifePhase === 'pregnant' ? trimester : null,
+      pregnancy_symptoms: lifePhase === 'pregnant' ? pregnancySymptoms : null,
       phase_name: phaseInfo.name,
     });
 
