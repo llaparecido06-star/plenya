@@ -212,7 +212,7 @@ const HormonalSuggestion: React.FC = () => {
           </div>
           <div>
             <h3 className="font-semibold text-foreground">
-              {isPregnant ? t('nutrition.pregnancy_suggestion') : t('nutrition.hormonal_suggestion')}
+              {isMenopause ? t('nutrition.menopause_suggestion') : isPregnant ? t('nutrition.pregnancy_suggestion') : t('nutrition.hormonal_suggestion')}
             </h3>
             <p className="text-xs text-muted-foreground">{contextLabel}</p>
           </div>

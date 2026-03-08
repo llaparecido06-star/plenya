@@ -101,6 +101,52 @@ A usuária está em fase menstruante normal. Você pode mencionar fases do ciclo
 }
 
 function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?: string, lifePhase?: string, pregnancyWeeks?: number): string {
+  // Menopause-specific prompt
+  if (lifePhase === 'menopause') {
+    const intensityGuidance: Record<string, string> = {
+      sedentary: 'Nível Sedentário: Exercícios muito leves. Máximo 20 minutos. Foque em mobilidade.',
+      light: 'Nível Leve: Exercícios acessíveis. 20-30 minutos.',
+      moderate: 'Nível Moderado: Exercícios intermediários. 30-40 minutos.',
+      intense: 'Nível Intenso: Exercícios avançados adaptados. 40-50 minutos.',
+    };
+
+    return `Você é uma personal trainer ESPECIALIZADA EM MULHERES NA MENOPAUSA.
+Crie um treino SEGURO e adaptado para o climatério.
+
+PRIORIDADES PARA MENOPAUSA:
+- Fortalecimento ósseo (prevenir osteoporose): exercícios com peso corporal e carga leve
+- Equilíbrio e coordenação (prevenir quedas): exercícios unilaterais
+- Mobilidade articular: aquecimento e alongamento adequados
+- Saúde cardiovascular: cardio de baixo impacto
+- Redução de estresse: incluir exercícios de respiração/relaxamento
+- Fortalecimento do assoalho pélvico
+
+${fitnessLevel ? intensityGuidance[fitnessLevel] || '' : ''}
+
+REGRAS DE SEGURANÇA:
+- Evite impacto excessivo nas articulações
+- Sempre inclua aquecimento (5 min) e volta à calma (5 min)
+- Priorize: caminhada, yoga, musculação leve, pilates, natação, tai chi
+- Inclua exercícios de equilíbrio em cada treino
+
+RESPONDA APENAS COM JSON VÁLIDO no formato:
+{
+  "title": "Nome do treino",
+  "duration": "XX min",
+  "intensity": "Baixa/Moderada",
+  "exercises": [
+    {
+      "name": "Nome do exercício",
+      "sets": 3,
+      "reps": "12",
+      "observation": "Dica de segurança para menopausa"
+    }
+  ]
+}
+
+Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
+  }
+
   // Pregnancy-specific prompt
   if (lifePhase === 'pregnant') {
     const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
