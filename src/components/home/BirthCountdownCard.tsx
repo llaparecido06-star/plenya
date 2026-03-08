@@ -56,7 +56,9 @@ const BirthCountdownCard: React.FC = () => {
         localStorage.setItem(notifiedKey, JSON.stringify(notified));
       }
     }
-  }, [daysRemaining, permission, showNotification, t]);
+  }, [daysRemaining, permission, showNotification, t, pregnancyStartDate]);
+
+  if (!pregnancyStartDate || pregnancyWeeks === null) return null;
 
   return (
     <motion.div
