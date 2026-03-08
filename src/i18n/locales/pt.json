@@ -816,6 +816,16 @@
     "ex_strength_b": "Protege ossos e previne osteoporose",
     "ex_swimming": "Natação / Hidroginástica",
     "ex_swimming_b": "Baixo impacto, alivia dores articulares",
-    "ex_generate": "Gerar treino personalizado"
+    "ex_generate": "Gerar treino personalizado",
+    "chart_title": "Evolução dos Sintomas",
+    "chart_subtitle": "Tendências das últimas 4 semanas",
+    "chart_week": "Sem",
+    "chart_symptoms": "Sintomas",
+    "chart_sleep": "Qualidade do Sono",
+    "chart_exercise": "Dias de Exercício",
+    "chart_correlation": "Correlação Identificada",
+    "chart_insight_exercise": "Semanas com mais exercícios tiveram menos sintomas! Continue se movimentando 💪",
+    "chart_insight_sleep": "Melhor qualidade de sono está associada a menos sintomas. Priorize o descanso 🌙",
+    "chart_insight_default": "Continue registrando para identificar padrões entre sintomas, sono e exercícios 📊"
   }
 }
