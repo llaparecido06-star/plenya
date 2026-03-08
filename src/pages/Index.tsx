@@ -25,7 +25,7 @@ import LatePeriodCard from '@/components/home/LatePeriodCard';
 import AwaitingPeriodCard from '@/components/home/AwaitingPeriodCard';
 import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
 import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
-import MenopauseCard from '@/components/home/MenopauseCard';
+import MenopauseWellnessHub from '@/components/home/MenopauseWellnessHub';
 import KickCounterCard from '@/components/home/KickCounterCard';
 import AppointmentChecklist from '@/components/home/AppointmentChecklist';
 import PregnancyDiaryCard from '@/components/home/PregnancyDiaryCard';
@@ -34,6 +34,8 @@ import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
 import BirthPlanCard from '@/components/home/BirthPlanCard';
 import BabyRegistryCard from '@/components/home/BabyRegistryCard';
 import GestationalWeightTracker from '@/components/home/GestationalWeightTracker';
+import BirthPlaylistCard from '@/components/home/BirthPlaylistCard';
+import WeeklyPregnancyInsight from '@/components/home/WeeklyPregnancyInsight';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
@@ -141,14 +143,16 @@ const Index: React.FC = () => {
           <KickCounterCard />
         )}
         {isToday && isPregnant && <BirthCountdownCard />}
+        {isToday && isPregnant && <WeeklyPregnancyInsight />}
         {isToday && isPregnant && <BirthPlanCard />}
         {isToday && isPregnant && <GestationalWeightTracker />}
         {isToday && isPregnant && <BabyRegistryCard />}
+        {isToday && isPregnant && <BirthPlaylistCard />}
         {isToday && isPregnant && <AppointmentChecklist />}
         {isToday && isPregnant && <PregnancyDiaryCard />}
 
         {/* === MENOPAUSE MODE === */}
-        {isToday && isMenopause && <MenopauseCard age={age} />}
+        {isToday && isMenopause && <MenopauseWellnessHub age={age} />}
 
         {/* === MENSTRUATING MODE === */}
         {isToday && isMenstruating && (
