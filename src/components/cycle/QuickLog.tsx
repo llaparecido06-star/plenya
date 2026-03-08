@@ -147,7 +147,9 @@ const QuickLog: React.FC = () => {
             </p>
           <div className="flex flex-wrap gap-2">
               {sortedSymptoms.map((symptom, index) => {
-                const isPriority = phaseSymptomPriority[currentPhase]?.includes(symptom);
+              const isPriority = isPregnant
+                    ? trimesterSymptomPriority[trimester]?.includes(symptom)
+                    : phaseSymptomPriority[currentPhase]?.includes(symptom);
                 return (
                   <div key={symptom} className="flex flex-col items-start gap-1">
                     <button
