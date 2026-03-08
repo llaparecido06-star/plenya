@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import PageLayout from '@/components/layout/PageLayout';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
