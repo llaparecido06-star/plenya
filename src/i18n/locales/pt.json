@@ -604,6 +604,19 @@
     "gallery_subtitle": "Suas fotos semana a semana",
     "gallery_count": "{{count}} fotos registradas",
     "gallery_empty": "Nenhuma foto ainda",
-    "gallery_empty_hint": "Adicione fotos no Diário da Gestação"
+    "gallery_empty_hint": "Adicione fotos no Diário da Gestação",
+    "countdown_title": "Contagem Regressiva",
+    "countdown_subtitle": "Cada dia mais perto do seu bebê",
+    "days_to_go": "dias para o grande dia",
+    "milestone_200": "Faltam 200 dias",
+    "milestone_150": "Faltam 150 dias",
+    "milestone_100": "Faltam 100 dias",
+    "milestone_50": "Faltam 50 dias",
+    "milestone_30": "Faltam 30 dias",
+    "milestone_14": "Faltam 2 semanas",
+    "milestone_7": "Faltam 7 dias",
+    "milestone_reached": "Marco alcançado! 🎉",
+    "milestone_in_days": "em {{days}} dias",
+    "milestone_notification": "Faltam {{days}} dias para conhecer seu bebê! 💜"
   }
 }
