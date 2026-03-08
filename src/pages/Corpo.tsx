@@ -45,6 +45,23 @@ const Corpo: React.FC = () => {
         <p className="text-muted-foreground">{getSubtitle()}</p>
       </div>
 
+      {/* Menopause safety tip */}
+      {isMenopause && (
+        <motion.div
+          className="mx-4 mb-4 p-4 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-xl"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-start gap-3">
+            <span className="text-xl">💜</span>
+            <div>
+              <p className="text-sm font-medium text-violet-800 dark:text-violet-200">{t('body.menopause_tip_title')}</p>
+              <p className="text-xs text-violet-600 dark:text-violet-400 mt-1">{t('body.menopause_tip_desc')}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Pregnancy safety alert */}
       {isPregnant && (
         <motion.div
