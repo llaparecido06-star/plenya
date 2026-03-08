@@ -194,6 +194,7 @@
     "title": "Nutrition",
     "subtitle": "Track your meals",
     "subtitle_pregnant": "Nutrition for you and your baby",
+    "subtitle_menopause": "Nutrition for hormonal balance",
     "macros_today": "Today's Macros",
     "calories": "Calories",
     "protein": "Protein",
@@ -219,6 +220,7 @@
     "tryptophan": "Tryptophan",
     "folic_acid": "Folic Acid",
     "calcium": "Calcium",
+    "phytoestrogens": "Phytoestrogens",
     "phase_menstrual_title": "Replenish & Comfort",
     "phase_menstrual_desc": "Focus on iron-rich foods to replenish losses and provide comfort.",
     "phase_follicular_title": "Energy & Renewal",
@@ -232,16 +234,34 @@
     "preg_tri2_title": "Growth & Strengthening",
     "preg_tri2_desc": "Calcium and omega-3 for baby's bones and brain. Increase protein intake.",
     "preg_tri3_title": "Preparation & Energy",
-    "preg_tri3_desc": "Boost iron for delivery and fiber for digestion. Maintain steady energy."
+    "preg_tri3_desc": "Boost iron for delivery and fiber for digestion. Maintain steady energy.",
+    "meno_title": "Natural Hormonal Balance",
+    "meno_desc": "Phytoestrogens, calcium and omega-3 help relieve symptoms and protect bones and heart.",
+    "menopause_suggestion": "Menopause Nutrition"
   },
   "body": {
     "title": "Body",
-    "subtitle": "Ideal workout for the {{phase}} phase"
+    "subtitle": "Ideal workout for the {{phase}} phase",
+    "subtitle_menopause": "Exercises for wellness and bone health",
+    "menopause_tip_title": "Exercise During Menopause",
+    "menopause_tip_desc": "Focus on bone strengthening, balance and mobility. Low-impact exercises are ideal."
   },
   "mind": {
     "title": "Mind",
     "subtitle": "Take care of your emotional well-being",
     "subtitle_pregnant": "Mental health during pregnancy",
+    "subtitle_menopause": "Emotional balance during menopause",
+    "preg_mental_title": "Mental Birth Preparation",
+    "preg_mental_subtitle": "Meditation and breathing techniques",
+    "preg_meditation_1": "Visualize your ideal birth: imagine each moment with calm and confidence",
+    "preg_meditation_2": "Practice birth breathing: inhale 4s through nose, exhale 6s through mouth slowly",
+    "preg_meditation_3": "Meditate 5 minutes connecting with baby: place hands on belly and feel movements",
+    "preg_meditation_birth": "Mentally rehearse labor: visualize contractions as waves that come and go, you're in control",
+    "meno_mental_title": "Emotional Wellness in Menopause",
+    "meno_mental_subtitle": "Meditation and relief techniques",
+    "meno_meditation_1": "Body scan for self-awareness: go through each body part releasing accumulated tension",
+    "meno_meditation_2": "Hot flash technique: breathe slowly and visualize a gentle coolness enveloping your body",
+    "meno_meditation_3": "Sleep ritual: 10 min before bed, practice gratitude and deep diaphragmatic breathing",
     "checkin_tab": "Check-in",
     "chat_tab": "Chat",
     "emotional_checkin": "Emotional Check-in",
@@ -796,6 +816,16 @@
     "ex_strength_b": "Protects bones and prevents osteoporosis",
     "ex_swimming": "Swimming / Aqua aerobics",
     "ex_swimming_b": "Low impact, relieves joint pain",
-    "ex_generate": "Generate personalized workout"
+    "ex_generate": "Generate personalized workout",
+    "chart_title": "Symptom Evolution",
+    "chart_subtitle": "Trends over the last 4 weeks",
+    "chart_week": "Wk",
+    "chart_symptoms": "Symptoms",
+    "chart_sleep": "Sleep Quality",
+    "chart_exercise": "Exercise Days",
+    "chart_correlation": "Correlation Found",
+    "chart_insight_exercise": "Weeks with more exercise had fewer symptoms! Keep moving 💪",
+    "chart_insight_sleep": "Better sleep quality is linked to fewer symptoms. Prioritize rest 🌙",
+    "chart_insight_default": "Keep logging to identify patterns between symptoms, sleep and exercise 📊"
   }
 }

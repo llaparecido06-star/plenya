@@ -194,6 +194,7 @@
     "title": "Nutrición",
     "subtitle": "Controla tu alimentación",
     "subtitle_pregnant": "Nutrición para ti y tu bebé",
+    "subtitle_menopause": "Alimentación para equilibrio hormonal",
     "macros_today": "Macros del Día",
     "calories": "Calorías",
     "protein": "Proteína",
@@ -219,6 +220,7 @@
     "tryptophan": "Triptófano",
     "folic_acid": "Ácido Fólico",
     "calcium": "Calcio",
+    "phytoestrogens": "Fitoestrógenos",
     "phase_menstrual_title": "Reposición & Confort",
     "phase_menstrual_desc": "Alimentos ricos en hierro para reponer pérdidas y dar confort.",
     "phase_follicular_title": "Energía & Renovación",
@@ -232,16 +234,34 @@
     "preg_tri2_title": "Crecimiento & Fortalecimiento",
     "preg_tri2_desc": "Calcio y omega-3 para los huesos y cerebro del bebé. Aumenta las proteínas.",
     "preg_tri3_title": "Preparación & Energía",
-    "preg_tri3_desc": "Refuerza hierro para el parto y fibra para el intestino. Mantén energía estable."
+    "preg_tri3_desc": "Refuerza hierro para el parto y fibra para el intestino. Mantén energía estable.",
+    "meno_title": "Equilibrio Hormonal Natural",
+    "meno_desc": "Fitoestrógenos, calcio y omega-3 ayudan a aliviar síntomas y proteger huesos y corazón.",
+    "menopause_suggestion": "Nutrición para Menopausia"
   },
   "body": {
     "title": "Cuerpo",
-    "subtitle": "Entrenamiento ideal para la fase {{phase}}"
+    "subtitle": "Entrenamiento ideal para la fase {{phase}}",
+    "subtitle_menopause": "Ejercicios para bienestar y salud ósea",
+    "menopause_tip_title": "Ejercicios en la Menopausia",
+    "menopause_tip_desc": "Prioriza fortalecimiento óseo, equilibrio y movilidad. Ejercicios de bajo impacto son ideales."
   },
   "mind": {
     "title": "Mente",
     "subtitle": "Cuida tu bienestar emocional",
     "subtitle_pregnant": "Salud mental en el embarazo",
+    "subtitle_menopause": "Equilibrio emocional en la menopausia",
+    "preg_mental_title": "Preparación Mental para el Parto",
+    "preg_mental_subtitle": "Técnicas de meditación y respiración",
+    "preg_meditation_1": "Visualiza tu parto ideal: imagina cada momento con calma y confianza",
+    "preg_meditation_2": "Practica la respiración del parto: inhala 4s por la nariz, exhala 6s por la boca lentamente",
+    "preg_meditation_3": "Medita 5 minutos conectándote con el bebé: pon las manos en la barriga y siente los movimientos",
+    "preg_meditation_birth": "Ensaya mentalmente el parto: visualiza las contracciones como olas que van y vienen, tú tienes el control",
+    "meno_mental_title": "Bienestar Emocional en la Menopausia",
+    "meno_mental_subtitle": "Meditación y técnicas de alivio",
+    "meno_meditation_1": "Body scan para autoconocimiento: recorre cada parte del cuerpo relajando tensiones acumuladas",
+    "meno_meditation_2": "Técnica para sofocos: respira lentamente y visualiza un frescor suave envolviendo tu cuerpo",
+    "meno_meditation_3": "Ritual de sueño: 10 min antes de dormir, practica gratitud y respiración diafragmática profunda",
     "checkin_tab": "Check-in",
     "chat_tab": "Chat",
     "emotional_checkin": "Check-in Emocional",
@@ -796,6 +816,16 @@
     "ex_strength_b": "Protege huesos y previene osteoporosis",
     "ex_swimming": "Natación / Aquagym",
     "ex_swimming_b": "Bajo impacto, alivia dolores articulares",
-    "ex_generate": "Generar entrenamiento personalizado"
+    "ex_generate": "Generar entrenamiento personalizado",
+    "chart_title": "Evolución de Síntomas",
+    "chart_subtitle": "Tendencias de las últimas 4 semanas",
+    "chart_week": "Sem",
+    "chart_symptoms": "Síntomas",
+    "chart_sleep": "Calidad del Sueño",
+    "chart_exercise": "Días de Ejercicio",
+    "chart_correlation": "Correlación Identificada",
+    "chart_insight_exercise": "¡Semanas con más ejercicio tuvieron menos síntomas! Sigue moviéndote 💪",
+    "chart_insight_sleep": "Mejor calidad de sueño está asociada a menos síntomas. Prioriza el descanso 🌙",
+    "chart_insight_default": "Sigue registrando para identificar patrones entre síntomas, sueño y ejercicio 📊"
   }
 }

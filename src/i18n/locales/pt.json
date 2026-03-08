@@ -194,6 +194,7 @@
     "title": "Nutrição",
     "subtitle": "Acompanhe sua alimentação",
     "subtitle_pregnant": "Nutrição para você e seu bebê",
+    "subtitle_menopause": "Alimentação para equilíbrio hormonal",
     "macros_today": "Macros do Dia",
     "calories": "Calorias",
     "protein": "Proteína",
@@ -219,6 +220,7 @@
     "tryptophan": "Triptofano",
     "folic_acid": "Ácido Fólico",
     "calcium": "Cálcio",
+    "phytoestrogens": "Fitoestrógenos",
     "phase_menstrual_title": "Reposição & Conforto",
     "phase_menstrual_desc": "Foco em alimentos ricos em ferro para repor as perdas e conforto.",
     "phase_follicular_title": "Energia & Renovação",
@@ -232,16 +234,34 @@
     "preg_tri2_title": "Crescimento & Fortalecimento",
     "preg_tri2_desc": "Cálcio e ômega-3 para os ossos e cérebro do bebê. Aumente proteínas.",
     "preg_tri3_title": "Preparação & Energia",
-    "preg_tri3_desc": "Reforce ferro para o parto e fibras para o intestino. Mantenha energia estável."
+    "preg_tri3_desc": "Reforce ferro para o parto e fibras para o intestino. Mantenha energia estável.",
+    "meno_title": "Equilíbrio Hormonal Natural",
+    "meno_desc": "Fitoestrógenos, cálcio e ômega-3 ajudam a aliviar sintomas e proteger ossos e coração.",
+    "menopause_suggestion": "Nutrição para Menopausa"
   },
   "body": {
     "title": "Corpo",
-    "subtitle": "Treino ideal para a fase {{phase}}"
+    "subtitle": "Treino ideal para a fase {{phase}}",
+    "subtitle_menopause": "Exercícios para bem-estar e saúde óssea",
+    "menopause_tip_title": "Exercícios na Menopausa",
+    "menopause_tip_desc": "Priorize fortalecimento ósseo, equilíbrio e mobilidade. Exercícios de baixo impacto são ideais."
   },
   "mind": {
     "title": "Mente",
     "subtitle": "Cuide do seu bem-estar emocional",
     "subtitle_pregnant": "Saúde mental na gestação",
+    "subtitle_menopause": "Equilíbrio emocional no climatério",
+    "preg_mental_title": "Preparação Mental para o Parto",
+    "preg_mental_subtitle": "Técnicas de meditação e respiração",
+    "preg_meditation_1": "Visualize seu parto ideal: imagine cada momento com tranquilidade e confiança",
+    "preg_meditation_2": "Pratique a respiração do parto: inspire 4s pelo nariz, expire 6s pela boca lentamente",
+    "preg_meditation_3": "Medite 5 minutos conectando-se ao bebê: coloque as mãos na barriga e sinta os movimentos",
+    "preg_meditation_birth": "Ensaie mentalmente o parto: visualize contrações como ondas que vêm e vão, você está no controle",
+    "meno_mental_title": "Bem-estar Emocional na Menopausa",
+    "meno_mental_subtitle": "Meditação e técnicas de alívio",
+    "meno_meditation_1": "Body scan para autoconhecimento: percorra cada parte do corpo relaxando tensões acumuladas",
+    "meno_meditation_2": "Técnica para ondas de calor: respire lentamente e visualize um frescor suave envolvendo seu corpo",
+    "meno_meditation_3": "Ritual de sono: 10 min antes de dormir, pratique gratidão e respiração diafragmática profunda",
     "checkin_tab": "Check-in",
     "chat_tab": "Chat",
     "emotional_checkin": "Check-in Emocional",
@@ -796,6 +816,16 @@
     "ex_strength_b": "Protege ossos e previne osteoporose",
     "ex_swimming": "Natação / Hidroginástica",
     "ex_swimming_b": "Baixo impacto, alivia dores articulares",
-    "ex_generate": "Gerar treino personalizado"
+    "ex_generate": "Gerar treino personalizado",
+    "chart_title": "Evolução dos Sintomas",
+    "chart_subtitle": "Tendências das últimas 4 semanas",
+    "chart_week": "Sem",
+    "chart_symptoms": "Sintomas",
+    "chart_sleep": "Qualidade do Sono",
+    "chart_exercise": "Dias de Exercício",
+    "chart_correlation": "Correlação Identificada",
+    "chart_insight_exercise": "Semanas com mais exercícios tiveram menos sintomas! Continue se movimentando 💪",
+    "chart_insight_sleep": "Melhor qualidade de sono está associada a menos sintomas. Priorize o descanso 🌙",
+    "chart_insight_default": "Continue registrando para identificar padrões entre sintomas, sono e exercícios 📊"
   }
 }

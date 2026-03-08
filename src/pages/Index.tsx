@@ -40,6 +40,7 @@ import ContractionTimerCard from '@/components/home/ContractionTimerCard';
 import HospitalBagCard from '@/components/home/HospitalBagCard';
 import MenopauseSleepTracker from '@/components/home/MenopauseSleepTracker';
 import MenopauseExerciseCard from '@/components/home/MenopauseExerciseCard';
+import MenopauseSymptomChart from '@/components/home/MenopauseSymptomChart';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
@@ -164,6 +165,7 @@ const Index: React.FC = () => {
         {isToday && isMenopause && (
           <div className="mx-4 space-y-4">
             <MenopauseSleepTracker />
+            <MenopauseSymptomChart />
             <MenopauseExerciseCard />
           </div>
         )}

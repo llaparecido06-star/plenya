@@ -3,6 +3,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import ChatInterface from '@/components/mind/ChatInterface';
 import EmotionalCheckin from '@/components/mind/EmotionalCheckin';
 import BreathingCard from '@/components/mind/BreathingCard';
+import LifePhaseBreathingCard from '@/components/mind/LifePhaseBreathingCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { mindTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { motion } from 'framer-motion';
@@ -14,6 +15,7 @@ const Mente: React.FC = () => {
   const { t } = useTranslation();
   const { lifePhase } = useLifePhase();
   const isPregnant = lifePhase === 'pregnant';
+  const isMenopause = lifePhase === 'menopause';
 
   return (
     <PageLayout>
@@ -25,12 +27,21 @@ const Mente: React.FC = () => {
         >
           {t('mind.title')}
         </motion.h1>
-        <p className="text-muted-foreground">{isPregnant ? t('mind.subtitle_pregnant') : t('mind.subtitle')}</p>
+        <p className="text-muted-foreground">
+          {isPregnant ? t('mind.subtitle_pregnant') : isMenopause ? t('mind.subtitle_menopause') : t('mind.subtitle')}
+        </p>
       </div>
 
       <div className="px-4 mb-4">
         <BreathingCard />
       </div>
+
+      {/* Life-phase specific meditation/breathing tips */}
+      {(isPregnant || isMenopause) && (
+        <div className="px-4 mb-4">
+          <LifePhaseBreathingCard />
+        </div>
+      )}
 
       <Tabs defaultValue="checkin" className="px-4">
         <TabsList className="grid w-full grid-cols-2 mb-4">
