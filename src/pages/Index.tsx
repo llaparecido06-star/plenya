@@ -41,6 +41,7 @@ import HospitalBagCard from '@/components/home/HospitalBagCard';
 import MenopauseSleepTracker from '@/components/home/MenopauseSleepTracker';
 import MenopauseExerciseCard from '@/components/home/MenopauseExerciseCard';
 import MenopauseSymptomChart from '@/components/home/MenopauseSymptomChart';
+import MenopauseDiaryCard from '@/components/home/MenopauseDiaryCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
