@@ -50,9 +50,18 @@ const Auth: React.FC = () => {
       });
       navigate('/');
     } catch (error: any) {
+      const msg = (error.message || '').toLowerCase();
+      let description = 'Verifique suas credenciais.';
+      if (msg.includes('invalid login') || msg.includes('invalid credentials')) {
+        description = 'Email ou senha incorretos. Tente novamente.';
+      } else if (msg.includes('email not confirmed') || msg.includes('not confirmed')) {
+        description = 'Confirme seu email antes de entrar. Verifique sua caixa de entrada.';
+      } else if (msg.includes('rate limit') || msg.includes('too many')) {
+        description = 'Muitas tentativas. Aguarde um momento e tente novamente.';
+      }
       toast({
         title: 'Erro no login',
-        description: error.message || 'Verifique suas credenciais.',
+        description,
         variant: 'destructive'
       });
     } finally {
@@ -76,9 +85,18 @@ const Auth: React.FC = () => {
       });
       // After signup, user will be redirected to onboarding via ProtectedRoute
     } catch (error: any) {
+      const msg = (error.message || '').toLowerCase();
+      let description = 'Tente novamente.';
+      if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('user already')) {
+        description = 'Este email já possui uma conta. Tente fazer login.';
+      } else if (msg.includes('password') && (msg.includes('weak') || msg.includes('at least') || msg.includes('characters'))) {
+        description = 'A senha deve ter pelo menos 6 caracteres.';
+      } else if (msg.includes('rate limit') || msg.includes('too many')) {
+        description = 'Muitas tentativas. Aguarde um momento e tente novamente.';
+      }
       toast({
         title: 'Erro ao criar conta',
-        description: error.message || 'Tente novamente.',
+        description,
         variant: 'destructive'
       });
     } finally {
