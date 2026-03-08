@@ -25,6 +25,7 @@ import AvatarUpload from '@/components/profile/AvatarUpload';
 import DeleteAccountButton from '@/components/profile/DeleteAccountButton';
 import MedicationTracker from '@/components/profile/MedicationTracker';
 import ChangePasswordCard from '@/components/profile/ChangePasswordCard';
+import BellyPhotoGallery from '@/components/home/BellyPhotoGallery';
 import { useTranslation } from 'react-i18next';
 
 const goalConfig: Record<string, { labelKey: string; icon: React.ElementType; color: string }> = {
