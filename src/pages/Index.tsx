@@ -36,6 +36,10 @@ import BabyRegistryCard from '@/components/home/BabyRegistryCard';
 import GestationalWeightTracker from '@/components/home/GestationalWeightTracker';
 import BirthPlaylistCard from '@/components/home/BirthPlaylistCard';
 import WeeklyPregnancyInsight from '@/components/home/WeeklyPregnancyInsight';
+import ContractionTimerCard from '@/components/home/ContractionTimerCard';
+import HospitalBagCard from '@/components/home/HospitalBagCard';
+import MenopauseSleepTracker from '@/components/home/MenopauseSleepTracker';
+import MenopauseExerciseCard from '@/components/home/MenopauseExerciseCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
@@ -142,17 +146,27 @@ const Index: React.FC = () => {
         {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 20 && (
           <KickCounterCard />
         )}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 36 && (
+          <ContractionTimerCard />
+        )}
         {isToday && isPregnant && <BirthCountdownCard />}
         {isToday && isPregnant && <WeeklyPregnancyInsight />}
-        {isToday && isPregnant && <BirthPlanCard />}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 28 && <BirthPlanCard />}
         {isToday && isPregnant && <GestationalWeightTracker />}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 34 && <HospitalBagCard />}
         {isToday && isPregnant && <BabyRegistryCard />}
-        {isToday && isPregnant && <BirthPlaylistCard />}
+        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 32 && <BirthPlaylistCard />}
         {isToday && isPregnant && <AppointmentChecklist />}
         {isToday && isPregnant && <PregnancyDiaryCard />}
 
         {/* === MENOPAUSE MODE === */}
         {isToday && isMenopause && <MenopauseWellnessHub age={age} />}
+        {isToday && isMenopause && (
+          <div className="mx-4 space-y-4">
+            <MenopauseSleepTracker />
+            <MenopauseExerciseCard />
+          </div>
+        )}
 
         {/* === MENSTRUATING MODE === */}
         {isToday && isMenstruating && (
