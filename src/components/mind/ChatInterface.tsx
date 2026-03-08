@@ -7,6 +7,7 @@ import { useCycle } from '@/contexts/CycleContext';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useAIBrain } from '@/hooks/useAIBrain';
+import { usePregnancyDiarySymptoms } from '@/hooks/usePregnancyDiarySymptoms';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 const ChatInterface: React.FC = () => {
@@ -18,6 +19,7 @@ const ChatInterface: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { getPhaseInfo } = useCycle();
   const { lifePhase, pregnancyWeeks } = useLifePhase();
+  const { symptoms: pregnancySymptoms } = usePregnancyDiarySymptoms();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +46,7 @@ const ChatInterface: React.FC = () => {
     }));
 
     const phaseInfo = getPhaseInfo();
+    const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : null;
 
     // Call AI Brain
     const response = await chat({
@@ -51,6 +54,8 @@ const ChatInterface: React.FC = () => {
       history,
       life_phase: lifePhase,
       pregnancy_weeks: pregnancyWeeks,
+      pregnancy_trimester: lifePhase === 'pregnant' ? trimester : null,
+      pregnancy_symptoms: lifePhase === 'pregnant' ? pregnancySymptoms : null,
       phase_name: phaseInfo.name,
     });
 

@@ -10,6 +10,8 @@ interface ChatPayload {
   history: Array<{ role: 'user' | 'assistant'; content: string }>;
   life_phase: 'menstruating' | 'pregnant' | 'menopause' | null;
   pregnancy_weeks?: number | null;
+  pregnancy_trimester?: number | null;
+  pregnancy_symptoms?: string[] | null;
   phase_name?: string;
 }
 
