@@ -303,7 +303,7 @@ serve(async (req) => {
     switch (mode) {
       case 'chat': {
         const chatPayload = payload as ChatPayload;
-        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks) + langInstruction;
+        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks, chatPayload.pregnancy_trimester, chatPayload.pregnancy_symptoms) + langInstruction;
         
         // Build messages with history
         const messages: Array<{ role: string; content: string }> = [
