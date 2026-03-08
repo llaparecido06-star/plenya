@@ -34,6 +34,8 @@ import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
 import BirthPlanCard from '@/components/home/BirthPlanCard';
 import BabyRegistryCard from '@/components/home/BabyRegistryCard';
 import GestationalWeightTracker from '@/components/home/GestationalWeightTracker';
+import BirthPlaylistCard from '@/components/home/BirthPlaylistCard';
+import WeeklyPregnancyInsight from '@/components/home/WeeklyPregnancyInsight';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
