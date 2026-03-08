@@ -30,11 +30,25 @@ const logTypes: LogType[] = [
   { id: 'weight', icon: Scale, label: 'Peso', color: 'bg-blue-100 text-blue-600' },
 ];
 
-// Base symptoms list
+// Base symptoms list for menstruating users
 const baseSymptoms = [
   'Cólica', 'Dor de cabeça', 'Inchaço', 'Fadiga', 
   'Sensibilidade', 'Acne', 'Náusea', 'Insônia', 'Irritabilidade', 'Espinhas'
 ];
+
+// Pregnancy-specific symptoms
+const pregnancySymptoms = [
+  'Náusea', 'Azia', 'Inchaço', 'Dor nas costas', 'Insônia', 'Fadiga',
+  'Cólica', 'Dor de cabeça', 'Tontura', 'Desejos', 'Constipação',
+  'Ansiedade', 'Contrações', 'Falta de ar'
+];
+
+// Pregnancy symptoms prioritized by trimester
+const trimesterSymptomPriority: Record<number, string[]> = {
+  1: ['Náusea', 'Fadiga', 'Tontura', 'Desejos'],
+  2: ['Azia', 'Dor nas costas', 'Inchaço', 'Constipação'],
+  3: ['Contrações', 'Falta de ar', 'Insônia', 'Dor nas costas'],
+};
 
 // Symptoms prioritized by phase - these will appear first
 const phaseSymptomPriority: Record<CyclePhase, string[]> = {
