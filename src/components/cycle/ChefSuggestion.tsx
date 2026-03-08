@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ChefHat, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 interface PhaseSuggestion {
@@ -44,10 +45,40 @@ const phaseSuggestions: Record<CyclePhase, PhaseSuggestion> = {
   },
 };
 
+const trimesterSuggestions: Record<number, PhaseSuggestion> = {
+  1: {
+    title: 'Sopa de Gengibre e Cenoura',
+    subtitle: 'Alivia náuseas e fornece ácido fólico',
+    emoji: '🥣',
+    gradient: 'from-amber-500/80 to-yellow-600/80',
+    bgImage: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=200&fit=crop',
+  },
+  2: {
+    title: 'Salmão com Espinafre',
+    subtitle: 'Ômega-3 e cálcio para o bebê crescer',
+    emoji: '🐟',
+    gradient: 'from-teal-500/80 to-emerald-600/80',
+    bgImage: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=200&fit=crop',
+  },
+  3: {
+    title: 'Bowl de Ferro e Energia',
+    subtitle: 'Preparação final com ferro e fibras',
+    emoji: '🥗',
+    gradient: 'from-rose-500/80 to-pink-600/80',
+    bgImage: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=200&fit=crop',
+  },
+};
+
 const ChefSuggestion: React.FC = () => {
   const navigate = useNavigate();
   const { currentPhase } = useCycle();
-  const suggestion = phaseSuggestions[currentPhase];
+  const { lifePhase, pregnancyWeeks } = useLifePhase();
+
+  const isPregnant = lifePhase === 'pregnant';
+  const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
+  
+  const suggestion = isPregnant ? trimesterSuggestions[trimester] : phaseSuggestions[currentPhase];
+  const headerLabel = isPregnant ? 'Chef Gestante' : 'Sugestão do Chef Hormonal';
 
   return (
     <PremiumGate feature="Sugestão do Chef" mode="inline">
@@ -60,7 +91,7 @@ const ChefSuggestion: React.FC = () => {
       <div className="flex items-center gap-2 mb-3">
         <ChefHat className="w-4 h-4 text-primary" />
         <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Sugestão do Chef Hormonal
+          {headerLabel}
         </span>
       </div>
       
@@ -70,16 +101,11 @@ const ChefSuggestion: React.FC = () => {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        {/* Background image */}
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
           style={{ backgroundImage: `url(${suggestion.bgImage})` }}
         />
-        
-        {/* Gradient overlay */}
         <div className={`absolute inset-0 bg-gradient-to-r ${suggestion.gradient}`} />
-        
-        {/* Content */}
         <div className="relative z-10 h-full flex items-center justify-between px-5">
           <div className="flex items-center gap-4">
             <span className="text-4xl">{suggestion.emoji}</span>
@@ -88,7 +114,6 @@ const ChefSuggestion: React.FC = () => {
               <p className="text-sm text-white/80">{suggestion.subtitle}</p>
             </div>
           </div>
-          
           <motion.div
             className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
             whileHover={{ x: 5 }}

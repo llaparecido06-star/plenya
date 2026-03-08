@@ -13,6 +13,7 @@ import { Slider } from '@/components/ui/slider';
 import { useDailyLog } from '@/hooks/useDailyLog';
 import { useMedication } from '@/hooks/useMedication';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
 import MedicationEffectBadge from '@/components/profile/MedicationEffectBadge';
 import IntimacyLog from './IntimacyLog';
 
@@ -29,11 +30,25 @@ const logTypes: LogType[] = [
   { id: 'weight', icon: Scale, label: 'Peso', color: 'bg-blue-100 text-blue-600' },
 ];
 
-// Base symptoms list
+// Base symptoms list for menstruating users
 const baseSymptoms = [
   'Cólica', 'Dor de cabeça', 'Inchaço', 'Fadiga', 
   'Sensibilidade', 'Acne', 'Náusea', 'Insônia', 'Irritabilidade', 'Espinhas'
 ];
+
+// Pregnancy-specific symptoms
+const pregnancySymptoms = [
+  'Náusea', 'Azia', 'Inchaço', 'Dor nas costas', 'Insônia', 'Fadiga',
+  'Cólica', 'Dor de cabeça', 'Tontura', 'Desejos', 'Constipação',
+  'Ansiedade', 'Contrações', 'Falta de ar'
+];
+
+// Pregnancy symptoms prioritized by trimester
+const trimesterSymptomPriority: Record<number, string[]> = {
+  1: ['Náusea', 'Fadiga', 'Tontura', 'Desejos'],
+  2: ['Azia', 'Dor nas costas', 'Inchaço', 'Constipação'],
+  3: ['Contrações', 'Falta de ar', 'Insônia', 'Dor nas costas'],
+};
 
 // Symptoms prioritized by phase - these will appear first
 const phaseSymptomPriority: Record<CyclePhase, string[]> = {
@@ -55,6 +70,10 @@ const QuickLog: React.FC = () => {
   const { data, loading, saving, saveLog, isAuthenticated } = useDailyLog();
   const { medicationName } = useMedication();
   const { currentPhase } = useCycle();
+  const { lifePhase, pregnancyWeeks } = useLifePhase();
+  const isPregnant = lifePhase === 'pregnant';
+  const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
+
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedMood, setSelectedMood] = useState<number>(2);
@@ -62,17 +81,22 @@ const QuickLog: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   
-  // Sort symptoms based on current phase - prioritized symptoms first
+  // Sort symptoms based on current phase or trimester
   const sortedSymptoms = useMemo(() => {
+    if (isPregnant) {
+      const prioritySymptoms = trimesterSymptomPriority[trimester] || [];
+      const prioritySet = new Set(prioritySymptoms);
+      const priority = prioritySymptoms.filter(s => pregnancySymptoms.includes(s));
+      const rest = pregnancySymptoms.filter(s => !prioritySet.has(s));
+      return [...priority, ...rest];
+    }
+    
     const prioritySymptoms = phaseSymptomPriority[currentPhase] || [];
     const prioritySet = new Set(prioritySymptoms);
-    
-    // Get unique symptoms: priority ones first, then the rest
     const priority = prioritySymptoms.filter(s => baseSymptoms.includes(s));
     const rest = baseSymptoms.filter(s => !prioritySet.has(s));
-    
     return [...priority, ...rest];
-  }, [currentPhase]);
+  }, [currentPhase, isPregnant, trimester]);
 
   // Load saved values
   useEffect(() => {
@@ -123,7 +147,9 @@ const QuickLog: React.FC = () => {
             </p>
           <div className="flex flex-wrap gap-2">
               {sortedSymptoms.map((symptom, index) => {
-                const isPriority = phaseSymptomPriority[currentPhase]?.includes(symptom);
+              const isPriority = isPregnant
+                    ? trimesterSymptomPriority[trimester]?.includes(symptom)
+                    : phaseSymptomPriority[currentPhase]?.includes(symptom);
                 return (
                   <div key={symptom} className="flex flex-col items-start gap-1">
                     <button
