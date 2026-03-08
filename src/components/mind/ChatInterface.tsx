@@ -19,6 +19,7 @@ const ChatInterface: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { getPhaseInfo } = useCycle();
   const { lifePhase, pregnancyWeeks } = useLifePhase();
+  const { symptoms: pregnancySymptoms } = usePregnancyDiarySymptoms();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
