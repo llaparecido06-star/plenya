@@ -143,9 +143,11 @@ const Index: React.FC = () => {
           <KickCounterCard />
         )}
         {isToday && isPregnant && <BirthCountdownCard />}
+        {isToday && isPregnant && <WeeklyPregnancyInsight />}
         {isToday && isPregnant && <BirthPlanCard />}
         {isToday && isPregnant && <GestationalWeightTracker />}
         {isToday && isPregnant && <BabyRegistryCard />}
+        {isToday && isPregnant && <BirthPlaylistCard />}
         {isToday && isPregnant && <AppointmentChecklist />}
         {isToday && isPregnant && <PregnancyDiaryCard />}
 
