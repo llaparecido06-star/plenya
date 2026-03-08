@@ -241,7 +241,10 @@
   },
   "body": {
     "title": "Body",
-    "subtitle": "Ideal workout for the {{phase}} phase"
+    "subtitle": "Ideal workout for the {{phase}} phase",
+    "subtitle_menopause": "Exercises for wellness and bone health",
+    "menopause_tip_title": "Exercise During Menopause",
+    "menopause_tip_desc": "Focus on bone strengthening, balance and mobility. Low-impact exercises are ideal."
   },
   "mind": {
     "title": "Mind",
