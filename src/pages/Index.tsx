@@ -29,6 +29,7 @@ import MenopauseCard from '@/components/home/MenopauseCard';
 import KickCounterCard from '@/components/home/KickCounterCard';
 import AppointmentChecklist from '@/components/home/AppointmentChecklist';
 import PregnancyDiaryCard from '@/components/home/PregnancyDiaryCard';
+import BirthCountdownCard from '@/components/home/BirthCountdownCard';
 import RecipeOfTheDayCard from '@/components/home/RecipeOfTheDayCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
