@@ -816,6 +816,16 @@
     "ex_strength_b": "Protects bones and prevents osteoporosis",
     "ex_swimming": "Swimming / Aqua aerobics",
     "ex_swimming_b": "Low impact, relieves joint pain",
-    "ex_generate": "Generate personalized workout"
+    "ex_generate": "Generate personalized workout",
+    "chart_title": "Symptom Evolution",
+    "chart_subtitle": "Trends over the last 4 weeks",
+    "chart_week": "Wk",
+    "chart_symptoms": "Symptoms",
+    "chart_sleep": "Sleep Quality",
+    "chart_exercise": "Exercise Days",
+    "chart_correlation": "Correlation Found",
+    "chart_insight_exercise": "Weeks with more exercise had fewer symptoms! Keep moving 💪",
+    "chart_insight_sleep": "Better sleep quality is linked to fewer symptoms. Prioritize rest 🌙",
+    "chart_insight_default": "Keep logging to identify patterns between symptoms, sleep and exercise 📊"
   }
 }
