@@ -26,12 +26,17 @@ const RecipeOfTheDayCard: React.FC = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Select a recipe of the day from favorites based on current phase
+  // Select a recipe of the day from favorites based on current phase or trimester
   useEffect(() => {
     if (favorites.length > 0) {
-      // Filter favorites by current phase or get a random one
-      const phaseMatch = favorites.filter(r => r.cycle_phase === currentPhase);
-      const source = phaseMatch.length > 0 ? phaseMatch : favorites;
+      const isPregnant = lifePhase === 'pregnant';
+      
+      // For pregnant users, match any favorite; for others, match by phase
+      let source = favorites;
+      if (!isPregnant) {
+        const phaseMatch = favorites.filter(r => r.cycle_phase === currentPhase);
+        if (phaseMatch.length > 0) source = phaseMatch;
+      }
       
       // Use today's date as seed for consistent daily selection
       const today = new Date().toDateString();
@@ -40,7 +45,7 @@ const RecipeOfTheDayCard: React.FC = () => {
       
       setTodayRecipe(source[index]);
     }
-  }, [favorites, currentPhase]);
+  }, [favorites, currentPhase, lifePhase]);
 
   const handleGenerateQuick = async () => {
     setIsGenerating(true);
