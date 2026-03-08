@@ -234,7 +234,10 @@
     "preg_tri2_title": "Crecimiento & Fortalecimiento",
     "preg_tri2_desc": "Calcio y omega-3 para los huesos y cerebro del bebé. Aumenta las proteínas.",
     "preg_tri3_title": "Preparación & Energía",
-    "preg_tri3_desc": "Refuerza hierro para el parto y fibra para el intestino. Mantén energía estable."
+    "preg_tri3_desc": "Refuerza hierro para el parto y fibra para el intestino. Mantén energía estable.",
+    "meno_title": "Equilibrio Hormonal Natural",
+    "meno_desc": "Fitoestrógenos, calcio y omega-3 ayudan a aliviar síntomas y proteger huesos y corazón.",
+    "menopause_suggestion": "Nutrición para Menopausia"
   },
   "body": {
     "title": "Cuerpo",
