@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ClipboardList, ChevronDown, ChevronUp, Check, Baby } from 'lucide-react';
+import { ClipboardList, ChevronDown, ChevronUp, Check, Baby, Download, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
 
 interface BirthPlanItem {
   id: string;
@@ -62,11 +65,11 @@ const STORAGE_KEY = 'plenya_birth_plan';
 
 const BirthPlanCard: React.FC = () => {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { lifePhase, pregnancyWeeks } = useLifePhase();
   const [expanded, setExpanded] = useState(false);
   const [selections, setSelections] = useState<Record<string, string[]>>({});
 
-  // Only show for 3rd trimester (28+ weeks)
   const isThirdTrimester = lifePhase === 'pregnant' && pregnancyWeeks !== null && pregnancyWeeks >= 28;
 
   useEffect(() => {
@@ -91,6 +94,106 @@ const BirthPlanCard: React.FC = () => {
   const totalOptions = birthPlanCategories.reduce((sum, c) => sum + c.options.length, 0);
   const totalSelected = Object.values(selections).reduce((sum, arr) => sum + arr.length, 0);
   const progressPercent = totalOptions > 0 ? (totalSelected / totalOptions) * 100 : 0;
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let y = 25;
+
+    // Header
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text(t('pregnancy.bp_title'), pageWidth / 2, y, { align: 'center' });
+    y += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(120, 120, 120);
+    doc.text(`${t('pregnancy.bp_subtitle')} — ${new Date().toLocaleDateString()}`, pageWidth / 2, y, { align: 'center' });
+    y += 5;
+
+    // Divider
+    doc.setDrawColor(230, 100, 150);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 12;
+
+    doc.setTextColor(0, 0, 0);
+
+    // Categories
+    birthPlanCategories.forEach((category) => {
+      const selectedInCategory = selections[category.id] || [];
+      
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(t(category.labelKey), margin, y);
+      y += 8;
+
+      category.options.forEach((option) => {
+        const isSelected = selectedInCategory.includes(option.id);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        
+        const checkmark = isSelected ? '☑' : '☐';
+        doc.text(`${checkmark}  ${t(option.labelKey)}`, margin + 5, y);
+        y += 7;
+      });
+
+      y += 6;
+
+      if (y > 260) {
+        doc.addPage();
+        y = 25;
+      }
+    });
+
+    // Disclaimer
+    y += 5;
+    doc.setDrawColor(230, 100, 150);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 8;
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    const disclaimer = doc.splitTextToSize(t('pregnancy.bp_disclaimer'), pageWidth - margin * 2);
+    doc.text(disclaimer, margin, y);
+    y += disclaimer.length * 5 + 8;
+
+    doc.setFontSize(8);
+    doc.text('Gerado por Plenya — plenya.lovable.app', pageWidth / 2, y, { align: 'center' });
+
+    return doc;
+  };
+
+  const handleExportPDF = () => {
+    try {
+      const doc = generatePDF();
+      doc.save('plano-de-parto-plenya.pdf');
+      toast({ title: t('pregnancy.bp_pdf_exported'), description: t('pregnancy.bp_pdf_exported_desc') });
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast({ title: 'Erro', description: 'Não foi possível gerar o PDF.', variant: 'destructive' });
+    }
+  };
+
+  const handleSharePDF = async () => {
+    try {
+      const doc = generatePDF();
+      const pdfBlob = doc.output('blob');
+      const file = new File([pdfBlob], 'plano-de-parto-plenya.pdf', { type: 'application/pdf' });
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: t('pregnancy.bp_title') });
+      } else {
+        // Fallback: download
+        handleExportPDF();
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        handleExportPDF();
+      }
+    }
+  };
 
   if (!isThirdTrimester) return null;
 
@@ -122,7 +225,6 @@ const BirthPlanCard: React.FC = () => {
           )}
         </div>
 
-        {/* Progress bar */}
         <div className="mt-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
             <span>{t('pregnancy.bp_progress')}</span>
@@ -177,6 +279,28 @@ const BirthPlanCard: React.FC = () => {
                   </div>
                 </div>
               ))}
+
+              {/* PDF Export Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={(e) => { e.stopPropagation(); handleExportPDF(); }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {t('pregnancy.bp_export_pdf')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={(e) => { e.stopPropagation(); handleSharePDF(); }}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  {t('pregnancy.bp_share')}
+                </Button>
+              </div>
 
               <div className="flex items-center gap-2 p-3 bg-pink-50 dark:bg-pink-950/30 rounded-xl">
                 <Baby className="w-4 h-4 text-pink-500 flex-shrink-0" />

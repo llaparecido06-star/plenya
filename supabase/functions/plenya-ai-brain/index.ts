@@ -100,7 +100,55 @@ CONTEXTO IMPORTANTE: A usuária está no climatério/menopausa.
 A usuária está em fase menstruante normal. Você pode mencionar fases do ciclo quando relevante.`;
 }
 
-function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?: string): string {
+function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?: string, lifePhase?: string, pregnancyWeeks?: number): string {
+  // Pregnancy-specific prompt
+  if (lifePhase === 'pregnant') {
+    const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
+    
+    const trimesterGuidance: Record<number, string> = {
+      1: `1º Trimestre (Semana ${pregnancyWeeks || '?'}): Evite exercícios de alto impacto e abdominais. Priorize caminhadas, yoga leve, alongamentos e exercícios de respiração. Intensidade baixa a moderada. Máximo 30 minutos. Se a gestante tiver náuseas, sugira exercícios suaves e curtos.`,
+      2: `2º Trimestre (Semana ${pregnancyWeeks || '?'}): Ótimo período para exercícios moderados! Fortalecimento do assoalho pélvico (Kegel), agachamentos leves, hidroginástica, pilates adaptado. Evite exercícios deitada de barriga para cima após 20 semanas. 30-40 minutos.`,
+      3: `3º Trimestre (Semana ${pregnancyWeeks || '?'}): Foco na preparação para o parto! Exercícios de respiração para o parto, mobilidade pélvica, agachamento de preparação (deep squat), alongamentos, caminhada. Evite qualquer exercício de impacto, abdominais e posições invertidas. Máximo 25 minutos. Inclua exercícios de relaxamento.`,
+    };
+
+    const intensityGuidance: Record<string, string> = {
+      sedentary: 'Nível Sedentário: Exercícios muito leves e curtos. Máximo 15 minutos.',
+      light: 'Nível Leve: Exercícios acessíveis e seguros. 20-25 minutos.',
+      moderate: 'Nível Moderado: Pode incluir exercícios intermediários adaptados. 25-35 minutos.',
+      intense: 'Nível Intenso: Mesmo sendo atleta, reduza a intensidade na gestação. 30-40 minutos.',
+    };
+
+    return `Você é uma personal trainer ESPECIALIZADA EM GESTANTES.
+Crie um treino SEGURO e adaptado para uma gestante.
+
+${trimesterGuidance[trimester]}
+${fitnessLevel ? intensityGuidance[fitnessLevel] || '' : ''}
+
+REGRAS DE SEGURANÇA OBRIGATÓRIAS:
+- NUNCA sugira: abdominais tradicionais, burpees, saltos, corrida intensa, levantamento terra pesado
+- Após 20 semanas: NENHUM exercício deitada de costas (supino, etc.)
+- 3º trimestre: Inclua OBRIGATORIAMENTE exercícios de preparação para o parto (Kegel, respiração, mobilidade pélvica)
+- Sempre inclua aquecimento e volta à calma
+- Priorize exercícios que fortaleçam: assoalho pélvico, costas, pernas
+
+RESPONDA APENAS COM JSON VÁLIDO no formato:
+{
+  "title": "Nome do treino",
+  "duration": "XX min",
+  "intensity": "Baixa/Moderada",
+  "exercises": [
+    {
+      "name": "Nome do exercício",
+      "sets": 3,
+      "reps": "12",
+      "observation": "Dica de segurança para gestante"
+    }
+  ]
+}
+
+Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
+  }
+
   const phaseGuidance: Record<string, string> = {
     menstrual: 'Fase Menstrual: Priorize Yoga, Mobilidade e Caminhadas leves. Evite exercícios de alta intensidade.',
     folicular: 'Fase Folicular: Energia em ascensão! Sugira treinos de Força e HIIT. Ótimo momento para novos desafios.',
@@ -115,7 +163,6 @@ function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?:
     intense: 'Nível Intenso/Atleta: Pode sugerir exercícios avançados e maior volume. 45-60 minutos.',
   };
 
-  // Cycle day specific guidance
   let cycleDayGuidance = '';
   if (cycleDay) {
     if (cycleDay >= 1 && cycleDay <= 3) {
