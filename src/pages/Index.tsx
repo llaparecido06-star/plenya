@@ -46,6 +46,8 @@ import HotFlashCounter from '@/components/home/HotFlashCounter';
 import MenopauseExamsCard from '@/components/home/MenopauseExamsCard';
 import HRTTracker from '@/components/home/HRTTracker';
 import MenopauseWeightChart from '@/components/home/MenopauseWeightChart';
+import HotFlashInsights from '@/components/home/HotFlashInsights';
+import MenopauseReportCard from '@/components/home/MenopauseReportCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
