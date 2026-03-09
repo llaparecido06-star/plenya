@@ -119,6 +119,13 @@ const Perfil: React.FC = () => {
   const { lifePhase } = useLifePhase();
   const isPregnant = lifePhase === 'pregnant';
 
+  const lifePhaseLabel: Record<string, string> = {
+    menstruating: '🌙 ' + t('life_phase.menstruating'),
+    pregnant: '🤰 ' + t('life_phase.pregnant'),
+    postpartum: '🌸 ' + t('life_phase.postpartum'),
+    menopause: '💜 ' + t('life_phase.menopause'),
+  };
+
   if (!user) {
     return (
       <PageLayout>
