@@ -98,7 +98,7 @@ const AwaitingPeriodCard: React.FC = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Droplets className="w-5 h-5 text-red-500" />
+              <Droplets className="w-5 h-5 text-primary" />
               Registrar menstruação?
             </AlertDialogTitle>
             <AlertDialogDescription>
