@@ -362,6 +362,9 @@ function getChefSystemPrompt(phase: string, cycleDay?: number, dietType?: string
     folicular: 'Priorize: proteínas magras, vegetais fermentados, grãos integrais.',
     ovulatoria: 'Priorize: antioxidantes, fibras, vegetais crucíferos.',
     lutea: 'Priorize: magnésio (chocolate amargo, abacate), vitamina B6, triptofano.',
+    gestante: 'Priorize: ácido fólico, ferro, cálcio, ômega-3. SEGURANÇA ALIMENTAR: evite peixes crus, queijos não pasteurizados, ovos mal cozidos.',
+    pos_parto: 'Priorize: ferro (reposição do parto), cálcio, ômega-3, vitamina B12. Alimentos galactagogos (aveia, linhaça, feno-grego) para produção de leite. Receitas rápidas e práticas para mães com pouco tempo.',
+    menopausa: 'Priorize: fitoestrógenos (soja, linhaça), cálcio (couve, brócolis, sardinha), ômega-3, magnésio. Alimentos anti-inflamatórios para aliviar ondas de calor.',
   };
 
   // Cycle day specific nutrition guidance
@@ -376,10 +379,13 @@ function getChefSystemPrompt(phase: string, cycleDay?: number, dietType?: string
     }
   }
 
-  return `Você é uma chef especializada em nutrição hormonal feminina e Cycle Syncing.
-Sugira receitas saudáveis e deliciosas adaptadas à fase e DIA ESPECÍFICO do ciclo.
+  const isLifePhaseMode = ['gestante', 'pos_parto', 'menopausa'].includes(phase);
+  const contextLabel = isLifePhaseMode ? `Modo: ${phase}` : `Fase atual: ${phase}${cycleDay ? ` (Dia ${cycleDay})` : ''}`;
 
-Fase atual: ${phase}${cycleDay ? ` (Dia ${cycleDay})` : ''}
+  return `Você é uma chef especializada em nutrição hormonal feminina${isLifePhaseMode ? '' : ' e Cycle Syncing'}.
+Sugira receitas saudáveis e deliciosas ${isLifePhaseMode ? `adaptadas ao ${phase}` : 'adaptadas à fase e DIA ESPECÍFICO do ciclo'}.
+
+${contextLabel}
 ${phaseNutrition[phase] || 'Sugira refeições equilibradas e nutritivas.'}${cycleDayGuidance}
 ${dietRestrictions}
 
