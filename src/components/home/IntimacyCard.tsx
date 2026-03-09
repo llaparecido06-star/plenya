@@ -169,7 +169,7 @@ const IntimacyCard: React.FC = () => {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="flex items-center gap-2">
-                <Heart className="w-5 h-5 text-rose-500" />
+                <Heart className="w-5 h-5 text-pink-500 fill-pink-500" />
                 Intimidade & Saúde
               </DialogTitle>
               <Button
