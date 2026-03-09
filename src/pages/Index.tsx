@@ -202,6 +202,7 @@ const Index: React.FC = () => {
         {isToday && isMenopause && <MenopauseWeeklySummary />}
         {isToday && isMenopause && <HotFlashCounter />}
         {isToday && isMenopause && <HotFlashInsights />}
+        {isToday && isMenopause && <HotFlashSleepCorrelation />}
         {isToday && isMenopause && <HRTTracker />}
         {isToday && isMenopause && <MenopauseDiaryCard />}
         {isToday && isMenopause && <MenopauseExamsCard />}
