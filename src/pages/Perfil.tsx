@@ -261,6 +261,12 @@ const Perfil: React.FC = () => {
             <NotificationSettings />
           </MenuItem>
 
+          {lifePhase === 'menopause' && (
+            <MenuItem icon={Gauge} label={t('menopause.alert_settings_title')} sublabel={t('menopause.alert_settings_sub')} iconClassName="bg-orange-100 text-orange-600">
+              <MenopauseAlertSettings />
+            </MenuItem>
+          )}
+
           <MenuItem icon={FileText} label={t('profile.medical_report')} sublabel={t('profile.medical_report_sub')} iconClassName="bg-amber-100 text-amber-600">
             <MedicalReportButton />
           </MenuItem>
