@@ -298,7 +298,7 @@
 
     "@capacitor/push-notifications": ["@capacitor/push-notifications@8.0.0", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-xJWQLqAfC8b2ETqAPmwDnkKB4t/lVrbYc2D8VpA2fSu10JFSL/R722Vk0Lfl9Lo9WusmyIiQbVfILNQ3iFNGKw=="],
 
-    "@capgo/capacitor-health": ["@capgo/capacitor-health@8.3.1", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-Na7yktWe78k0pO4tpFE1Sf5WPVd+CUlr/m5T9yraPQafXMiEwsisLHgmGtVq/Wt2yqDoKpjWt7KpzAZABn4Fgw=="],
+    "@capgo/capacitor-health": ["@capgo/capacitor-health@8.3.2", "", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-kQ5gsPrjq7hAcUSp+X9ybyv2Y5ssBDMLVPO2Se/kq1dteWvi6uUtnH64EoPOREYMzEqitaMr3R0h/PuHh5Q6hQ=="],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.0", "", { "os": "aix", "cpu": "ppc64" }, "sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ=="],
 
