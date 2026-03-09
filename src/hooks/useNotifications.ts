@@ -15,6 +15,8 @@ interface NotificationSettings {
   pmsAlert: boolean;
   hydrationAlert: boolean;
   phaseChangeAlert: boolean;
+  ovulationAlert: boolean;
+  latePeriodAlert: boolean;
 }
 
 const NOTIFICATION_SETTINGS_KEY = 'plenya_notification_settings';
