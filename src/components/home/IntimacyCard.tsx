@@ -373,7 +373,7 @@ const IntimacyCard: React.FC = () => {
                               <Heart
                                 className={`w-7 h-7 transition-all ${
                                   level <= pleasureLevel
-                                    ? 'text-rose-500 fill-rose-500'
+                                    ? 'text-pink-500 fill-pink-500'
                                     : 'text-muted-foreground/30'
                                 }`}
                               />

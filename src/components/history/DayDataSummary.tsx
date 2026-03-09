@@ -159,7 +159,7 @@ const DayDataSummary: React.FC = () => {
     { id: 'symptom', icon: Stethoscope, label: 'Sintoma', color: 'bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400' },
     { id: 'mood', icon: Smile, label: 'Humor', color: 'bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400' },
     { id: 'weight', icon: Scale, label: 'Peso', color: 'bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400' },
-    { id: 'intimacy', icon: Heart, label: 'Sexo', color: 'bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400' },
+    { id: 'intimacy', icon: Heart, label: 'Sexo', color: 'bg-pink-100 text-pink-600 dark:bg-pink-950 dark:text-pink-400' },
   ];
 
   return (

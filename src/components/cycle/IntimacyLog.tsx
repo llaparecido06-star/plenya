@@ -425,7 +425,7 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
             ) : !isAuthenticated ? (
               'Faça login para salvar'
             ) : (
-              'Salvar Registro 💜'
+              'Salvar Registro 💗'
             )}
           </Button>
         </div>
