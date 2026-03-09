@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Droplets, Moon, Smile, Activity } from 'lucide-react';
+import { Heart, Droplets, Moon, Smile, Activity, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -10,6 +10,7 @@ import { useLifePhase } from '@/hooks/useLifePhase';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { toLocalDateString } from '@/lib/dateUtils';
+import { subDays } from 'date-fns';
 
 const PostpartumRecoveryCard: React.FC = () => {
   const { t } = useTranslation();
@@ -21,6 +22,7 @@ const PostpartumRecoveryCard: React.FC = () => {
   const [mood, setMood] = useState(3);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [safetyAlert, setSafetyAlert] = useState<string | null>(null);
 
   const today = toLocalDateString(new Date());
 
@@ -39,9 +41,38 @@ const PostpartumRecoveryCard: React.FC = () => {
         setMood(data.mood ?? 3);
         setSaved(true);
       }
+
+      // Safety alert: check if bleeding or pain was 5/5 for 2+ consecutive days
+      checkSafetyAlerts();
     };
     load();
   }, [user, today]);
+
+  const checkSafetyAlerts = async () => {
+    if (!user) return;
+    const yesterday = toLocalDateString(subDays(new Date(), 1));
+    const dayBefore = toLocalDateString(subDays(new Date(), 2));
+
+    const { data: recentLogs } = await supabase
+      .from('postpartum_logs')
+      .select('log_date, bleeding_level, pain_level')
+      .eq('user_id', user.id)
+      .in('log_date', [yesterday, dayBefore])
+      .order('log_date', { ascending: false });
+
+    if (recentLogs && recentLogs.length >= 2) {
+      const highBleeding = recentLogs.filter(l => (l.bleeding_level ?? 0) >= 4).length >= 2;
+      const highPain = recentLogs.filter(l => (l.pain_level ?? 0) >= 4).length >= 2;
+      
+      if (highBleeding && highPain) {
+        setSafetyAlert('⚠️ Sangramento intenso e dor alta por 2+ dias. Recomendamos que entre em contato com seu médico.');
+      } else if (highBleeding) {
+        setSafetyAlert('⚠️ Sangramento intenso por 2+ dias. Converse com seu médico para garantir que está tudo bem.');
+      } else if (highPain) {
+        setSafetyAlert('⚠️ Dor intensa por 2+ dias consecutivos. Considere falar com seu médico.');
+      }
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -55,9 +86,7 @@ const PostpartumRecoveryCard: React.FC = () => {
         mood,
       }, { onConflict: 'user_id,log_date' });
 
-      // Use insert with conflict handling since there's no unique constraint
       if (error) {
-        // Try insert if upsert fails
         await supabase.from('postpartum_logs').insert({
           user_id: user.id,
           log_date: today,
@@ -69,6 +98,11 @@ const PostpartumRecoveryCard: React.FC = () => {
 
       setSaved(true);
       toast({ title: t('postpartum.saved', 'Registro salvo! 💜') });
+      
+      // Re-check safety with current values included
+      if (bleeding >= 4 || pain >= 4) {
+        checkSafetyAlerts();
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -105,6 +139,20 @@ const PostpartumRecoveryCard: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
+            {/* Safety Alert */}
+            {safetyAlert && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-3 rounded-lg bg-destructive/10 border border-destructive/30"
+              >
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                  <p className="text-sm text-destructive font-medium">{safetyAlert}</p>
+                </div>
+              </motion.div>
+            )}
+
             {/* Recovery tip */}
             {getRecoveryTip() && (
               <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">

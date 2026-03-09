@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Battery, BatteryLow, BatteryMedium, BatteryFull, Sparkles } from 'lucide-react';
 import { useCycle, CyclePhase } from '@/contexts/CycleContext';
+import { useLifePhase } from '@/hooks/useLifePhase';
+import { useTranslation } from 'react-i18next';
 
 interface PhaseInsight {
   emoji: string;
@@ -13,6 +15,7 @@ interface PhaseInsight {
   bgColor: string;
 }
 
+// Default menstruating phase insights
 const phaseInsights: Record<CyclePhase, PhaseInsight> = {
   menstrual: {
     emoji: '🔋',
@@ -52,6 +55,28 @@ const phaseInsights: Record<CyclePhase, PhaseInsight> = {
   },
 };
 
+// Postpartum-adapted labels
+const postpartumInsight: PhaseInsight = {
+  emoji: '💜',
+  batteryLabel: 'Bateria Social: Adaptando',
+  batteryLevel: 'charging',
+  superpower: 'Resiliência',
+  message: 'Seu superpoder agora é a Resiliência. Cada dia é uma conquista. Esteja presente e cuide de si.',
+  color: 'text-primary',
+  bgColor: 'bg-primary/10',
+};
+
+// Menopause-adapted labels
+const menopauseInsight: PhaseInsight = {
+  emoji: '🌿',
+  batteryLabel: 'Equilíbrio Hormonal',
+  batteryLevel: 'charging',
+  superpower: 'Vitalidade Prateada',
+  message: 'Seu superpoder é a Vitalidade Prateada. Sabedoria e autocuidado são sua força.',
+  color: 'text-leaf-green',
+  bgColor: 'bg-leaf-green/10',
+};
+
 const BatteryIcon: React.FC<{ level: PhaseInsight['batteryLevel']; className?: string }> = ({ level, className }) => {
   switch (level) {
     case 'low':
@@ -69,28 +94,40 @@ const BatteryIcon: React.FC<{ level: PhaseInsight['batteryLevel']; className?: s
 
 const CycleSyncInsightCard: React.FC = () => {
   const { currentPhase, cycleDay, hasDUM, isLate } = useCycle();
+  const { lifePhase } = useLifePhase();
   
-  // Don't show if no DUM or if late (show late card instead)
+  // For postpartum and menopause, show adapted cards
+  if (lifePhase === 'postpartum') {
+    return <InsightDisplay insight={postpartumInsight} />;
+  }
+  
+  if (lifePhase === 'menopause') {
+    return <InsightDisplay insight={menopauseInsight} />;
+  }
+  
+  // Don't show if no DUM or if late (show late card instead) for menstruating
   if (!hasDUM || isLate) return null;
   
   const insight = phaseInsights[currentPhase];
 
+  return <InsightDisplay insight={insight} cycleDay={cycleDay} phase={currentPhase} />;
+};
+
+const InsightDisplay: React.FC<{ insight: PhaseInsight; cycleDay?: number; phase?: CyclePhase }> = ({ insight, cycleDay, phase }) => {
   return (
     <motion.div
       className={`glass-card p-4 mx-4 mt-4 ${insight.bgColor} border-l-4`}
-      style={{ borderLeftColor: `hsl(var(--${currentPhase}))` }}
+      style={phase ? { borderLeftColor: `hsl(var(--${phase}))` } : { borderLeftColor: 'hsl(var(--primary))' }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
       <div className="flex items-start gap-3">
-        {/* Battery indicator */}
         <div className={`p-2 rounded-xl ${insight.bgColor}`}>
           <BatteryIcon level={insight.batteryLevel} className={`w-6 h-6 ${insight.color}`} />
         </div>
         
         <div className="flex-1 min-w-0">
-          {/* Header with battery status */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-lg">{insight.emoji}</span>
@@ -98,10 +135,11 @@ const CycleSyncInsightCard: React.FC = () => {
                 {insight.batteryLabel}
               </span>
             </div>
-            <span className="text-xs text-muted-foreground">Dia {cycleDay}</span>
+            {cycleDay !== undefined && (
+              <span className="text-xs text-muted-foreground">Dia {cycleDay}</span>
+            )}
           </div>
           
-          {/* Superpower badge */}
           <div className="flex items-center gap-1.5 mb-2">
             <Sparkles className={`w-4 h-4 ${insight.color}`} />
             <span className="text-xs font-medium text-muted-foreground">
@@ -109,7 +147,6 @@ const CycleSyncInsightCard: React.FC = () => {
             </span>
           </div>
           
-          {/* Insight message */}
           <p className="text-sm text-foreground/80 leading-relaxed">
             {insight.message}
           </p>
