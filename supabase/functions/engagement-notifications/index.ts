@@ -318,12 +318,9 @@ serve(async (req) => {
       const trendResults: Record<string, unknown> = {};
 
       if (sleepAlertUsers.length > 0) {
-        trendResults.sleep = await sendPush(
-          sleepAlertUsers,
-          "🌙 Alerta de Sono",
-          "Você dormiu menos de 6h nas últimas 3 noites. Tente um chá de camomila antes de dormir e evite telas 1h antes de deitar.",
-          "/"
-        );
+        const sleepTitle = "🌙 Alerta de Sono";
+        const sleepBody = "Você dormiu menos de 6h nas últimas 3 noites. Tente um chá de camomila antes de dormir e evite telas 1h antes de deitar.";
+        trendResults.sleep = await sendPushAndLog(sleepAlertUsers, "sleep_low", sleepTitle, sleepBody, "/");
       }
 
       if (flashAlertUsers.length > 0) {
