@@ -922,6 +922,32 @@
     "weight_min": "Mínimo",
     "weight_avg": "Média",
     "weight_max": "Máximo",
-    "weight_need_more_data": "Registre seu peso no Diário para ver o gráfico"
+    "weight_need_more_data": "Registre seu peso no Diário para ver o gráfico",
+
+    "insights_title": "Insights de Ondas de Calor",
+    "insights_subtitle": "Correlações e padrões identificados",
+    "insights_triggers": "Distribuição por gatilho",
+    "insights_time": "Horário mais frequente",
+    "insights_see_more": "Ver mais insights",
+    "insight_top_trigger": "{{trigger}} é seu principal gatilho ({{percent}}% dos episódios)",
+    "insight_intense_trigger": "{{trigger}} causa episódios mais intensos (média {{intensity}}/5)",
+    "insight_trigger_increasing": "Episódios com {{trigger}} estão aumentando nas últimas semanas",
+    "insight_trigger_decreasing": "Episódios com {{trigger}} diminuíram — bom progresso!",
+    "insight_time_pattern": "{{percent}}% das ondas ocorrem no período da {{period}}",
+    "insight_frequency_up": "Frequência de ondas de calor aumentou {{percent}}% nas últimas 2 semanas",
+    "insight_frequency_down": "Frequência de ondas de calor diminuiu {{percent}}% — ótima evolução!",
+    "insight_intensity_up": "A intensidade média das ondas está aumentando. Considere conversar com seu médico.",
+    "insight_intensity_down": "A intensidade média está diminuindo — seus esforços estão funcionando!",
+    "time_morning": "manhã",
+    "time_afternoon": "tarde",
+    "time_evening": "noite",
+    "time_night": "madrugada",
+
+    "report_title": "Relatório Mensal",
+    "report_subtitle": "PDF completo para seu médico",
+    "report_description": "Gere um relatório PDF profissional com gráficos de sintomas, peso, sono, ondas de calor e exercícios dos últimos 30 dias.",
+    "report_generate": "Gerar Relatório PDF",
+    "report_downloaded": "Relatório baixado!",
+    "report_shared": "Relatório compartilhado!"
   }
 }

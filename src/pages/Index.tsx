@@ -46,6 +46,8 @@ import HotFlashCounter from '@/components/home/HotFlashCounter';
 import MenopauseExamsCard from '@/components/home/MenopauseExamsCard';
 import HRTTracker from '@/components/home/HRTTracker';
 import MenopauseWeightChart from '@/components/home/MenopauseWeightChart';
+import HotFlashInsights from '@/components/home/HotFlashInsights';
+import MenopauseReportCard from '@/components/home/MenopauseReportCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
@@ -168,9 +170,11 @@ const Index: React.FC = () => {
         {/* === MENOPAUSE MODE === */}
         {isToday && isMenopause && <MenopauseWellnessHub age={age} />}
         {isToday && isMenopause && <HotFlashCounter />}
+        {isToday && isMenopause && <HotFlashInsights />}
         {isToday && isMenopause && <HRTTracker />}
         {isToday && isMenopause && <MenopauseDiaryCard />}
         {isToday && isMenopause && <MenopauseExamsCard />}
+        {isToday && isMenopause && <MenopauseReportCard />}
         {isToday && isMenopause && (
           <div className="mx-4 space-y-4">
             <MenopauseWeightChart />

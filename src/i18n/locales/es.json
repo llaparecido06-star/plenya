@@ -922,6 +922,32 @@
     "weight_min": "Mínimo",
     "weight_avg": "Promedio",
     "weight_max": "Máximo",
-    "weight_need_more_data": "Registra tu peso en el Diario para ver el gráfico"
+    "weight_need_more_data": "Registra tu peso en el Diario para ver el gráfico",
+
+    "insights_title": "Insights de Sofocos",
+    "insights_subtitle": "Correlaciones y patrones",
+    "insights_triggers": "Distribución por desencadenante",
+    "insights_time": "Horario más frecuente",
+    "insights_see_more": "Ver más insights",
+    "insight_top_trigger": "{{trigger}} es tu principal desencadenante ({{percent}}% de episodios)",
+    "insight_intense_trigger": "{{trigger}} causa episodios más intensos (promedio {{intensity}}/5)",
+    "insight_trigger_increasing": "Episodios con {{trigger}} están aumentando",
+    "insight_trigger_decreasing": "Episodios con {{trigger}} disminuyeron — ¡buen progreso!",
+    "insight_time_pattern": "{{percent}}% de sofocos ocurren en la {{period}}",
+    "insight_frequency_up": "Frecuencia de sofocos aumentó {{percent}}% en las últimas 2 semanas",
+    "insight_frequency_down": "Frecuencia de sofocos disminuyó {{percent}}% — ¡gran evolución!",
+    "insight_intensity_up": "La intensidad promedio está aumentando. Considera hablar con tu médico.",
+    "insight_intensity_down": "La intensidad promedio está disminuyendo — ¡tus esfuerzos funcionan!",
+    "time_morning": "mañana",
+    "time_afternoon": "tarde",
+    "time_evening": "noche",
+    "time_night": "madrugada",
+
+    "report_title": "Informe Mensual",
+    "report_subtitle": "PDF completo para tu médico",
+    "report_description": "Genera un informe PDF profesional con gráficos de síntomas, peso, sueño, sofocos y ejercicios de los últimos 30 días.",
+    "report_generate": "Generar Informe PDF",
+    "report_downloaded": "¡Informe descargado!",
+    "report_shared": "¡Informe compartido!"
   }
 }

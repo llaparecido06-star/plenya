@@ -162,28 +162,56 @@ serve(async (req) => {
       results.cycle_tips = phaseResults;
     }
 
-    // ─── 4. PILL REMINDERS ──────────────────────────
-    if (type === "pill" || type === "all") {
-      // Get pill users who haven't logged today
+    // ─── 5. HRT REMINDERS (Menopause) ────────────────
+    if (type === "hrt" || type === "all") {
       const todayStr = new Date().toISOString().split("T")[0];
 
-      const pillUsers: { user_id: string }[] = await dbFetch(
-        `profiles?contraceptive_type=eq.Pílula&select=user_id`
+      const hrtUsers: {
+        user_id: string;
+        hrt_type: string;
+        hrt_frequency_days: number;
+        hrt_last_taken: string | null;
+      }[] = await dbFetch(
+        "profiles?life_phase=eq.menopause&hrt_type=not.is.null&hrt_frequency_days=not.is.null&select=user_id,hrt_type,hrt_frequency_days,hrt_last_taken"
       );
 
-      const todayPillLogs: { user_id: string }[] = await dbFetch(
-        `pill_logs?log_date=eq.${todayStr}&select=user_id`
+      const hrtNeedReminder: string[] = [];
+      for (const u of hrtUsers) {
+        if (!u.hrt_last_taken) {
+          hrtNeedReminder.push(u.user_id);
+          continue;
+        }
+        const lastTaken = new Date(u.hrt_last_taken);
+        const nextDue = new Date(lastTaken);
+        nextDue.setDate(nextDue.getDate() + u.hrt_frequency_days);
+        const today = new Date(todayStr);
+        if (nextDue <= today) {
+          hrtNeedReminder.push(u.user_id);
+        }
+      }
+
+      results.hrt = await sendPush(
+        hrtNeedReminder,
+        "💊 Lembrete de Terapia Hormonal",
+        "Está na hora da sua dose de TRH. Não esqueça de registrar!",
+        "/"
+      );
+    }
+
+    // ─── 6. MENOPAUSE EXAMS OVERDUE ─────────────────
+    if (type === "exams" || type === "all") {
+      const todayStr = new Date().toISOString().split("T")[0];
+
+      const overdueExams: { user_id: string }[] = await dbFetch(
+        `menopause_exams?is_completed=eq.false&next_due_at=lt.${todayStr}&select=user_id`
       );
 
-      const loggedSet = new Set(todayPillLogs.map((r) => r.user_id));
-      const needReminder = pillUsers
-        .filter((r) => !loggedSet.has(r.user_id))
-        .map((r) => r.user_id);
+      const uniqueExamUsers = [...new Set(overdueExams.map((r) => r.user_id))];
 
-      results.pill = await sendPush(
-        needReminder,
-        "💊 Lembrete de pílula",
-        "Você ainda não registrou sua pílula hoje. Não esqueça!",
+      results.exams = await sendPush(
+        uniqueExamUsers,
+        "🩺 Exames pendentes",
+        "Você tem exames de saúde vencidos. Agende uma consulta para ficar em dia!",
         "/"
       );
     }
