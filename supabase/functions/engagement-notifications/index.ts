@@ -278,7 +278,7 @@ serve(async (req) => {
 
         if (prevFlashes.length > 0) {
           const increase = ((recentFlashes.length - prevFlashes.length) / prevFlashes.length) * 100;
-          if (increase >= 50) {
+          if (increase >= flashPercent) {
             alerts.push("flash_spike");
           }
         }
