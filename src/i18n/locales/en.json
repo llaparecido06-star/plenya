@@ -357,7 +357,27 @@
     "updated_desc": "The app has been adapted to your new phase.",
     "error": "Error updating phase",
     "confirm_title": "Confirm phase change",
-    "confirm_desc": "This will change all app content (workouts, nutrition, mind and home) to adapt to the new phase. Do you want to continue?"
+    "confirm_desc": "This will change all app content (workouts, nutrition, mind and home) to adapt to the new phase. Do you want to continue?",
+    "setup_title_menstruating": "Cycle Setup",
+    "setup_title_pregnant": "Pregnancy Setup",
+    "setup_title_postpartum": "Postpartum Setup",
+    "setup_title_menopause": "Menopause Setup",
+    "setup_cycle_length": "Cycle length (days)",
+    "setup_period_duration": "Period duration (days)",
+    "setup_last_period": "Last period date",
+    "setup_trying_conceive": "I'm trying to conceive",
+    "setup_dum": "Last menstrual period date (LMP)",
+    "setup_dum_hint_pregnant": "Used to calculate gestational weeks",
+    "setup_dum_hint_postpartum": "Used to estimate birth date and postpartum weeks",
+    "setup_hrt": "I'm on HRT (Hormone Replacement Therapy)",
+    "setup_hrt_type": "HRT type",
+    "setup_symptoms_tracking": "I want to track menopause symptoms",
+    "setup_breastfeeding": "I'm breastfeeding",
+    "setup_step_info": "Fill in the details for your new phase"
+  },
+  "life_phase_badge": {
+    "week": "Week {{weeks}}",
+    "age": "{{age}} yo"
   },
   "goals": {
     "lose_weight": "Lose Weight",
