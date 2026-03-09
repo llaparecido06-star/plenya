@@ -226,6 +226,10 @@ const Perfil: React.FC = () => {
         >
           <MenuItem icon={Crown} label={t('profile.view_plans')} sublabel={t('profile.view_plans_sub')} iconClassName="bg-amber-100 text-amber-600" onClick={() => navigate('/planos')} />
 
+          <MenuItem icon={Sparkles} label={t('profile.life_phase')} sublabel={lifePhase ? lifePhaseLabel[lifePhase] || '' : ''} iconClassName="bg-pink-100 text-pink-600">
+            <LifePhaseSelector />
+          </MenuItem>
+
           <MenuItem icon={Globe} label={t('profile.language')} sublabel={currentLang ? `${currentLang.flag} ${currentLang.label}` : ''} iconClassName="bg-sky-100 text-sky-600">
             <div className="flex flex-col gap-2">
               {languages.map((lang) => (
