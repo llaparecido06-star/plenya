@@ -105,12 +105,12 @@ const LifePhaseTransitionCard: React.FC = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>{t('transition.confirm_postpartum_title', 'Confirmar transição')}</AlertDialogTitle>
               <AlertDialogDescription>
-                {t('transition.confirm_postpartum_desc', 'Isso vai desativar o modo gestante e ativar o acompanhamento de ciclo novamente. Os dados da gestação serão mantidos no histórico.')}
+                {t('transition.confirm_postpartum_desc', 'Isso vai ativar o modo pós-parto com acompanhamento de recuperação e amamentação. Os dados da gestação serão mantidos.')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={() => handleTransition('menstruating')} disabled={loading}>
+              <AlertDialogAction onClick={() => handleTransition('postpartum')} disabled={loading}>
                 {t('actions.confirm')}
               </AlertDialogAction>
             </AlertDialogFooter>
