@@ -76,6 +76,9 @@ const ChatInterface: React.FC = () => {
       recent_symptoms: todayLog?.symptoms || null,
       recent_mood: todayLog?.mood || null,
       recent_energy: todayLog?.energy || null,
+      recent_stress: todayLog?.stress || null,
+      streak_days: streak,
+      streak_status: getStreakStatus(),
     });
 
     setIsTyping(false);
