@@ -23,7 +23,7 @@ const ChatInterface: React.FC = () => {
   const { lifePhase, pregnancyWeeks, postpartumWeeks } = useLifePhase();
   const { symptoms: pregnancySymptoms } = usePregnancyDiarySymptoms();
   const { goal, diet_type } = useProfile();
-  const { todayLog } = useDailyLog();
+  const { data: todayLog } = useDailyLog();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
