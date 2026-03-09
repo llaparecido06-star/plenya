@@ -128,7 +128,9 @@ const Index: React.FC = () => {
                 ? t('home.subtitle_pregnant')
                 : isMenopause
                   ? t('home.subtitle_menopause')
-                  : t('home.subtitle_menstruating')
+                  : isPostpartum
+                    ? t('home.subtitle_postpartum', 'Cuidando de você e do bebê')
+                    : t('home.subtitle_menstruating')
               : t('home.subtitle_history')}
           </p>
         </motion.div>
