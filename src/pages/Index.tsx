@@ -39,6 +39,8 @@ import WeeklyPregnancyInsight from '@/components/home/WeeklyPregnancyInsight';
 import ContractionTimerCard from '@/components/home/ContractionTimerCard';
 import HospitalBagCard from '@/components/home/HospitalBagCard';
 import MenopauseSleepTracker from '@/components/home/MenopauseSleepTracker';
+import WearableSleepImport from '@/components/home/WearableSleepImport';
+import MenopauseWeeklySummary from '@/components/home/MenopauseWeeklySummary';
 import MenopauseExerciseCard from '@/components/home/MenopauseExerciseCard';
 import MenopauseSymptomChart from '@/components/home/MenopauseSymptomChart';
 import MenopauseDiaryCard from '@/components/home/MenopauseDiaryCard';
