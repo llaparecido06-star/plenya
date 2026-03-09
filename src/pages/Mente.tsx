@@ -38,7 +38,7 @@ const Mente: React.FC = () => {
       </div>
 
       {/* Life-phase specific meditation/breathing tips */}
-      {(isPregnant || isMenopause) && (
+      {(isPregnant || isMenopause || isPostpartum) && (
         <div className="px-4 mb-4">
           <LifePhaseBreathingCard />
         </div>
