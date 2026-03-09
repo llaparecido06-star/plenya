@@ -52,7 +52,7 @@ const LatePeriodCard: React.FC = () => {
       transition={{ delay: 0.1 }}
     >
       <div className="flex items-center gap-4">
-        <div className="p-3 rounded-xl bg-red-500/20">
+        <div className="p-3 rounded-xl bg-destructive/15">
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
