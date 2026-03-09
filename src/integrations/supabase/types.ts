@@ -116,6 +116,39 @@ export type Database = {
         }
         Relationships: []
       }
+      hot_flash_logs: {
+        Row: {
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          intensity: number
+          logged_at: string
+          notes: string | null
+          trigger: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          intensity?: number
+          logged_at?: string
+          notes?: string | null
+          trigger?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          intensity?: number
+          logged_at?: string
+          notes?: string | null
+          trigger?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       intimacy_logs: {
         Row: {
           activity_type: string | null
@@ -248,6 +281,51 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight?: number | null
+        }
+        Relationships: []
+      }
+      menopause_exams: {
+        Row: {
+          created_at: string
+          description: string | null
+          exam_name: string
+          exam_type: string
+          id: string
+          is_completed: boolean
+          last_done_at: string | null
+          next_due_at: string | null
+          notes: string | null
+          recommended_frequency: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          exam_name: string
+          exam_type: string
+          id?: string
+          is_completed?: boolean
+          last_done_at?: string | null
+          next_due_at?: string | null
+          notes?: string | null
+          recommended_frequency?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          exam_name?: string
+          exam_type?: string
+          id?: string
+          is_completed?: boolean
+          last_done_at?: string | null
+          next_due_at?: string | null
+          notes?: string | null
+          recommended_frequency?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -448,6 +526,10 @@ export type Database = {
           fitness_level: string | null
           full_name: string | null
           goal: string | null
+          hrt_frequency_days: number | null
+          hrt_last_taken: string | null
+          hrt_start_date: string | null
+          hrt_type: string | null
           id: string
           is_trying_to_conceive: boolean | null
           last_period_start: string | null
@@ -484,6 +566,10 @@ export type Database = {
           fitness_level?: string | null
           full_name?: string | null
           goal?: string | null
+          hrt_frequency_days?: number | null
+          hrt_last_taken?: string | null
+          hrt_start_date?: string | null
+          hrt_type?: string | null
           id?: string
           is_trying_to_conceive?: boolean | null
           last_period_start?: string | null
@@ -520,6 +606,10 @@ export type Database = {
           fitness_level?: string | null
           full_name?: string | null
           goal?: string | null
+          hrt_frequency_days?: number | null
+          hrt_last_taken?: string | null
+          hrt_start_date?: string | null
+          hrt_type?: string | null
           id?: string
           is_trying_to_conceive?: boolean | null
           last_period_start?: string | null
