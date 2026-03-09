@@ -70,7 +70,56 @@ const AdaptiveHomeCard: React.FC = () => {
   if (homeStatus.type === 'injection' || homeStatus.type === 'ring_patch') {
     const daysLeft = homeStatus.daysUntilNext ?? 0;
     const isUrgent = homeStatus.isUrgent;
-    return;
+    const label = homeStatus.label || 'Próxima dose';
+    const nextDateStr = homeStatus.nextDate ? format(homeStatus.nextDate, "dd 'de' MMMM", { locale: ptBR }) : null;
+
+    return (
+      <motion.div className="mx-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div className={cn(
+          "glass-card p-5 transition-all duration-300",
+          isUrgent && "ring-2 ring-destructive bg-destructive/5"
+        )}>
+          <div className="flex items-center gap-3 mb-3">
+            <div className={cn(
+              "w-10 h-10 rounded-full flex items-center justify-center",
+              isUrgent ? "bg-destructive/10" : "bg-primary/10"
+            )}>
+              {isUrgent ? (
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+              ) : (
+                <Calendar className="w-5 h-5 text-primary" />
+              )}
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">{label}</h3>
+              {homeStatus.brand && (
+                <p className="text-sm text-muted-foreground">{homeStatus.brand}</p>
+              )}
+            </div>
+          </div>
+
+          <div className={cn(
+            "flex items-center justify-center py-4 rounded-xl",
+            isUrgent ? "bg-destructive/10" : "bg-primary/5"
+          )}>
+            <div className="text-center">
+              <p className={cn(
+                "text-3xl font-bold",
+                isUrgent ? "text-destructive" : "text-primary"
+              )}>
+                {daysLeft === 0 ? 'Hoje!' : `${daysLeft} dias`}
+              </p>
+              {nextDateStr && (
+                <p className="text-sm text-muted-foreground mt-1">{nextDateStr}</p>
+              )}
+              {isUrgent && daysLeft > 0 && (
+                <p className="text-xs text-destructive mt-1 font-medium">⚠️ Atenção: faltam poucos dias!</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
   }
 
   // LONG DURATION (DIU/Implant) - Already handled by DeviceExpirationCard
