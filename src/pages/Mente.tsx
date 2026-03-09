@@ -16,6 +16,7 @@ const Mente: React.FC = () => {
   const { lifePhase } = useLifePhase();
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
+  const isPostpartum = lifePhase === 'postpartum';
 
   return (
     <PageLayout>
