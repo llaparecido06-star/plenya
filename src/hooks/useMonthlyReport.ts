@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCycle } from '@/contexts/CycleContext';
@@ -13,12 +13,34 @@ interface MonthlyReport {
   wellnessScore: number;
 }
 
+interface SavedReport {
+  id: string;
+  report_date: string;
+  cycle_start_date: string;
+  cycle_end_date: string;
+  wellness_score: number;
+  summary: string;
+  patterns: string[];
+  correlations: string[];
+  recommendations: string[];
+  next_cycle_tip: string | null;
+  avg_mood: number | null;
+  avg_energy: number | null;
+  avg_stress: number | null;
+  top_symptoms: string[];
+  total_logs: number;
+  period_days: number;
+  created_at: string;
+}
+
 export const useMonthlyReport = () => {
   const { user } = useAuth();
   const { cycleLength, lastPeriodStart, cycleDay } = useCycle();
   const [report, setReport] = useState<MonthlyReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const generateReport = useCallback(async () => {
     if (!user || !lastPeriodStart) return;
