@@ -251,6 +251,9 @@ const Index: React.FC = () => {
             <div className="px-4">
               <WeeklySummaryCard />
             </div>
+
+            {/* Cycle Diary with AI */}
+            <CycleDiaryCard />
           </>
         )}
 
