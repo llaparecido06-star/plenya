@@ -16,15 +16,15 @@ const CycleWheel: React.FC = () => {
 
   // Phase colors matching our design system
   const phaseColors: Record<CyclePhase, string> = {
-    menstrual: '#E07A5F',
-    folicular: '#81B29A',
-    ovulatoria: '#F4A261',
-    lutea: '#9B8BB0',
+    menstrual: 'hsl(var(--terracotta))',
+    folicular: 'hsl(var(--leaf-green))',
+    ovulatoria: 'hsl(var(--burnt-pink))',
+    lutea: 'hsl(var(--phase-glow))',
   };
 
   // Neutral color for awaiting state
-  const neutralColor = '#9CA3AF';
-  const lateColor = '#EF4444';
+  const neutralColor = 'hsl(var(--muted-foreground) / 0.4)';
+  const lateColor = 'hsl(var(--destructive))';
 
   // Phase angles (approximate based on typical cycle)
   const phases = [
