@@ -19,6 +19,9 @@ interface ChatPayload {
   recent_symptoms?: string[] | null;
   recent_mood?: number | null;
   recent_energy?: number | null;
+  recent_stress?: number | null;
+  streak_days?: number | null;
+  streak_status?: 'active' | 'absent_48h' | 'streak_at_risk' | null;
 }
 
 interface TrainerPayload {

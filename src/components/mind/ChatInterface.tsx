@@ -10,6 +10,7 @@ import { useAIBrain } from '@/hooks/useAIBrain';
 import { usePregnancyDiarySymptoms } from '@/hooks/usePregnancyDiarySymptoms';
 import { useProfile } from '@/hooks/useProfile';
 import { useDailyLog } from '@/hooks/useDailyLog';
+import { useLoginStreak } from '@/hooks/useLoginStreak';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 const ChatInterface: React.FC = () => {
@@ -24,6 +25,14 @@ const ChatInterface: React.FC = () => {
   const { symptoms: pregnancySymptoms } = usePregnancyDiarySymptoms();
   const { goal, diet_type } = useProfile();
   const { data: todayLog } = useDailyLog();
+  const { streak } = useLoginStreak();
+
+  // Determine engagement status
+  const getStreakStatus = (): 'active' | 'absent_48h' | 'streak_at_risk' | null => {
+    if (streak === 0) return 'absent_48h';
+    if (streak === 1) return 'streak_at_risk';
+    return 'active';
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -67,6 +76,9 @@ const ChatInterface: React.FC = () => {
       recent_symptoms: todayLog?.symptoms || null,
       recent_mood: todayLog?.mood || null,
       recent_energy: todayLog?.energy || null,
+      recent_stress: todayLog?.stress || null,
+      streak_days: streak,
+      streak_status: getStreakStatus(),
     });
 
     setIsTyping(false);

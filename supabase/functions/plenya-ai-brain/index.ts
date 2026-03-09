@@ -20,6 +20,9 @@ interface ChatPayload {
   recent_symptoms?: string[] | null;
   recent_mood?: number | null;
   recent_energy?: number | null;
+  recent_stress?: number | null;
+  streak_days?: number | null;
+  streak_status?: 'active' | 'absent_48h' | 'streak_at_risk' | null;
 }
 
 interface TrainerPayload {
@@ -72,34 +75,86 @@ type RequestPayload = {
   language?: string;
 };
 
-function getCrossCheckInstruction(lifePhase: string | null, phaseName?: string, goal?: string | null, dietType?: string | null, recentSymptoms?: string[] | null, recentMood?: number | null, recentEnergy?: number | null): string {
+function getCrossCheckInstruction(lifePhase: string | null, phaseName?: string, goal?: string | null, dietType?: string | null, recentSymptoms?: string[] | null, recentMood?: number | null, recentEnergy?: number | null, recentStress?: number | null): string {
   const varA = lifePhase === 'pregnant' ? 'Gestante' : lifePhase === 'postpartum' ? 'Pós-parto' : lifePhase === 'menopause' ? 'Menopausa' : phaseName ? `Fase ${phaseName}` : 'Menstruante';
-  const varB = recentSymptoms && recentSymptoms.length > 0 ? recentSymptoms.join(', ') : recentMood ? `humor ${recentMood}/5` : recentEnergy ? `energia ${recentEnergy}/5` : null;
+  
+  const symptomParts: string[] = [];
+  if (recentSymptoms && recentSymptoms.length > 0) symptomParts.push(recentSymptoms.join(', '));
+  if (recentMood) symptomParts.push(`humor ${recentMood}/5`);
+  if (recentEnergy) symptomParts.push(`energia ${recentEnergy}/5`);
+  if (recentStress) symptomParts.push(`estresse ${recentStress}/5`);
+  const varB = symptomParts.length > 0 ? symptomParts.join('; ') : null;
+  
   const goalLabel = goal || null;
   const dietLabel = dietType ? ({ vegetarian: 'Vegetariana', vegan: 'Vegana', low_carb: 'Low Carb', lactose_free: 'Sem Lactose', omnivore: 'Onívora' } as Record<string, string>)[dietType] || dietType : null;
   const varC = [goalLabel, dietLabel].filter(Boolean).join(', ') || null;
 
+  // Detect severe symptoms (stress >= 4 or mood <= 2 or energy <= 2)
+  const hasSevereSymptom = (recentStress && recentStress >= 4) || (recentMood && recentMood <= 2) || (recentEnergy && recentEnergy <= 2);
+
   return `
 
-MOTOR DE CORRELAÇÃO CRUZADA (OBRIGATÓRIO):
-Antes de gerar qualquer resposta, execute silenciosamente esta lógica:
+## PROTOCOLO 1: MOTOR DE CORRELAÇÃO CRUZADA (OBRIGATÓRIO)
+
+Antes de gerar qualquer resposta, execute silenciosamente esta triangulação:
 - Variável A (Fase/Momento): ${varA}
-- Variável B (Sintoma/Registro Recente): ${varB || 'Não informado'}
+- Variável B (Sintoma/Registro Recente): ${varB || 'Nenhum registro hoje'}
 - Variável C (Objetivo/Contexto): ${varC || 'Não informado'}
+
+REGRAS DE GERAÇÃO:
+1. VALIDAÇÃO BIOLÓGICA: Explique *por que* a dica funciona naquela fase específica.
+2. CONTEXTO DE SINTOMA: ${hasSevereSymptom ? '⚠️ ATIVADO - Sintoma severo detectado. IGNORE metas estéticas (perda de peso) e foque 100% em alívio imediato e acolhimento.' : 'Se houver dor/desconforto severo, ignore metas estéticas e foque em alívio.'}
+3. AÇÃO IMEDIATA: Termine SEMPRE com uma micro-ação executável em menos de 2 minutos.
 
 REGRA DE OURO: Sua sugestão SÓ É VÁLIDA se conectar pelo menos 2 das 3 variáveis (A+B, A+C, B+C, ou A+B+C).
 - ERRADO: "Beba mais água." (genérico, sem conexão)
-- CERTO: "Como você está na ${varA} (A)${varB ? ` e relatou ${varB} (B)` : ''}${varC ? `, considerando seu objetivo de ${varC} (C)` : ''}, sugiro..."
-- Nunca dê dicas genéricas que qualquer pessoa poderia receber. Personalize SEMPRE.`;
+- CERTO: "Como você está na ${varA} (A)${varB ? ` e registrou ${varB} (B)` : ''}${varC ? `, considerando ${varC} (C)` : ''}, sugiro..."
+- Nunca dê dicas genéricas. Personalize SEMPRE.`;
 }
 
-function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null, pregnancyTrimester?: number | null, pregnancySymptoms?: string[] | null, postpartumWeeks?: number | null, goal?: string | null, dietType?: string | null, recentSymptoms?: string[] | null, phaseName?: string, recentMood?: number | null, recentEnergy?: number | null): string {
-  let basePrompt = `Você é a Plenya, uma assistente empática de saúde e bem-estar feminino. 
-Responda de forma curta (máximo 3 frases), acolhedora e prática. 
-Use emojis ocasionalmente para tornar a conversa mais leve.
-Nunca faça diagnósticos médicos - sugira consultar profissionais quando apropriado.`;
+function getGamificationInstruction(streakDays?: number | null, streakStatus?: string | null, recentMood?: number | null, recentEnergy?: number | null, recentStress?: number | null): string {
+  const hasSevereSymptom = (recentStress && recentStress >= 4) || (recentMood && recentMood <= 2) || (recentEnergy && recentEnergy <= 2);
 
-  const crossCheck = getCrossCheckInstruction(lifePhase, phaseName, goal, dietType, recentSymptoms || pregnancySymptoms, recentMood, recentEnergy);
+  let gamification = `
+
+## PROTOCOLO 2: GAMIFICAÇÃO COMPASSIVA (Symptom Shield)
+
+Gerencie a constância ("dias cultivados") com acolhimento, NUNCA com punição.
+- NUNCA use: "Você perdeu", "Quebrou a sequência", "Ficou para trás"
+- USE: "Ciclo Cultivado", "Consistência Mensal", "Dias de Autocuidado"`;
+
+  if (hasSevereSymptom) {
+    gamification += `
+
+🛡️ ESCUDO DE SINTOMAS ATIVADO: A usuária está com sintomas severos.
+Mensagem: "Detectamos que hoje é um dia difícil. O Plenya ativou o 'Modo de Descanso'. 🛡️ Sua constância está protegida automaticamente. Cuidar de você (mesmo sem treino) conta como progresso."`;
+  }
+
+  if (streakStatus === 'absent_48h') {
+    gamification += `
+
+🌱 RETORNO APÓS AUSÊNCIA: A usuária voltou após 48h+ fora.
+Mensagem de acolhimento: "Que bom te ver de volta! 🌱 Enquanto você cuidava da vida lá fora, deixamos seus dias cultivados congelados esperando por você. O descanso também faz parte do ciclo. Vamos retomar?"
+- NÃO mencione dias perdidos. Use "congelados" ou "pausados".`;
+  }
+
+  if (streakDays && streakDays > 0) {
+    gamification += `\n- A usuária está com ${streakDays} dias cultivados consecutivos. Reconheça esse progresso quando natural na conversa.`;
+  }
+
+  return gamification;
+}
+
+function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null, pregnancyTrimester?: number | null, pregnancySymptoms?: string[] | null, postpartumWeeks?: number | null, goal?: string | null, dietType?: string | null, recentSymptoms?: string[] | null, phaseName?: string, recentMood?: number | null, recentEnergy?: number | null, recentStress?: number | null, streakDays?: number | null, streakStatus?: string | null): string {
+  let basePrompt = `Você é a IA central do ecossistema Plenya. Sua missão é dupla: fornecer orientações de saúde hiper-personalizadas (cruzando dados biológicos) e gerenciar a motivação da usuária com empatia (protegendo sua constância).
+
+Responda de forma curta (máximo 3 parágrafos curtos), acolhedora e prática.
+Use emojis com moderação para manter o tom leve, mas profissional.
+Nunca faça diagnósticos médicos - sugira consultar profissionais quando apropriado.
+Idioma: Português Brasileiro.`;
+
+  const crossCheck = getCrossCheckInstruction(lifePhase, phaseName, goal, dietType, recentSymptoms || pregnancySymptoms, recentMood, recentEnergy, recentStress);
+  const gamification = getGamificationInstruction(streakDays, streakStatus, recentMood, recentEnergy, recentStress);
 
   if (lifePhase === 'pregnant') {
     const trimesterLabel = pregnancyTrimester ? `${pregnancyTrimester}º trimestre` : '';
@@ -120,6 +175,7 @@ Nunca faça diagnósticos médicos - sugira consultar profissionais quando aprop
 
     return `${basePrompt}
 ${crossCheck}
+${gamification}
 
 CONTEXTO IMPORTANTE: A usuária está grávida${contextParts ? ` (${contextParts})` : ''}.
 - NUNCA fale sobre menstruação, ciclo menstrual ou fases do ciclo
@@ -132,19 +188,22 @@ CONTEXTO IMPORTANTE: A usuária está grávida${contextParts ? ` (${contextParts
   if (lifePhase === 'menopause') {
     return `${basePrompt}
 ${crossCheck}
+${gamification}
 
 CONTEXTO IMPORTANTE: A usuária está no climatério/menopausa.
 - NUNCA fale sobre menstruação, ciclo menstrual ou fases do ciclo
 - Foque em alívio de sintomas como ondas de calor, insônia, alterações de humor
 - Sugira fitoestrógenos naturais (soja, linhaça) quando apropriado
 - Recomende técnicas de relaxamento e exercícios de baixo impacto
-- Priorize saúde óssea e cardiovascular nas recomendações`;
+- Priorize saúde óssea e cardiovascular nas recomendações
+- Correlacione fogachos com qualidade do sono quando relevante`;
   }
 
   if (lifePhase === 'postpartum') {
     const weeksContext = postpartumWeeks ? ` (semana ${postpartumWeeks} pós-parto)` : '';
     return `${basePrompt}
 ${crossCheck}
+${gamification}
 
 CONTEXTO IMPORTANTE: A usuária está no pós-parto${weeksContext}.
 - Foque na recuperação física e emocional pós-parto
@@ -158,6 +217,7 @@ CONTEXTO IMPORTANTE: A usuária está no pós-parto${weeksContext}.
 
   return `${basePrompt}
 ${crossCheck}
+${gamification}
 
 A usuária está em fase menstruante normal. Você pode mencionar fases do ciclo quando relevante.`;
 }
@@ -516,7 +576,7 @@ serve(async (req) => {
     switch (mode) {
       case 'chat': {
         const chatPayload = payload as ChatPayload;
-        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks, chatPayload.pregnancy_trimester, chatPayload.pregnancy_symptoms, chatPayload.postpartum_weeks, chatPayload.goal, chatPayload.diet_type, chatPayload.recent_symptoms, chatPayload.phase_name, chatPayload.recent_mood, chatPayload.recent_energy) + langInstruction;
+        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks, chatPayload.pregnancy_trimester, chatPayload.pregnancy_symptoms, chatPayload.postpartum_weeks, chatPayload.goal, chatPayload.diet_type, chatPayload.recent_symptoms, chatPayload.phase_name, chatPayload.recent_mood, chatPayload.recent_energy, chatPayload.recent_stress, chatPayload.streak_days, chatPayload.streak_status) + langInstruction;
         
         // Build messages with history
         const messages: Array<{ role: string; content: string }> = [
