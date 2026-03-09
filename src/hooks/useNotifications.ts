@@ -12,6 +12,9 @@ interface NotificationSettings {
   recipeReminder: boolean;
   recipeReminderTime: string;
   trialExpiration: boolean;
+  pmsAlert: boolean;
+  hydrationAlert: boolean;
+  phaseChangeAlert: boolean;
 }
 
 const NOTIFICATION_SETTINGS_KEY = 'plenya_notification_settings';
