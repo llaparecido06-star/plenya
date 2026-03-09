@@ -134,6 +134,48 @@ export type Database = {
         }
         Relationships: []
       }
+      cycle_diary: {
+        Row: {
+          ai_analysis: string | null
+          content: string
+          created_at: string
+          cycle_day: number | null
+          cycle_phase: string | null
+          entry_date: string
+          id: string
+          sentiment: string | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_analysis?: string | null
+          content: string
+          created_at?: string
+          cycle_day?: number | null
+          cycle_phase?: string | null
+          entry_date?: string
+          id?: string
+          sentiment?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_analysis?: string | null
+          content?: string
+          created_at?: string
+          cycle_day?: number | null
+          cycle_phase?: string | null
+          entry_date?: string
+          id?: string
+          sentiment?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_logs: {
         Row: {
           created_at: string
