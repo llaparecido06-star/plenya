@@ -1121,16 +1121,19 @@
   },
   "monthly_report": {
     "title": "Relatório Mensal IA",
-    "ai_badge": "IA",
-    "description": "Gere um relatório completo do seu ciclo com análise de padrões e recomendações personalizadas pela IA.",
+    "not_generated": "Relatório Ainda Não Gerado",
+    "description": "Gere um relatório completo do seu ciclo com análise de padrões, correlações e recomendações personalizadas.",
     "generate": "Gerar Relatório com IA",
-    "wellness_score": "Score de Bem-Estar",
-    "next_cycle": "Dica para o Próximo Ciclo",
-    "hide": "Ocultar detalhes",
-    "show": "Ver padrões e recomendações",
+    "wellness_score": "Pontuação de Bem-Estar",
     "patterns": "Padrões Identificados",
-    "correlations": "Correlações",
-    "recommendations": "Recomendações",
-    "regenerate": "Gerar novo relatório"
+    "correlations": "Correlações Encontradas",
+    "recommendations": "Recomendações Personalizadas",
+    "next_cycle_tip": "Meta Para o Próximo Ciclo",
+    "current_report": "Relatório Atual",
+    "history": "Histórico",
+    "no_history": "Nenhum relatório anterior ainda",
+    "logs": "registros",
+    "delete_confirm": "Excluir relatório?",
+    "delete_description": "Esta ação não pode ser desfeita. O relatório será excluído permanentemente."
   }
 }

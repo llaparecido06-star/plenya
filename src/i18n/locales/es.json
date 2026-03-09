@@ -1121,16 +1121,19 @@
   },
   "monthly_report": {
     "title": "Informe Mensual IA",
-    "ai_badge": "IA",
-    "description": "Genera un informe completo de tu ciclo con análisis de patrones y recomendaciones personalizadas con IA.",
+    "not_generated": "Informe Aún No Generado",
+    "description": "Genera un informe completo de tu ciclo con análisis de patrones, correlaciones y recomendaciones personalizadas.",
     "generate": "Generar Informe con IA",
     "wellness_score": "Puntuación de Bienestar",
-    "next_cycle": "Consejo para el Próximo Ciclo",
-    "hide": "Ocultar detalles",
-    "show": "Ver patrones y recomendaciones",
     "patterns": "Patrones Identificados",
-    "correlations": "Correlaciones",
-    "recommendations": "Recomendaciones",
-    "regenerate": "Generar nuevo informe"
+    "correlations": "Correlaciones Encontradas",
+    "recommendations": "Recomendaciones Personalizadas",
+    "next_cycle_tip": "Meta Para el Próximo Ciclo",
+    "current_report": "Informe Actual",
+    "history": "Historial",
+    "no_history": "Aún no hay informes anteriores",
+    "logs": "registros",
+    "delete_confirm": "¿Eliminar informe?",
+    "delete_description": "Esta acción no se puede deshacer. El informe será eliminado permanentemente."
   }
 }
