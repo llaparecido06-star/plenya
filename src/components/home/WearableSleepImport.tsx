@@ -1,12 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Watch, Upload, Smartphone, CloudDownload, CheckCircle, AlertCircle } from 'lucide-react';
+import { Watch, Upload, Smartphone, CloudDownload, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useHealthSync } from '@/hooks/useHealthSync';
 
 interface SleepEntry {
   date: string;
@@ -23,6 +24,11 @@ const WearableSleepImport: React.FC = () => {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; errors: number } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { isNative, available, syncing, checkAvailability, syncSleepToDatabase } = useHealthSync();
+
+  useEffect(() => {
+    checkAvailability();
+  }, [checkAvailability]);
 
   const parseCSV = (text: string): SleepEntry[] => {
     const lines = text.trim().split('\n');
@@ -149,6 +155,11 @@ const WearableSleepImport: React.FC = () => {
     { id: 'samsung_health', name: 'Samsung Health', icon: '📱', status: 'coming_soon' as const },
   ];
 
+  const handleNativeSync = async () => {
+    if (!user) return;
+    await syncSleepToDatabase(user.id, 14);
+  };
+
   return (
     <div className="glass-card p-5 bg-gradient-to-br from-cyan-500/5 to-teal-500/10 border-cyan-500/20">
       <div className="flex items-center gap-3 mb-4">
@@ -160,6 +171,20 @@ const WearableSleepImport: React.FC = () => {
           <p className="text-xs text-muted-foreground">{t('menopause.wearable_subtitle')}</p>
         </div>
       </div>
+
+      {/* Native Health Sync Button */}
+      {isNative && available && (
+        <Button
+          variant="default"
+          size="sm"
+          className="w-full mb-3"
+          onClick={handleNativeSync}
+          disabled={syncing}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+          {syncing ? t('actions.loading') : t('menopause.health_sync_now')}
+        </Button>
+      )}
 
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
         <DrawerTrigger asChild>
