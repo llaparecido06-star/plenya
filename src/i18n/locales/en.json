@@ -505,7 +505,12 @@
     "error_google": "Error signing in with Google",
     "error_apple": "Error signing in with Apple",
     "tagline": "Where your best self awakens.",
-    "plenya": "Plenya"
+    "plenya": "Plenya",
+    "accept_terms": "I have read and agree to the",
+    "terms_link": "Terms of Use",
+    "and": "and the",
+    "privacy_link": "Privacy Policy",
+    "must_accept_terms": "You must accept the terms to create your account."
   },
   "plans": {
     "title": "Plenya Plans",

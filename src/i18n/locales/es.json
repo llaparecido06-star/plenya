@@ -505,7 +505,12 @@
     "error_google": "Error al iniciar sesión con Google",
     "error_apple": "Error al iniciar sesión con Apple",
     "tagline": "Donde tu mejor versión despierta.",
-    "plenya": "Plenya"
+    "plenya": "Plenya",
+    "accept_terms": "He leído y acepto los",
+    "terms_link": "Términos de Uso",
+    "and": "y la",
+    "privacy_link": "Política de Privacidad",
+    "must_accept_terms": "Debes aceptar los términos para crear tu cuenta."
   },
   "plans": {
     "title": "Planes Plenya",
