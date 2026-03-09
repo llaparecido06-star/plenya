@@ -3,12 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { parseLocalDate } from '@/lib/dateUtils';
 
-export type LifePhase = 'menstruating' | 'pregnant' | 'menopause';
+export type LifePhase = 'menstruating' | 'pregnant' | 'menopause' | 'postpartum';
 
 interface LifePhaseData {
   lifePhase: LifePhase | null;
   pregnancyStartDate: Date | null;
   pregnancyWeeks: number | null;
+  postpartumWeeks: number | null;
   isTryingToConceive: boolean;
   dateOfBirth: Date | null;
   age: number | null;
