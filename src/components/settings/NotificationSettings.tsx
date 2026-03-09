@@ -107,21 +107,55 @@ const NotificationSettings: React.FC = () => {
     if (permission !== 'granted' || !hasDUM || !isMenstruating) return;
 
     const now = new Date();
-    const periodDate = new Date(now);
-    periodDate.setDate(periodDate.getDate() + (cycleLength - cycleDay));
 
-    if (settings.pmsAlert) schedulePMSAlert(periodDate);
+    const expectedPeriodDate = new Date(now);
+    expectedPeriodDate.setDate(expectedPeriodDate.getDate() + (cycleLength - cycleDay));
 
-    const ovulationDay = Math.round(cycleLength / 2) - 2;
+    if (settings.pmsAlert && !isLate) {
+      schedulePMSAlert(expectedPeriodDate);
+    }
+
+    if (settings.latePeriodAlert && !isLate) {
+      scheduleLatePeriodAlert(expectedPeriodDate);
+    }
+
+    const ovulationDay = Math.round(cycleLength / 2);
+    const ovulationDate = new Date(now);
+    ovulationDate.setDate(ovulationDate.getDate() + (ovulationDay - cycleDay));
+    if (settings.ovulationAlert) {
+      scheduleOvulationAlert(ovulationDate);
+    }
+
     const fertileStart = new Date(now);
-    fertileStart.setDate(fertileStart.getDate() + (ovulationDay - cycleDay));
-    if (settings.fertileWindow) scheduleFertileWindowAlert(fertileStart);
+    fertileStart.setDate(fertileStart.getDate() + ((ovulationDay - 2) - cycleDay));
+    if (settings.fertileWindow) {
+      scheduleFertileWindowAlert(fertileStart);
+    }
 
     const lutealStart = new Date(now);
     const lutealDay = Math.round(cycleLength / 2) + 2;
     lutealStart.setDate(lutealStart.getDate() + (lutealDay - cycleDay));
-    if (settings.hydrationAlert) scheduleHydrationAlert(lutealStart);
-  }, [permission, hasDUM, isMenstruating, cycleLength, cycleDay, settings.pmsAlert, settings.fertileWindow, settings.hydrationAlert, schedulePMSAlert, scheduleFertileWindowAlert, scheduleHydrationAlert]);
+    if (settings.hydrationAlert) {
+      scheduleHydrationAlert(lutealStart);
+    }
+  }, [
+    permission,
+    hasDUM,
+    isMenstruating,
+    isLate,
+    cycleLength,
+    cycleDay,
+    settings.pmsAlert,
+    settings.fertileWindow,
+    settings.hydrationAlert,
+    settings.ovulationAlert,
+    settings.latePeriodAlert,
+    schedulePMSAlert,
+    scheduleFertileWindowAlert,
+    scheduleHydrationAlert,
+    scheduleOvulationAlert,
+    scheduleLatePeriodAlert,
+  ]);
 
   const showPillOption = contraceptiveType === 'Pílula';
   const showInjectionOption = contraceptiveType === 'Injeção';
