@@ -149,6 +149,19 @@ const menopauseSuggestion = {
   },
 };
 
+const postpartumSuggestion = {
+  titleKey: 'nutrition.postpartum_title',
+  descKey: 'nutrition.postpartum_desc',
+  nutrientKeys: ['nutrition.iron', 'nutrition.calcium', 'nutrition.omega3', 'nutrition.vitamin_b12'],
+  foods: {
+    default: ['Salmão', 'Ovos', 'Aveia', 'Espinafre', 'Batata doce'],
+    vegetarian: ['Ovos', 'Aveia', 'Espinafre', 'Lentilha', 'Castanhas'],
+    vegan: ['Aveia', 'Espinafre', 'Lentilha', 'Castanhas', 'Sementes de chia'],
+    low_carb: ['Salmão', 'Ovos', 'Abacate', 'Espinafre', 'Castanhas'],
+    lactose_free: ['Salmão', 'Ovos', 'Aveia', 'Espinafre', 'Batata doce'],
+  },
+};
+
 const HormonalSuggestion: React.FC = () => {
   const { t } = useTranslation();
   const { currentPhase, getPhaseInfo } = useCycle();
@@ -158,6 +171,7 @@ const HormonalSuggestion: React.FC = () => {
 
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
+  const isPostpartum = lifePhase === 'postpartum';
   const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
 
   const suggestion = useMemo((): PhaseSuggestion => {
@@ -169,6 +183,15 @@ const HormonalSuggestion: React.FC = () => {
         description: t(menopauseSuggestion.descKey),
         nutrients: menopauseSuggestion.nutrientKeys.map(k => t(k)),
         foods: menopauseSuggestion.foods[dietKey] || menopauseSuggestion.foods.default,
+      };
+    }
+
+    if (isPostpartum) {
+      return {
+        title: t(postpartumSuggestion.titleKey, 'Nutrição Pós-Parto'),
+        description: t(postpartumSuggestion.descKey, 'Alimentos para recuperação e produção de leite. Priorize ferro, cálcio e ômega-3.'),
+        nutrients: postpartumSuggestion.nutrientKeys.map(k => t(k)),
+        foods: postpartumSuggestion.foods[dietKey] || postpartumSuggestion.foods.default,
       };
     }
 
@@ -189,12 +212,14 @@ const HormonalSuggestion: React.FC = () => {
       nutrients: base.nutrientKeys.map(k => t(k)),
       foods: base.foods[dietKey] || base.foods.default,
     };
-  }, [currentPhase, diet_type, isPregnant, isMenopause, trimester, t]);
+  }, [currentPhase, diet_type, isPregnant, isMenopause, isPostpartum, trimester, t]);
 
   const contextLabel = isPregnant
     ? `${t('pregnancy.trimester_' + trimester)} — ${t('pregnancy.week')} ${pregnancyWeeks || '?'}`
     : isMenopause
     ? t('menopause.title')
+    : isPostpartum
+    ? t('postpartum.title', 'Pós-Parto')
     : phaseInfo.name;
 
   return (
@@ -212,7 +237,7 @@ const HormonalSuggestion: React.FC = () => {
           </div>
           <div>
             <h3 className="font-semibold text-foreground">
-              {isMenopause ? t('nutrition.menopause_suggestion') : isPregnant ? t('nutrition.pregnancy_suggestion') : t('nutrition.hormonal_suggestion')}
+              {isMenopause ? t('nutrition.menopause_suggestion') : isPregnant ? t('nutrition.pregnancy_suggestion') : isPostpartum ? t('nutrition.postpartum_suggestion', 'Sugestão Pós-Parto') : t('nutrition.hormonal_suggestion')}
             </h3>
             <p className="text-xs text-muted-foreground">{contextLabel}</p>
           </div>

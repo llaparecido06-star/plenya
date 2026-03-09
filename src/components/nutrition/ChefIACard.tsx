@@ -58,7 +58,7 @@ const ChefIACard: React.FC = () => {
     return dietType ? labels[dietType] || null : null;
   };
 
-  const recipePhase = lifePhase === 'pregnant' ? 'folicular' : currentPhase;
+  const recipePhase = lifePhase === 'pregnant' ? 'gestante' : lifePhase === 'postpartum' ? 'pos_parto' : lifePhase === 'menopause' ? 'menopausa' : currentPhase;
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -202,6 +202,10 @@ const ChefIACard: React.FC = () => {
                 ? `${displayedHistory.length} receita${displayedHistory.length !== 1 ? 's' : ''} salva${displayedHistory.length !== 1 ? 's' : ''}`
                 : lifePhase === 'pregnant'
                 ? `Receitas seguras para gestantes (semana ${pregnancyWeeks || '?'})!`
+                : lifePhase === 'postpartum'
+                ? 'Receitas nutritivas para o pós-parto e amamentação!'
+                : lifePhase === 'menopause'
+                ? 'Receitas ricas em fitoestrógenos e cálcio!'
                 : `Receitas personalizadas para a fase ${recipePhase}!`}
             </DialogDescription>
           </DialogHeader>

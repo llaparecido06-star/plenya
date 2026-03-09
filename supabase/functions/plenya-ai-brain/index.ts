@@ -9,11 +9,12 @@ const corsHeaders = {
 interface ChatPayload {
   message: string;
   history: Array<{ role: 'user' | 'assistant'; content: string }>;
-  life_phase: 'menstruating' | 'pregnant' | 'menopause' | null;
+  life_phase: 'menstruating' | 'pregnant' | 'menopause' | 'postpartum' | null;
   pregnancy_weeks?: number | null;
   pregnancy_trimester?: number | null;
   pregnancy_symptoms?: string[] | null;
   phase_name?: string;
+  postpartum_weeks?: number | null;
 }
 
 interface TrainerPayload {
@@ -53,7 +54,7 @@ type RequestPayload = {
   language?: string;
 };
 
-function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null, pregnancyTrimester?: number | null, pregnancySymptoms?: string[] | null): string {
+function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null, pregnancyTrimester?: number | null, pregnancySymptoms?: string[] | null, postpartumWeeks?: number | null): string {
   let basePrompt = `Você é a Plenya, uma assistente empática de saúde e bem-estar feminino. 
 Responda de forma curta (máximo 3 frases), acolhedora e prática. 
 Use emojis ocasionalmente para tornar a conversa mais leve.
@@ -93,6 +94,19 @@ CONTEXTO IMPORTANTE: A usuária está no climatério/menopausa.
 - Foque em alívio de sintomas como ondas de calor, insônia, alterações de humor
 - Sugira fitoestrógenos naturais (soja, linhaça) quando apropriado
 - Recomende técnicas de relaxamento e exercícios de baixo impacto`;
+  }
+
+  if (lifePhase === 'postpartum') {
+    const weeksContext = postpartumWeeks ? ` (semana ${postpartumWeeks} pós-parto)` : '';
+    return `${basePrompt}
+
+CONTEXTO IMPORTANTE: A usuária está no pós-parto${weeksContext}.
+- Foque na recuperação física e emocional pós-parto
+- Considere amamentação: alimentos galactagogos (aveia, linhaça, feno-grego), hidratação
+- Saúde mental: baby blues, cansaço extremo, adaptação - seja empática e acolhedora
+- Nutrição: priorize ferro (reposição do parto), cálcio, ômega-3, vitamina B12
+- Exercício: retorno gradual, respeitar a liberação médica (geralmente 6 semanas)
+- NUNCA fale sobre ciclo menstrual ou fases - o ciclo pode não ter retornado ainda`;
   }
 
   return `${basePrompt}
@@ -140,6 +154,53 @@ RESPONDA APENAS COM JSON VÁLIDO no formato:
       "sets": 3,
       "reps": "12",
       "observation": "Dica de segurança para menopausa"
+    }
+  ]
+}
+
+Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
+  }
+
+  // Postpartum-specific prompt
+  if (lifePhase === 'postpartum') {
+    const intensityGuidance: Record<string, string> = {
+      sedentary: 'Nível Sedentário: Exercícios muito leves. Máximo 15 minutos. Foque em respiração e assoalho pélvico.',
+      light: 'Nível Leve: Exercícios suaves. 15-20 minutos.',
+      moderate: 'Nível Moderado: Exercícios intermediários (se liberada pelo médico). 20-30 minutos.',
+      intense: 'Nível Intenso: Retorno gradual à intensidade. 30-40 minutos.',
+    };
+
+    return `Você é uma personal trainer ESPECIALIZADA EM PÓS-PARTO.
+Crie um treino SEGURO e adaptado para recuperação pós-parto.
+
+PRIORIDADES PÓS-PARTO:
+- Fortalecimento do assoalho pélvico (Kegel progressivo)
+- Ativação do transverso abdominal (recuperação da diástase)
+- Fortalecimento de costas e postura (amamentação causa dores)
+- Mobilidade e alongamento
+- Exercícios de respiração e relaxamento
+
+${fitnessLevel ? intensityGuidance[fitnessLevel] || '' : ''}
+
+REGRAS DE SEGURANÇA:
+- Antes de 6 semanas: APENAS exercícios de Kegel, respiração e caminhada leve
+- Após 6 semanas (com liberação médica): retorno gradual
+- NUNCA sugira abdominais tradicionais (risco de diástase)
+- Evite saltos e impacto alto
+- Sempre inclua aquecimento e volta à calma
+- Considere privação de sono: treinos curtos e energizantes
+
+RESPONDA APENAS COM JSON VÁLIDO no formato:
+{
+  "title": "Nome do treino",
+  "duration": "XX min",
+  "intensity": "Baixa/Moderada",
+  "exercises": [
+    {
+      "name": "Nome do exercício",
+      "sets": 3,
+      "reps": "12",
+      "observation": "Dica de segurança para pós-parto"
     }
   ]
 }
@@ -301,6 +362,9 @@ function getChefSystemPrompt(phase: string, cycleDay?: number, dietType?: string
     folicular: 'Priorize: proteínas magras, vegetais fermentados, grãos integrais.',
     ovulatoria: 'Priorize: antioxidantes, fibras, vegetais crucíferos.',
     lutea: 'Priorize: magnésio (chocolate amargo, abacate), vitamina B6, triptofano.',
+    gestante: 'Priorize: ácido fólico, ferro, cálcio, ômega-3. SEGURANÇA ALIMENTAR: evite peixes crus, queijos não pasteurizados, ovos mal cozidos.',
+    pos_parto: 'Priorize: ferro (reposição do parto), cálcio, ômega-3, vitamina B12. Alimentos galactagogos (aveia, linhaça, feno-grego) para produção de leite. Receitas rápidas e práticas para mães com pouco tempo.',
+    menopausa: 'Priorize: fitoestrógenos (soja, linhaça), cálcio (couve, brócolis, sardinha), ômega-3, magnésio. Alimentos anti-inflamatórios para aliviar ondas de calor.',
   };
 
   // Cycle day specific nutrition guidance
@@ -315,10 +379,13 @@ function getChefSystemPrompt(phase: string, cycleDay?: number, dietType?: string
     }
   }
 
-  return `Você é uma chef especializada em nutrição hormonal feminina e Cycle Syncing.
-Sugira receitas saudáveis e deliciosas adaptadas à fase e DIA ESPECÍFICO do ciclo.
+  const isLifePhaseMode = ['gestante', 'pos_parto', 'menopausa'].includes(phase);
+  const contextLabel = isLifePhaseMode ? `Modo: ${phase}` : `Fase atual: ${phase}${cycleDay ? ` (Dia ${cycleDay})` : ''}`;
 
-Fase atual: ${phase}${cycleDay ? ` (Dia ${cycleDay})` : ''}
+  return `Você é uma chef especializada em nutrição hormonal feminina${isLifePhaseMode ? '' : ' e Cycle Syncing'}.
+Sugira receitas saudáveis e deliciosas ${isLifePhaseMode ? `adaptadas ao ${phase}` : 'adaptadas à fase e DIA ESPECÍFICO do ciclo'}.
+
+${contextLabel}
 ${phaseNutrition[phase] || 'Sugira refeições equilibradas e nutritivas.'}${cycleDayGuidance}
 ${dietRestrictions}
 
@@ -398,7 +465,7 @@ serve(async (req) => {
     switch (mode) {
       case 'chat': {
         const chatPayload = payload as ChatPayload;
-        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks, chatPayload.pregnancy_trimester, chatPayload.pregnancy_symptoms) + langInstruction;
+        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks, chatPayload.pregnancy_trimester, chatPayload.pregnancy_symptoms, chatPayload.postpartum_weeks) + langInstruction;
         
         // Build messages with history
         const messages: Array<{ role: string; content: string }> = [
