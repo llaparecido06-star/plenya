@@ -37,7 +37,7 @@ const AwaitingPeriodCard: React.FC = () => {
 
   return (
     <motion.div
-      className="mx-4 p-4 rounded-2xl border bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
+      className="mx-4 p-4 rounded-2xl border bg-gradient-to-br from-primary/12 to-accent/10 border-primary/20 hover-scale"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
