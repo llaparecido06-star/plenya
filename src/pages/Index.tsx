@@ -39,6 +39,8 @@ import WeeklyPregnancyInsight from '@/components/home/WeeklyPregnancyInsight';
 import ContractionTimerCard from '@/components/home/ContractionTimerCard';
 import HospitalBagCard from '@/components/home/HospitalBagCard';
 import MenopauseSleepTracker from '@/components/home/MenopauseSleepTracker';
+import WearableSleepImport from '@/components/home/WearableSleepImport';
+import MenopauseWeeklySummary from '@/components/home/MenopauseWeeklySummary';
 import MenopauseExerciseCard from '@/components/home/MenopauseExerciseCard';
 import MenopauseSymptomChart from '@/components/home/MenopauseSymptomChart';
 import MenopauseDiaryCard from '@/components/home/MenopauseDiaryCard';
@@ -169,6 +171,7 @@ const Index: React.FC = () => {
 
         {/* === MENOPAUSE MODE === */}
         {isToday && isMenopause && <MenopauseWellnessHub age={age} />}
+        {isToday && isMenopause && <MenopauseWeeklySummary />}
         {isToday && isMenopause && <HotFlashCounter />}
         {isToday && isMenopause && <HotFlashInsights />}
         {isToday && isMenopause && <HRTTracker />}
@@ -179,6 +182,7 @@ const Index: React.FC = () => {
           <div className="mx-4 space-y-4">
             <MenopauseWeightChart />
             <MenopauseSleepTracker />
+            <WearableSleepImport />
             <MenopauseSymptomChart />
             <MenopauseExerciseCard />
           </div>

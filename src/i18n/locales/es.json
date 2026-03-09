@@ -948,6 +948,35 @@
     "report_description": "Genera un informe PDF profesional con gráficos de síntomas, peso, sueño, sofocos y ejercicios de los últimos 30 días.",
     "report_generate": "Generar Informe PDF",
     "report_downloaded": "¡Informe descargado!",
-    "report_shared": "¡Informe compartido!"
+    "report_shared": "¡Informe compartido!",
+
+    "wearable_title": "Wearables y Sueño",
+    "wearable_subtitle": "Importa datos de tu dispositivo",
+    "wearable_import": "Importar datos de sueño",
+    "wearable_connect": "Conectar dispositivo",
+    "wearable_coming_soon": "Próximamente",
+    "wearable_manual": "Importar archivo manualmente",
+    "wearable_format_hint": "Acepta CSV o JSON exportados de tu wearable (Fitbit, Google Fit, etc.)",
+    "wearable_upload_file": "Elegir archivo (.csv o .json)",
+    "wearable_no_data": "No se encontraron datos de sueño en el archivo",
+    "wearable_imported": "¡{{count}} noche(s) de sueño importada(s)!",
+    "wearable_result": "Importación completada",
+    "wearable_result_detail": "{{success}} importado(s) con éxito, {{errors}} error(es)",
+    "wearable_csv_example": "Ejemplo de formato CSV:",
+
+    "weekly_title": "Resumen Semanal",
+    "weekly_subtitle": "Tu bienestar en los últimos 7 días",
+    "weekly_score": "Puntuación de Bienestar",
+    "weekly_vs_last": "vs semana pasada",
+    "weekly_stable": "estable vs semana pasada",
+    "weekly_sleep": "Sueño promedio",
+    "weekly_flashes": "Sofocos",
+    "weekly_exercise": "Ejercicio",
+    "weekly_days": "días",
+    "weekly_mood": "Humor promedio",
+    "weekly_top_symptoms": "Síntomas más frecuentes",
+    "weekly_ai_tip": "Consejo personalizado",
+    "weekly_get_tip": "Generar consejos con IA",
+    "weekly_refresh_tip": "Actualizar consejos"
   }
 }

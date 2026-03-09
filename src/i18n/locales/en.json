@@ -948,6 +948,35 @@
     "report_description": "Generate a professional PDF report with symptom charts, weight, sleep, hot flashes and exercises from the last 30 days.",
     "report_generate": "Generate PDF Report",
     "report_downloaded": "Report downloaded!",
-    "report_shared": "Report shared!"
+    "report_shared": "Report shared!",
+
+    "wearable_title": "Wearables & Sleep",
+    "wearable_subtitle": "Import data from your device",
+    "wearable_import": "Import sleep data",
+    "wearable_connect": "Connect device",
+    "wearable_coming_soon": "Coming soon",
+    "wearable_manual": "Import file manually",
+    "wearable_format_hint": "Accepts CSV or JSON exported from your wearable (Fitbit, Google Fit, etc.)",
+    "wearable_upload_file": "Choose file (.csv or .json)",
+    "wearable_no_data": "No sleep data found in file",
+    "wearable_imported": "{{count}} night(s) of sleep imported!",
+    "wearable_result": "Import complete",
+    "wearable_result_detail": "{{success}} imported successfully, {{errors}} error(s)",
+    "wearable_csv_example": "CSV format example:",
+
+    "weekly_title": "Weekly Summary",
+    "weekly_subtitle": "Your wellness over the last 7 days",
+    "weekly_score": "Wellness Score",
+    "weekly_vs_last": "vs last week",
+    "weekly_stable": "stable vs last week",
+    "weekly_sleep": "Avg sleep",
+    "weekly_flashes": "Hot flashes",
+    "weekly_exercise": "Exercise",
+    "weekly_days": "days",
+    "weekly_mood": "Avg mood",
+    "weekly_top_symptoms": "Top symptoms",
+    "weekly_ai_tip": "Personalized tip",
+    "weekly_get_tip": "Generate AI tips",
+    "weekly_refresh_tip": "Refresh tips"
   }
 }
