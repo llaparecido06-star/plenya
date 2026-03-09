@@ -7,6 +7,7 @@ import { useAIBrain } from '@/hooks/useAIBrain';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useDailyLog } from '@/hooks/useDailyLog';
 
+
 // Baby development milestones by week for synchronized insights
 const weekMilestones: Record<number, string> = {
   4: 'Implantação no útero',
