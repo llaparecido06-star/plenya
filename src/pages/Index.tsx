@@ -46,6 +46,7 @@ import ContractionTimerCard from '@/components/home/ContractionTimerCard';
 import HospitalBagCard from '@/components/home/HospitalBagCard';
 import MenopauseSleepTracker from '@/components/home/MenopauseSleepTracker';
 import WearableSleepImport from '@/components/home/WearableSleepImport';
+import HotFlashSleepCorrelation from '@/components/home/HotFlashSleepCorrelation';
 import MenopauseWeeklySummary from '@/components/home/MenopauseWeeklySummary';
 import MenopauseExerciseCard from '@/components/home/MenopauseExerciseCard';
 import MenopauseMonthlyTrends from '@/components/home/MenopauseMonthlyTrends';
