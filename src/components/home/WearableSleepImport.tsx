@@ -155,6 +155,11 @@ const WearableSleepImport: React.FC = () => {
     { id: 'samsung_health', name: 'Samsung Health', icon: '📱', status: 'coming_soon' as const },
   ];
 
+  const handleNativeSync = async () => {
+    if (!user) return;
+    await syncSleepToDatabase(user.id, 14);
+  };
+
   return (
     <div className="glass-card p-5 bg-gradient-to-br from-cyan-500/5 to-teal-500/10 border-cyan-500/20">
       <div className="flex items-center gap-3 mb-4">
@@ -166,6 +171,20 @@ const WearableSleepImport: React.FC = () => {
           <p className="text-xs text-muted-foreground">{t('menopause.wearable_subtitle')}</p>
         </div>
       </div>
+
+      {/* Native Health Sync Button */}
+      {isNative && available && (
+        <Button
+          variant="default"
+          size="sm"
+          className="w-full mb-3"
+          onClick={handleNativeSync}
+          disabled={syncing}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+          {syncing ? t('actions.loading') : t('menopause.health_sync_now')}
+        </Button>
+      )}
 
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
         <DrawerTrigger asChild>
