@@ -25,7 +25,8 @@ export const useHealthSync = () => {
 
     try {
       const { Health } = await import('@capgo/capacitor-health');
-      const result = await Health.isHealthAvailable();
+      // Check if health APIs are available on this device
+      const result = await Health.isAvailable();
       setAvailable(result.available);
       return result.available;
     } catch {
