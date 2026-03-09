@@ -9,7 +9,7 @@ import AuthForm from '@/components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
 import {
   LogOut, Target, Dumbbell, Heart, Baby, Activity, Utensils, Zap, Crown, Globe,
-  Lock, Bell, CalendarDays, Settings, Trash2, ChevronRight, Pill, FileText, Gauge, Sparkles
+  Lock, Bell, CalendarDays, Settings, Trash2, ChevronRight, Pill, FileText, Gauge, Sparkles, HelpCircle
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import DUMPicker from '@/components/profile/DUMPicker';
