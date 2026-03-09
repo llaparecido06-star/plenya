@@ -999,6 +999,19 @@
     "weekly_top_symptoms": "Top symptoms",
     "weekly_ai_tip": "Personalized tip",
     "weekly_get_tip": "Generate AI tips",
-    "weekly_refresh_tip": "Refresh tips"
+    "weekly_refresh_tip": "Refresh tips",
+
+    "alert_settings_title": "Smart Alerts",
+    "alert_settings_sub": "Customize alert thresholds",
+    "alert_saved": "Alert settings saved!",
+    "alert_enabled": "Alerts enabled",
+    "alert_enabled_desc": "Receive trend-based notifications",
+    "alert_sleep_title": "Sleep Alert",
+    "alert_sleep_hours": "Minimum sleep hours",
+    "alert_sleep_nights": "Consecutive nights",
+    "alert_sleep_example": "Alert if sleeping less than {{hours}}h for {{nights}} consecutive nights",
+    "alert_flash_title": "Hot Flash Alert",
+    "alert_flash_percent": "Increase percentage for alert",
+    "alert_flash_example": "Alert if hot flashes increase by {{percent}}% vs previous week"
   }
 }
