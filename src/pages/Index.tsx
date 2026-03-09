@@ -255,6 +255,9 @@ const Index: React.FC = () => {
 
             {/* Cycle Diary with AI */}
             <CycleDiaryCard />
+
+            {/* Symptom Map - Last 3 cycles */}
+            <CycleSymptomMap />
           </>
         )}
 
