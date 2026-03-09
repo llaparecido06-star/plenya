@@ -408,7 +408,7 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
           {renderTagGroup('After-Care', aftercareTags, selectedAftercare, setSelectedAftercare)}
 
           <Button 
-            className="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white"
+            className="w-full mt-6 bg-pink-500 hover:bg-pink-600 text-white"
             onClick={handleSave}
             disabled={saving || saved || !isAuthenticated}
           >
