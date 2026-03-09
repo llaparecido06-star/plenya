@@ -99,6 +99,8 @@ const ChatInterface: React.FC = () => {
               ? t('chat.subtitle_pregnant')
               : lifePhase === 'menopause'
               ? t('chat.subtitle_menopause')
+              : lifePhase === 'postpartum'
+              ? t('chat.subtitle_postpartum')
               : t('chat.subtitle_default')}
           </p>
         </div>
