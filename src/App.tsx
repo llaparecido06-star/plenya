@@ -5,12 +5,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { ThemeProvider } from "next-themes";
 import { CycleProvider } from "@/contexts/CycleContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SelectedDateProvider } from "@/contexts/SelectedDateContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import NotificationPrompt from "@/components/notifications/NotificationPrompt";
+import LGPDConsentBanner from "@/components/home/LGPDConsentBanner";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -27,6 +27,7 @@ const Privacidade = lazy(() => import("./pages/Privacidade"));
 const Termos = lazy(() => import("./pages/Termos"));
 const Admin = lazy(() => import("./pages/Admin"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const FAQ = lazy(() => import("./pages/FAQ"));
 
 const queryClient = new QueryClient();
 
@@ -38,7 +39,6 @@ const PageLoader = () => (
 );
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <CycleProvider>
@@ -47,6 +47,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <NotificationPrompt />
+            <LGPDConsentBanner />
             <BrowserRouter>
               <AnimatePresence mode="wait">
                 <Suspense fallback={<PageLoader />}>
@@ -104,6 +105,7 @@ const App = () => (
                     <Route path="/instalar" element={<Instalar />} />
                     <Route path="/privacidade" element={<Privacidade />} />
                     <Route path="/termos" element={<Termos />} />
+                    <Route path="/faq" element={<FAQ />} />
                     <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="*" element={<NotFound />} />
@@ -116,7 +118,6 @@ const App = () => (
       </CycleProvider>
     </AuthProvider>
   </QueryClientProvider>
-  </ThemeProvider>
 );
 
 export default App;

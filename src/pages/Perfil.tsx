@@ -286,6 +286,8 @@ const Perfil: React.FC = () => {
           <MenuItem icon={Trash2} label={t('profile.delete_account')} sublabel={t('profile.delete_account_sub')} iconClassName="bg-red-100 text-red-600">
             <DeleteAccountButton />
           </MenuItem>
+
+          <MenuItem icon={HelpCircle} label="FAQ & Suporte" sublabel="Dúvidas frequentes e contato" iconClassName="bg-sky-100 text-sky-600" onClick={() => navigate('/faq')} />
         </motion.div>
 
         <Button onClick={signOut} variant="outline" className="w-full mt-6 mb-4">

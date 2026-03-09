@@ -250,6 +250,9 @@ const Index: React.FC = () => {
             {/* Next Contraceptive Reminder (Injection, Ring, Patch) */}
             <NextContraceptiveCard />
 
+            {/* Medication / Injection Quick Log */}
+            <MedicationQuickLog />
+
             {/* Weekly Summary */}
             <div className="px-4">
               <WeeklySummaryCard />
