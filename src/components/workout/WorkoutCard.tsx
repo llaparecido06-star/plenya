@@ -155,6 +155,8 @@ const WorkoutCard: React.FC = () => {
     }
   }, [savedWorkout, workoutPhase]);
 
+  const { postpartumWeeks } = useLifePhase();
+
   const handleGenerateAIWorkout = async () => {
     const goalText = goals.length > 0 ? goals.join(', ') : null;
     
@@ -165,6 +167,7 @@ const WorkoutCard: React.FC = () => {
       fitness_level: fitness_level || 'moderate',
       life_phase: lifePhase || undefined,
       pregnancy_weeks: pregnancyWeeks || undefined,
+      postpartum_weeks: postpartumWeeks || undefined,
     });
 
     if (result) {
@@ -326,7 +329,10 @@ const WorkoutCard: React.FC = () => {
           <div>
             <h3 className="text-xl font-bold text-foreground">{t('workout.workout_of_day')}</h3>
             <p className="text-sm text-muted-foreground">
-              {t('workout.phase_info', { title: defaultPlan.title.toLowerCase(), intensity: defaultPlan.intensity })}
+              {lifePhase === 'pregnant' ? t('workout.phase_info_pregnant') :
+               lifePhase === 'postpartum' ? t('workout.phase_info_postpartum') :
+               lifePhase === 'menopause' ? t('workout.phase_info_menopause') :
+               t('workout.phase_info', { title: defaultPlan.title.toLowerCase(), intensity: defaultPlan.intensity })}
             </p>
           </div>
         </div>

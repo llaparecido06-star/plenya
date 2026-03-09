@@ -25,6 +25,7 @@ interface TrainerPayload {
   fitness_level?: string;
   life_phase?: string;
   pregnancy_weeks?: number;
+  postpartum_weeks?: number;
 }
 
 interface NutritionScannerPayload {

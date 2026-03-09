@@ -81,6 +81,23 @@ const Corpo: React.FC = () => {
         </motion.div>
       )}
 
+      {/* Postpartum safety tip */}
+      {isPostpartum && (
+        <motion.div
+          className="mx-4 mb-4 p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-xl"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-start gap-3">
+            <span className="text-xl">🌸</span>
+            <div>
+              <p className="text-sm font-medium text-rose-800 dark:text-rose-200">{t('body.postpartum_tip_title')}</p>
+              <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">{t('body.postpartum_tip_desc')}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       <LastWorkoutCard />
 
       <div className="mt-4">

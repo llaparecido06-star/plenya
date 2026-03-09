@@ -247,8 +247,11 @@
     "title": "Body",
     "subtitle": "Ideal workout for the {{phase}} phase",
     "subtitle_menopause": "Exercises for wellness and bone health",
+    "subtitle_postpartum": "Gentle exercises for your recovery",
     "menopause_tip_title": "Exercise During Menopause",
-    "menopause_tip_desc": "Focus on bone strengthening, balance and mobility. Low-impact exercises are ideal."
+    "menopause_tip_desc": "Focus on bone strengthening, balance and mobility. Low-impact exercises are ideal.",
+    "postpartum_tip_title": "Postpartum Exercise",
+    "postpartum_tip_desc": "Respect your body and medical clearance. Focus on pelvic floor, breathing and gradual return."
   },
   "mind": {
     "title": "Mind",
@@ -359,6 +362,9 @@
     "planned_workout": "The planned workout for this phase would be:",
     "workout_of_day": "Workout of the Day",
     "phase_info": "{{title}} Phase — {{intensity}}",
+    "phase_info_pregnant": "Safe workout adapted for pregnancy",
+    "phase_info_postpartum": "Postpartum recovery with safety",
+    "phase_info_menopause": "Bone strengthening and wellness",
     "energy_today": "Energy today:",
     "generating": "Generating workout...",
     "generate_workout": "Generate Workout of the Day ⚡",

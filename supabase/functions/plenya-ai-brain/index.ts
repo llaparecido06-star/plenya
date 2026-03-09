@@ -26,6 +26,7 @@ interface TrainerPayload {
   fitness_level?: string;
   life_phase?: string;
   pregnancy_weeks?: number;
+  postpartum_weeks?: number;
 }
 
 interface NutritionScannerPayload {
@@ -114,7 +115,7 @@ CONTEXTO IMPORTANTE: A usuária está no pós-parto${weeksContext}.
 A usuária está em fase menstruante normal. Você pode mencionar fases do ciclo quando relevante.`;
 }
 
-function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?: string, lifePhase?: string, pregnancyWeeks?: number): string {
+function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?: string, lifePhase?: string, pregnancyWeeks?: number, postpartumWeeks?: number): string {
   // Menopause-specific prompt
   if (lifePhase === 'menopause') {
     const intensityGuidance: Record<string, string> = {
@@ -163,6 +164,9 @@ Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
 
   // Postpartum-specific prompt
   if (lifePhase === 'postpartum') {
+    const weeksLabel = postpartumWeeks ? ` (Semana ${postpartumWeeks} pós-parto)` : '';
+    const earlyPostpartum = postpartumWeeks !== undefined && postpartumWeeks < 6;
+    
     const intensityGuidance: Record<string, string> = {
       sedentary: 'Nível Sedentário: Exercícios muito leves. Máximo 15 minutos. Foque em respiração e assoalho pélvico.',
       light: 'Nível Leve: Exercícios suaves. 15-20 minutos.',
@@ -170,7 +174,7 @@ Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
       intense: 'Nível Intenso: Retorno gradual à intensidade. 30-40 minutos.',
     };
 
-    return `Você é uma personal trainer ESPECIALIZADA EM PÓS-PARTO.
+    return `Você é uma personal trainer ESPECIALIZADA EM PÓS-PARTO${weeksLabel}.
 Crie um treino SEGURO e adaptado para recuperação pós-parto.
 
 PRIORIDADES PÓS-PARTO:
@@ -183,7 +187,7 @@ PRIORIDADES PÓS-PARTO:
 ${fitnessLevel ? intensityGuidance[fitnessLevel] || '' : ''}
 
 REGRAS DE SEGURANÇA:
-- Antes de 6 semanas: APENAS exercícios de Kegel, respiração e caminhada leve
+${earlyPostpartum ? '- ANTES DE 6 SEMANAS: APENAS exercícios de Kegel, respiração e caminhada leve!\n' : ''}- Antes de 6 semanas sem liberação médica: apenas Kegel, respiração e caminhada leve
 - Após 6 semanas (com liberação médica): retorno gradual
 - NUNCA sugira abdominais tradicionais (risco de diástase)
 - Evite saltos e impacto alto
@@ -518,7 +522,7 @@ serve(async (req) => {
 
       case 'trainer': {
         const trainerPayload = payload as TrainerPayload;
-        systemPrompt = getTrainerSystemPrompt(trainerPayload.phase, trainerPayload.cycle_day, trainerPayload.fitness_level, trainerPayload.life_phase, trainerPayload.pregnancy_weeks) + langInstruction;
+        systemPrompt = getTrainerSystemPrompt(trainerPayload.phase, trainerPayload.cycle_day, trainerPayload.fitness_level, trainerPayload.life_phase, trainerPayload.pregnancy_weeks, trainerPayload.postpartum_weeks) + langInstruction;
         
         let userMessage = `Crie um treino para hoje.
 Nível de energia: ${trainerPayload.energy_level}/5

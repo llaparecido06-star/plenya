@@ -247,8 +247,11 @@
     "title": "Corpo",
     "subtitle": "Treino ideal para a fase {{phase}}",
     "subtitle_menopause": "Exercícios para bem-estar e saúde óssea",
+    "subtitle_postpartum": "Exercícios suaves para sua recuperação",
     "menopause_tip_title": "Exercícios na Menopausa",
-    "menopause_tip_desc": "Priorize fortalecimento ósseo, equilíbrio e mobilidade. Exercícios de baixo impacto são ideais."
+    "menopause_tip_desc": "Priorize fortalecimento ósseo, equilíbrio e mobilidade. Exercícios de baixo impacto são ideais.",
+    "postpartum_tip_title": "Exercícios no Pós-Parto",
+    "postpartum_tip_desc": "Respeite seu corpo e a liberação médica. Foque em assoalho pélvico, respiração e retorno gradual."
   },
   "mind": {
     "title": "Mente",
@@ -359,6 +362,9 @@
     "planned_workout": "O treino planejado para esta fase seria:",
     "workout_of_day": "Treino do Dia",
     "phase_info": "Fase {{title}} — {{intensity}}",
+    "phase_info_pregnant": "Treino seguro adaptado à gestação",
+    "phase_info_postpartum": "Recuperação pós-parto com segurança",
+    "phase_info_menopause": "Fortalecimento ósseo e bem-estar",
     "energy_today": "Energia hoje:",
     "generating": "Gerando treino...",
     "generate_workout": "Gerar Treino do Dia ⚡",
