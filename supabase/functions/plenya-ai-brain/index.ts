@@ -49,9 +49,21 @@ interface ChefPayload {
   diet_type?: string;
 }
 
+interface MonthlyReportPayload {
+  cycle_day: number;
+  cycle_length: number;
+  phase: string;
+  avg_mood: number;
+  avg_energy: number;
+  avg_stress: number;
+  top_symptoms: string[];
+  total_logs: number;
+  period_days: number;
+}
+
 type RequestPayload = {
-  mode: 'chat' | 'trainer' | 'nutrition_scanner' | 'chef' | 'estimate_macros';
-  payload: ChatPayload | TrainerPayload | NutritionScannerPayload | ChefPayload | EstimateMacrosPayload;
+  mode: 'chat' | 'trainer' | 'nutrition_scanner' | 'chef' | 'estimate_macros' | 'monthly_report';
+  payload: ChatPayload | TrainerPayload | NutritionScannerPayload | ChefPayload | EstimateMacrosPayload | MonthlyReportPayload;
   language?: string;
 };
 
