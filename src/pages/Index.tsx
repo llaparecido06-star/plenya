@@ -23,6 +23,7 @@ import PillTracker from '@/components/home/PillTracker';
 import DeviceExpirationCard from '@/components/home/DeviceExpirationCard';
 import NextPeriodCard from '@/components/home/NextPeriodCard';
 import LatePeriodCard from '@/components/home/LatePeriodCard';
+import PMSPredictionCard from '@/components/home/PMSPredictionCard';
 import AwaitingPeriodCard from '@/components/home/AwaitingPeriodCard';
 import PregnancyWeeksCard from '@/components/home/PregnancyWeeksCard';
 import TryingToConceiveCard from '@/components/home/TryingToConceiveCard';
