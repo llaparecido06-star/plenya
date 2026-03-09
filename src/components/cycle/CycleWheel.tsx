@@ -125,7 +125,7 @@ const CycleWheel: React.FC = () => {
   }
 
   return (
-    <div id="cycle-wheel" className="relative flex flex-col items-center">
+    <div id="cycle-wheel" className="relative flex flex-col items-center animate-fade-up">
       <div className="relative">
         <svg width={size} height={size} className="drop-shadow-lg">
           {/* Background circle */}
