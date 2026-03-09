@@ -285,8 +285,8 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
           >
-            <div className={`p-3 rounded-xl ${hasIntimacyData ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-600'}`}>
-              <Flame className="w-5 h-5" fill={hasIntimacyData ? 'currentColor' : 'none'} />
+            <div className={`p-3 rounded-xl ${hasIntimacyData ? 'bg-pink-500 text-white' : 'bg-pink-100 text-pink-600'}`}>
+              <Heart className="w-5 h-5" fill={hasIntimacyData ? 'currentColor' : 'none'} />
             </div>
             <span className="text-xs font-medium text-foreground text-center">Sexo & Libido</span>
           </motion.button>
