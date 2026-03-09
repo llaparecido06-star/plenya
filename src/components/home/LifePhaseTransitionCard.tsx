@@ -35,7 +35,7 @@ const LifePhaseTransitionCard: React.FC = () => {
         life_phase: newPhase,
       };
 
-      // Clear pregnancy data when transitioning to postpartum
+      // Keep pregnancy_start_date for postpartum weeks calculation
       if (newPhase === 'menstruating') {
         updates.pregnancy_start_date = null;
         updates.is_trying_to_conceive = false;
