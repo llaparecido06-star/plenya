@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getPlanByProductId, PlanKey } from '@/data/stripePlans';
+import { storeAuthForBackground } from '@/lib/backgroundSync';
 
 interface AuthContextType {
   user: User | null;
@@ -57,10 +58,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => subscription.unsubscribe();
   }, []);
 
-  // Check subscription when user changes
+  // Check subscription and store auth for background sync when user changes
   useEffect(() => {
     if (user) {
       checkSubscription();
+      storeAuthForBackground();
       const interval = setInterval(checkSubscription, 60000);
       return () => clearInterval(interval);
     } else {

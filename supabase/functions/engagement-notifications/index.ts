@@ -216,7 +216,90 @@ serve(async (req) => {
       );
     }
 
-    return new Response(JSON.stringify({ success: true, results }), {
+    // ─── 7. SMART TREND ALERTS (Menopause) ───────────
+    if (type === "trend_alerts" || type === "all") {
+      const menopauseProfiles: { user_id: string }[] = await dbFetch(
+        "profiles?life_phase=eq.menopause&select=user_id"
+      );
+
+      const alertUsers: { userId: string; alerts: string[] }[] = [];
+
+      for (const profile of menopauseProfiles) {
+        const userId = profile.user_id;
+        const alerts: string[] = [];
+
+        // --- Sleep alert: 3 consecutive nights < 6h ---
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        const sleepLogs: { notes: string; log_date: string }[] = await dbFetch(
+          `daily_logs?user_id=eq.${userId}&log_date=gte.${threeDaysAgo.toISOString().split("T")[0]}&order=log_date.desc&limit=3&select=notes,log_date`
+        );
+
+        if (sleepLogs.length >= 3) {
+          let consecutiveLow = 0;
+          for (const log of sleepLogs) {
+            try {
+              const parsed = JSON.parse(log.notes || "{}");
+              if (parsed.sleep_hours && parsed.sleep_hours < 6) consecutiveLow++;
+            } catch { /* ignore */ }
+          }
+          if (consecutiveLow >= 3) {
+            alerts.push("sleep_low");
+          }
+        }
+
+        // --- Hot flash spike: compare last 7 days vs previous 7 days ---
+        const now = new Date();
+        const oneWeekAgo = new Date(now);
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const twoWeeksAgo = new Date(now);
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+        const recentFlashes: { id: string }[] = await dbFetch(
+          `hot_flash_logs?user_id=eq.${userId}&logged_at=gte.${oneWeekAgo.toISOString()}&select=id`
+        );
+        const prevFlashes: { id: string }[] = await dbFetch(
+          `hot_flash_logs?user_id=eq.${userId}&logged_at=gte.${twoWeeksAgo.toISOString()}&logged_at=lt.${oneWeekAgo.toISOString()}&select=id`
+        );
+
+        if (prevFlashes.length > 0) {
+          const increase = ((recentFlashes.length - prevFlashes.length) / prevFlashes.length) * 100;
+          if (increase >= 50) {
+            alerts.push("flash_spike");
+          }
+        }
+
+        if (alerts.length > 0) {
+          alertUsers.push({ userId, alerts });
+        }
+      }
+
+      // Send targeted notifications
+      const sleepAlertUsers = alertUsers.filter(u => u.alerts.includes("sleep_low")).map(u => u.userId);
+      const flashAlertUsers = alertUsers.filter(u => u.alerts.includes("flash_spike")).map(u => u.userId);
+
+      const trendResults: Record<string, unknown> = {};
+
+      if (sleepAlertUsers.length > 0) {
+        trendResults.sleep = await sendPush(
+          sleepAlertUsers,
+          "🌙 Alerta de Sono",
+          "Você dormiu menos de 6h nas últimas 3 noites. Tente um chá de camomila antes de dormir e evite telas 1h antes de deitar.",
+          "/"
+        );
+      }
+
+      if (flashAlertUsers.length > 0) {
+        trendResults.flashes = await sendPush(
+          flashAlertUsers,
+          "🔥 Ondas de Calor em Alta",
+          "Suas ondas de calor aumentaram 50%+ esta semana. Considere reduzir cafeína e alimentos picantes, e converse com seu médico.",
+          "/"
+        );
+      }
+
+      results.trend_alerts = trendResults;
+    }
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
