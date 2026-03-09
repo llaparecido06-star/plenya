@@ -12,6 +12,9 @@ interface NotificationSettings {
   recipeReminder: boolean;
   recipeReminderTime: string;
   trialExpiration: boolean;
+  pmsAlert: boolean;
+  hydrationAlert: boolean;
+  phaseChangeAlert: boolean;
 }
 
 const NOTIFICATION_SETTINGS_KEY = 'plenya_notification_settings';
@@ -29,6 +32,9 @@ export const useNotifications = () => {
     recipeReminder: false,
     recipeReminderTime: '11:00',
     trialExpiration: true,
+    pmsAlert: true,
+    hydrationAlert: true,
+    phaseChangeAlert: true,
   });
 
   // Check for notification support (web or native)
@@ -240,6 +246,62 @@ export const useNotifications = () => {
     console.log(`Trial expiration reminder scheduled for ${reminderDate.toISOString()}`);
   }, [permission, settings.trialExpiration, scheduleNotification]);
 
+  // Schedule PMS alert (3 days before predicted period)
+  const schedulePMSAlert = useCallback(async (predictedPeriodDate: Date) => {
+    if (permission !== 'granted' || !settings.pmsAlert) return;
+
+    const alertDate = new Date(predictedPeriodDate);
+    alertDate.setDate(alertDate.getDate() - 3);
+    alertDate.setHours(9, 0, 0, 0);
+
+    const now = new Date();
+    if (alertDate <= now) return;
+
+    await scheduleNotification(
+      '🌙 TPM se aproximando',
+      'Sua TPM pode começar em 3 dias. Priorize magnésio, sono e exercícios leves.',
+      alertDate,
+      'pms-alert'
+    );
+  }, [permission, settings.pmsAlert, scheduleNotification]);
+
+  // Schedule fertile window alert
+  const scheduleFertileWindowAlert = useCallback(async (fertileStartDate: Date) => {
+    if (permission !== 'granted' || !settings.fertileWindow) return;
+
+    const alertDate = new Date(fertileStartDate);
+    alertDate.setDate(alertDate.getDate() - 1);
+    alertDate.setHours(9, 0, 0, 0);
+
+    const now = new Date();
+    if (alertDate <= now) return;
+
+    await scheduleNotification(
+      '🌸 Janela fértil amanhã',
+      'Sua janela de fertilidade começa amanhã. Fique atenta aos sinais do seu corpo.',
+      alertDate,
+      'fertile-window-alert'
+    );
+  }, [permission, settings.fertileWindow, scheduleNotification]);
+
+  // Schedule hydration reminder for luteal phase
+  const scheduleHydrationAlert = useCallback(async (lutealStartDate: Date) => {
+    if (permission !== 'granted' || !settings.hydrationAlert) return;
+
+    const alertDate = new Date(lutealStartDate);
+    alertDate.setHours(10, 0, 0, 0);
+
+    const now = new Date();
+    if (alertDate <= now) return;
+
+    await scheduleNotification(
+      '💧 Hidratação na fase lútea',
+      'Na fase lútea seu corpo retém mais líquidos. Beba bastante água para reduzir inchaço.',
+      alertDate,
+      'hydration-alert'
+    );
+  }, [permission, settings.hydrationAlert, scheduleNotification]);
+
   return {
     supported,
     permission,
@@ -250,6 +312,9 @@ export const useNotifications = () => {
     schedulePillReminder,
     scheduleRecipeReminder,
     scheduleTrialExpirationReminder,
+    schedulePMSAlert,
+    scheduleFertileWindowAlert,
+    scheduleHydrationAlert,
     updateSettings,
     showNotification,
   };
