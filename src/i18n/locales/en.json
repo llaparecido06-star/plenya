@@ -922,6 +922,32 @@
     "weight_min": "Min",
     "weight_avg": "Avg",
     "weight_max": "Max",
-    "weight_need_more_data": "Log your weight in the Diary to see the chart"
+    "weight_need_more_data": "Log your weight in the Diary to see the chart",
+
+    "insights_title": "Hot Flash Insights",
+    "insights_subtitle": "Correlations and patterns",
+    "insights_triggers": "Trigger distribution",
+    "insights_time": "Most frequent time",
+    "insights_see_more": "See more insights",
+    "insight_top_trigger": "{{trigger}} is your top trigger ({{percent}}% of episodes)",
+    "insight_intense_trigger": "{{trigger}} causes more intense episodes (avg {{intensity}}/5)",
+    "insight_trigger_increasing": "Episodes from {{trigger}} are increasing recently",
+    "insight_trigger_decreasing": "Episodes from {{trigger}} decreased — great progress!",
+    "insight_time_pattern": "{{percent}}% of flashes happen in the {{period}}",
+    "insight_frequency_up": "Hot flash frequency increased {{percent}}% in the last 2 weeks",
+    "insight_frequency_down": "Hot flash frequency decreased {{percent}}% — great progress!",
+    "insight_intensity_up": "Average intensity is increasing. Consider talking to your doctor.",
+    "insight_intensity_down": "Average intensity is decreasing — your efforts are paying off!",
+    "time_morning": "morning",
+    "time_afternoon": "afternoon",
+    "time_evening": "evening",
+    "time_night": "night",
+
+    "report_title": "Monthly Report",
+    "report_subtitle": "Complete PDF for your doctor",
+    "report_description": "Generate a professional PDF report with symptom charts, weight, sleep, hot flashes and exercises from the last 30 days.",
+    "report_generate": "Generate PDF Report",
+    "report_downloaded": "Report downloaded!",
+    "report_shared": "Report shared!"
   }
 }
