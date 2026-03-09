@@ -948,6 +948,35 @@
     "report_description": "Gere um relatório PDF profissional com gráficos de sintomas, peso, sono, ondas de calor e exercícios dos últimos 30 dias.",
     "report_generate": "Gerar Relatório PDF",
     "report_downloaded": "Relatório baixado!",
-    "report_shared": "Relatório compartilhado!"
+    "report_shared": "Relatório compartilhado!",
+
+    "wearable_title": "Wearables & Sono",
+    "wearable_subtitle": "Importe dados do seu dispositivo",
+    "wearable_import": "Importar dados de sono",
+    "wearable_connect": "Conectar dispositivo",
+    "wearable_coming_soon": "Em breve",
+    "wearable_manual": "Importar arquivo manualmente",
+    "wearable_format_hint": "Aceita CSV ou JSON exportados do seu wearable (Fitbit, Google Fit, etc.)",
+    "wearable_upload_file": "Escolher arquivo (.csv ou .json)",
+    "wearable_no_data": "Nenhum dado de sono encontrado no arquivo",
+    "wearable_imported": "{{count}} noite(s) de sono importada(s)!",
+    "wearable_result": "Importação concluída",
+    "wearable_result_detail": "{{success}} importado(s) com sucesso, {{errors}} erro(s)",
+    "wearable_csv_example": "Exemplo de formato CSV:",
+
+    "weekly_title": "Resumo Semanal",
+    "weekly_subtitle": "Seu bem-estar nos últimos 7 dias",
+    "weekly_score": "Pontuação de Bem-estar",
+    "weekly_vs_last": "vs semana passada",
+    "weekly_stable": "estável vs semana passada",
+    "weekly_sleep": "Sono médio",
+    "weekly_flashes": "Ondas de calor",
+    "weekly_exercise": "Exercícios",
+    "weekly_days": "dias",
+    "weekly_mood": "Humor médio",
+    "weekly_top_symptoms": "Sintomas mais frequentes",
+    "weekly_ai_tip": "Dica personalizada",
+    "weekly_get_tip": "Gerar dicas com IA",
+    "weekly_refresh_tip": "Atualizar dicas"
   }
 }
