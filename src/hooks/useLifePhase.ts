@@ -22,6 +22,7 @@ export const useLifePhase = (): LifePhaseData => {
     lifePhase: null,
     pregnancyStartDate: null,
     pregnancyWeeks: null,
+    postpartumWeeks: null,
     isTryingToConceive: false,
     dateOfBirth: null,
     age: null,
