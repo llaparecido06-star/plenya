@@ -8,6 +8,8 @@ import { useLifePhase } from '@/hooks/useLifePhase';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useAIBrain } from '@/hooks/useAIBrain';
 import { usePregnancyDiarySymptoms } from '@/hooks/usePregnancyDiarySymptoms';
+import { useProfile } from '@/hooks/useProfile';
+import { useDailyLog } from '@/hooks/useDailyLog';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 const ChatInterface: React.FC = () => {
@@ -20,6 +22,8 @@ const ChatInterface: React.FC = () => {
   const { getPhaseInfo } = useCycle();
   const { lifePhase, pregnancyWeeks, postpartumWeeks } = useLifePhase();
   const { symptoms: pregnancySymptoms } = usePregnancyDiarySymptoms();
+  const { goal, diet_type } = useProfile();
+  const { data: todayLog } = useDailyLog();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -58,6 +62,11 @@ const ChatInterface: React.FC = () => {
       pregnancy_symptoms: lifePhase === 'pregnant' ? pregnancySymptoms : null,
       phase_name: phaseInfo.name,
       postpartum_weeks: lifePhase === 'postpartum' ? postpartumWeeks : null,
+      goal,
+      diet_type,
+      recent_symptoms: todayLog?.symptoms || null,
+      recent_mood: todayLog?.mood || null,
+      recent_energy: todayLog?.energy || null,
     });
 
     setIsTyping(false);
