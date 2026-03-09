@@ -37,6 +37,8 @@ export const useNotifications = () => {
     pmsAlert: true,
     hydrationAlert: true,
     phaseChangeAlert: true,
+    ovulationAlert: true,
+    latePeriodAlert: true,
   });
 
   // Check for notification support (web or native)
