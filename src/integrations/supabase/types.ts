@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_logs: {
+        Row: {
+          alert_body: string
+          alert_title: string
+          alert_type: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          alert_body: string
+          alert_title: string
+          alert_type: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          alert_body?: string
+          alert_title?: string
+          alert_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
