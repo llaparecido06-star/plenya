@@ -208,6 +208,12 @@ const Index: React.FC = () => {
         {isToday && isPostpartum && <PostpartumWeeksCard />}
         {isToday && isPostpartum && <PostpartumRecoveryCard />}
         {isToday && isPostpartum && <BreastfeedingTracker />}
+        {isToday && isPostpartum && <PostpartumEvolutionChart />}
+        {isToday && isPostpartum && (
+          <div className="px-4">
+            <WeeklySummaryCard />
+          </div>
+        )}
         {isToday && isPostpartum && <CycleReturnCard />}
 
         {/* === MENSTRUATING MODE === */}
