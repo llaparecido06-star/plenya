@@ -464,6 +464,72 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_reports: {
+        Row: {
+          avg_energy: number | null
+          avg_mood: number | null
+          avg_stress: number | null
+          correlations: string[]
+          created_at: string
+          cycle_end_date: string
+          cycle_start_date: string
+          id: string
+          next_cycle_tip: string | null
+          patterns: string[]
+          period_days: number | null
+          recommendations: string[]
+          report_date: string
+          summary: string
+          top_symptoms: string[] | null
+          total_logs: number | null
+          updated_at: string
+          user_id: string
+          wellness_score: number
+        }
+        Insert: {
+          avg_energy?: number | null
+          avg_mood?: number | null
+          avg_stress?: number | null
+          correlations?: string[]
+          created_at?: string
+          cycle_end_date: string
+          cycle_start_date: string
+          id?: string
+          next_cycle_tip?: string | null
+          patterns?: string[]
+          period_days?: number | null
+          recommendations?: string[]
+          report_date: string
+          summary: string
+          top_symptoms?: string[] | null
+          total_logs?: number | null
+          updated_at?: string
+          user_id: string
+          wellness_score: number
+        }
+        Update: {
+          avg_energy?: number | null
+          avg_mood?: number | null
+          avg_stress?: number | null
+          correlations?: string[]
+          created_at?: string
+          cycle_end_date?: string
+          cycle_start_date?: string
+          id?: string
+          next_cycle_tip?: string | null
+          patterns?: string[]
+          period_days?: number | null
+          recommendations?: string[]
+          report_date?: string
+          summary?: string
+          top_symptoms?: string[] | null
+          total_logs?: number | null
+          updated_at?: string
+          user_id?: string
+          wellness_score?: number
+        }
+        Relationships: []
+      }
       nutrition_intake: {
         Row: {
           calories: number | null

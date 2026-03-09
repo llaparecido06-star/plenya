@@ -42,6 +42,32 @@ export const useMonthlyReport = () => {
   const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // Load saved reports history
+  const loadSavedReports = useCallback(async () => {
+    if (!user) return;
+    
+    setLoadingHistory(true);
+    try {
+      const { data, error } = await supabase
+        .from('monthly_reports' as any)
+        .select('*')
+        .eq('user_id', user.id)
+        .order('report_date', { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+      setSavedReports((data as any[]) || []);
+    } catch (err) {
+      console.error('Error loading saved reports:', err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadSavedReports();
+  }, [loadSavedReports]);
+
   const generateReport = useCallback(async () => {
     if (!user || !lastPeriodStart) return;
 
@@ -104,15 +130,60 @@ export const useMonthlyReport = () => {
       if (error) throw error;
 
       if (data?.report) {
-        setReport(data.report);
+        const newReport = data.report;
+        setReport(newReport);
         setGenerated(true);
+
+        // Save report to database
+        const cycleEndDate = new Date(lastPeriodStart);
+        cycleEndDate.setDate(cycleEndDate.getDate() + cycleLength - 1);
+
+        await supabase.from('monthly_reports' as any).insert({
+          user_id: user.id,
+          report_date: today,
+          cycle_start_date: cycleStart,
+          cycle_end_date: format(cycleEndDate, 'yyyy-MM-dd'),
+          wellness_score: newReport.wellnessScore,
+          summary: newReport.summary,
+          patterns: newReport.patterns,
+          correlations: newReport.correlations,
+          recommendations: newReport.recommendations,
+          next_cycle_tip: newReport.nextCycleTip,
+          avg_mood: payload.avg_mood,
+          avg_energy: payload.avg_energy,
+          avg_stress: payload.avg_stress,
+          top_symptoms: topSymptoms,
+          total_logs: logs.length,
+          period_days: menstruation?.length || 0,
+        } as any);
+
+        // Reload history
+        await loadSavedReports();
       }
     } catch (err) {
       console.error('Error generating monthly report:', err);
     } finally {
       setLoading(false);
     }
-  }, [user, cycleLength, lastPeriodStart, cycleDay]);
+  }, [user, cycleLength, lastPeriodStart, cycleDay, loadSavedReports]);
 
-  return { report, loading, generated, generateReport };
+  const deleteReport = useCallback(async (reportId: string) => {
+    try {
+      await supabase.from('monthly_reports' as any).delete().eq('id', reportId);
+      await loadSavedReports();
+    } catch (err) {
+      console.error('Error deleting report:', err);
+    }
+  }, [loadSavedReports]);
+
+  return { 
+    report, 
+    loading, 
+    generated, 
+    generateReport, 
+    savedReports, 
+    loadingHistory,
+    deleteReport,
+    refreshHistory: loadSavedReports
+  };
 };
