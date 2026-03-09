@@ -227,6 +227,9 @@ const Index: React.FC = () => {
             {/* Trying to Conceive Card - Golden Fertile Window */}
             {isTryingToConceive && <TryingToConceiveCard />}
 
+            {/* PMS Prediction Card */}
+            <PMSPredictionCard />
+
             {/* Period State Cards - Conditional based on DUM and late status */}
             {!isPregnant && (
               <>
