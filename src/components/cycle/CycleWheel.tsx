@@ -234,9 +234,9 @@ const CycleWheel: React.FC = () => {
             key={phase}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${
               displayPhase === phase
-                ? isLate && phase === 'lutea' 
-                  ? 'bg-red-500/20 scale-105' 
-                  : 'bg-phase-secondary/50 scale-105'
+                  ? isLate && phase === 'lutea' 
+                    ? 'bg-destructive/15 scale-105' 
+                    : 'bg-phase-secondary/50 scale-105'
                 : 'opacity-60'
             }`}
           >
