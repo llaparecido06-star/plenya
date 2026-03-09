@@ -183,6 +183,94 @@ serve(async (req) => {
       results.cycle_tips = phaseResults;
     }
 
+    // ─── 4. PMS SMART ALERTS ───────────────────────
+    if (type === "pms_alerts" || type === "all") {
+      const profiles: {
+        user_id: string;
+        last_period_start: string;
+        cycle_length: number;
+        life_phase: string | null;
+      }[] = await dbFetch(
+        "profiles?last_period_start=not.is.null&life_phase=neq.menopause&life_phase=neq.pregnant&select=user_id,last_period_start,cycle_length,life_phase"
+      );
+
+      const today = new Date();
+      const pmsUsers: string[] = [];
+      const fertileUsers: string[] = [];
+      const phaseChangeUsers: { userId: string; phase: string }[] = [];
+
+      for (const p of profiles) {
+        const dumDate = new Date(p.last_period_start);
+        const diffDays = Math.floor((today.getTime() - dumDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        const cl = p.cycle_length || 28;
+        const cycleDay = ((diffDays - 1) % cl) + 1;
+        const daysUntilPeriod = cl - cycleDay;
+
+        // PMS alert: exactly 3 days before period
+        if (daysUntilPeriod === 3) {
+          pmsUsers.push(p.user_id);
+        }
+
+        // Fertile window alert: 1 day before ovulation (ovulation ~ day cl/2)
+        const ovulationDay = Math.round(cl / 2);
+        if (cycleDay === ovulationDay - 3) {
+          fertileUsers.push(p.user_id);
+        }
+
+        // Phase change alerts (day 1, 6, ovDay-1, ovDay+2)
+        const phaseTransitions: Record<number, string> = {
+          1: 'menstrual',
+          6: 'folicular',
+          [ovulationDay - 1]: 'ovulatoria',
+          [ovulationDay + 2]: 'lutea',
+        };
+        if (phaseTransitions[cycleDay]) {
+          phaseChangeUsers.push({ userId: p.user_id, phase: phaseTransitions[cycleDay] });
+        }
+      }
+
+      const smartResults: Record<string, unknown> = {};
+
+      if (pmsUsers.length > 0) {
+        smartResults.pms = await sendPushAndLog(
+          pmsUsers,
+          "pms_alert",
+          "🌙 TPM se aproximando",
+          "Sua TPM pode começar em 3 dias. Priorize magnésio, sono e exercícios leves.",
+          "/"
+        );
+      }
+
+      if (fertileUsers.length > 0) {
+        smartResults.fertile = await sendPushAndLog(
+          fertileUsers,
+          "fertile_alert",
+          "🌸 Janela fértil se aproxima",
+          "Sua janela de fertilidade começa em breve. Fique atenta aos sinais do corpo.",
+          "/"
+        );
+      }
+
+      // Phase change grouped notifications
+      const phaseMessages: Record<string, { title: string; body: string }> = {
+        menstrual: { title: "🩸 Fase Menstrual começou", body: "Hora de descansar e se cuidar. Priorize ferro, chás e descanso." },
+        folicular: { title: "🌱 Fase Folicular — Energia subindo!", body: "Estrogênio em alta! Ótimo momento para projetos e treinos intensos." },
+        ovulatoria: { title: "✨ Fase Ovulatória — Você brilha!", body: "Pico de energia e carisma. Aproveite para socializar e exercícios de alta intensidade." },
+        lutea: { title: "🍂 Fase Lútea — Gentileza consigo", body: "Progesterona em alta. Beba água, prefira yoga e alimentos ricos em B6." },
+      };
+
+      for (const [phase, msg] of Object.entries(phaseMessages)) {
+        const users = phaseChangeUsers.filter(u => u.phase === phase).map(u => u.userId);
+        if (users.length > 0) {
+          smartResults[`phase_${phase}`] = await sendPushAndLog(
+            users, "phase_change", msg.title, msg.body, "/"
+          );
+        }
+      }
+
+      results.pms_alerts = smartResults;
+    }
+
     // ─── 5. HRT REMINDERS (Menopause) ────────────────
     if (type === "hrt" || type === "all") {
       const todayStr = new Date().toISOString().split("T")[0];
