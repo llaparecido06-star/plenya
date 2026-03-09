@@ -13,6 +13,7 @@ interface ChatPayload {
   pregnancy_trimester?: number | null;
   pregnancy_symptoms?: string[] | null;
   phase_name?: string;
+  postpartum_weeks?: number | null;
 }
 
 interface TrainerPayload {

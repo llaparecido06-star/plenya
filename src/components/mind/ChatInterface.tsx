@@ -57,6 +57,7 @@ const ChatInterface: React.FC = () => {
       pregnancy_trimester: lifePhase === 'pregnant' ? trimester : null,
       pregnancy_symptoms: lifePhase === 'pregnant' ? pregnancySymptoms : null,
       phase_name: phaseInfo.name,
+      postpartum_weeks: lifePhase === 'postpartum' ? postpartumWeeks : null,
     });
 
     setIsTyping(false);
