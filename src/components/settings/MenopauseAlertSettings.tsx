@@ -56,7 +56,7 @@ const MenopauseAlertSettings: React.FC = () => {
 
     const { error } = await supabase
       .from('profiles')
-      .update({ alert_thresholds: thresholds as unknown as Record<string, unknown> })
+      .update({ alert_thresholds: JSON.parse(JSON.stringify(thresholds)) })
       .eq('user_id', user.id);
 
     setSaving(false);
