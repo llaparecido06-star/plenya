@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLifePhase } from '@/hooks/useLifePhase';
+import LifePhaseSelector from '@/components/profile/LifePhaseSelector';
 import PageLayout from '@/components/layout/PageLayout';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,7 +9,7 @@ import AuthForm from '@/components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
 import {
   LogOut, Target, Dumbbell, Heart, Baby, Activity, Utensils, Zap, Crown, Globe,
-  Lock, Bell, CalendarDays, Settings, Trash2, ChevronRight, Pill, FileText, Gauge
+  Lock, Bell, CalendarDays, Settings, Trash2, ChevronRight, Pill, FileText, Gauge, Sparkles
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import DUMPicker from '@/components/profile/DUMPicker';
@@ -118,6 +119,13 @@ const Perfil: React.FC = () => {
   const { lifePhase } = useLifePhase();
   const isPregnant = lifePhase === 'pregnant';
 
+  const lifePhaseLabel: Record<string, string> = {
+    menstruating: '🌙 ' + t('life_phase.menstruating'),
+    pregnant: '🤰 ' + t('life_phase.pregnant'),
+    postpartum: '🌸 ' + t('life_phase.postpartum'),
+    menopause: '💜 ' + t('life_phase.menopause'),
+  };
+
   if (!user) {
     return (
       <PageLayout>
@@ -217,6 +225,10 @@ const Perfil: React.FC = () => {
           transition={{ delay: 0.2 }}
         >
           <MenuItem icon={Crown} label={t('profile.view_plans')} sublabel={t('profile.view_plans_sub')} iconClassName="bg-amber-100 text-amber-600" onClick={() => navigate('/planos')} />
+
+          <MenuItem icon={Sparkles} label={t('profile.life_phase')} sublabel={lifePhase ? lifePhaseLabel[lifePhase] || '' : ''} iconClassName="bg-pink-100 text-pink-600">
+            <LifePhaseSelector />
+          </MenuItem>
 
           <MenuItem icon={Globe} label={t('profile.language')} sublabel={currentLang ? `${currentLang.flag} ${currentLang.label}` : ''} iconClassName="bg-sky-100 text-sky-600">
             <div className="flex flex-col gap-2">
