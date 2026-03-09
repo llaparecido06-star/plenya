@@ -42,6 +42,7 @@ import MenopauseSleepTracker from '@/components/home/MenopauseSleepTracker';
 import WearableSleepImport from '@/components/home/WearableSleepImport';
 import MenopauseWeeklySummary from '@/components/home/MenopauseWeeklySummary';
 import MenopauseExerciseCard from '@/components/home/MenopauseExerciseCard';
+import MenopauseMonthlyTrends from '@/components/home/MenopauseMonthlyTrends';
 import MenopauseSymptomChart from '@/components/home/MenopauseSymptomChart';
 import MenopauseDiaryCard from '@/components/home/MenopauseDiaryCard';
 import HotFlashCounter from '@/components/home/HotFlashCounter';
