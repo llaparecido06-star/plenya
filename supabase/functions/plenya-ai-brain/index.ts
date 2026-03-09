@@ -115,7 +115,7 @@ CONTEXTO IMPORTANTE: A usuária está no pós-parto${weeksContext}.
 A usuária está em fase menstruante normal. Você pode mencionar fases do ciclo quando relevante.`;
 }
 
-function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?: string, lifePhase?: string, pregnancyWeeks?: number): string {
+function getTrainerSystemPrompt(phase: string, cycleDay?: number, fitnessLevel?: string, lifePhase?: string, pregnancyWeeks?: number, postpartumWeeks?: number): string {
   // Menopause-specific prompt
   if (lifePhase === 'menopause') {
     const intensityGuidance: Record<string, string> = {
