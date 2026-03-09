@@ -26,7 +26,10 @@
     "send": "Enviar",
     "loading": "Carregando...",
     "sign_out": "Sair",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "add": "Adicionar",
+    "show_less": "Ver menos",
+    "error": "Erro"
   },
   "onboarding": {
     "name_question": "Como você quer ser chamada?",
