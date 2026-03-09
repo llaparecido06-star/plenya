@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Baby, Plus, Clock } from 'lucide-react';
+import { Baby, Plus, Clock, Droplets } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,6 +97,7 @@ const BreastfeedingTracker: React.FC = () => {
   const breastCount = todayLogs.filter(l => l.feed_type === 'breast').length;
   const bottleCount = todayLogs.filter(l => l.feed_type === 'bottle').length;
   const totalMinutes = todayLogs.reduce((sum, l) => sum + (l.duration_minutes || 0), 0);
+  const totalFeeds = breastCount + bottleCount;
 
   return (
     <div className="px-4">
@@ -113,6 +114,24 @@ const BreastfeedingTracker: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Daily Summary Card */}
+            {totalFeeds > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-3 rounded-xl bg-primary/5 border border-primary/10"
+              >
+                <p className="text-sm text-foreground font-medium">
+                  📊 Hoje você amamentou {totalFeeds} {totalFeeds === 1 ? 'vez' : 'vezes'}
+                  {totalMinutes > 0 && ` (~${totalMinutes}min)`}.
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <Droplets className="w-3 h-3" />
+                  Lembre-se de se hidratar! Meta: 2.7L para amamentação 💧
+                </p>
+              </motion.div>
+            )}
+
             {/* Timer */}
             {timerRunning ? (
               <div className="text-center space-y-3">
@@ -142,7 +161,7 @@ const BreastfeedingTracker: React.FC = () => {
               </div>
             )}
 
-            {/* Today's summary */}
+            {/* Today's log list */}
             {todayLogs.length > 0 && (
               <div className="pt-3 border-t border-border space-y-1.5">
                 <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">

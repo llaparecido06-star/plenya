@@ -46,6 +46,7 @@ import ContractionTimerCard from '@/components/home/ContractionTimerCard';
 import HospitalBagCard from '@/components/home/HospitalBagCard';
 import MenopauseSleepTracker from '@/components/home/MenopauseSleepTracker';
 import WearableSleepImport from '@/components/home/WearableSleepImport';
+import HotFlashSleepCorrelation from '@/components/home/HotFlashSleepCorrelation';
 import MenopauseWeeklySummary from '@/components/home/MenopauseWeeklySummary';
 import MenopauseExerciseCard from '@/components/home/MenopauseExerciseCard';
 import MenopauseMonthlyTrends from '@/components/home/MenopauseMonthlyTrends';
@@ -160,8 +161,8 @@ const Index: React.FC = () => {
         {/* Show CycleWheel only for menstruating users viewing today */}
         {isToday && isMenstruating && <CycleWheel />}
         
-        {/* Cycle Sync Insight Card - Right below the wheel for menstruating users */}
-        {isToday && isMenstruating && <CycleSyncInsightCard />}
+        {/* Cycle Sync Insight Card - adapts per life phase */}
+        {isToday && <CycleSyncInsightCard />}
       </div>
 
       <div className="space-y-4 mt-4">
@@ -201,6 +202,7 @@ const Index: React.FC = () => {
         {isToday && isMenopause && <MenopauseWeeklySummary />}
         {isToday && isMenopause && <HotFlashCounter />}
         {isToday && isMenopause && <HotFlashInsights />}
+        {isToday && isMenopause && <HotFlashSleepCorrelation />}
         {isToday && isMenopause && <HRTTracker />}
         {isToday && isMenopause && <MenopauseDiaryCard />}
         {isToday && isMenopause && <MenopauseExamsCard />}
