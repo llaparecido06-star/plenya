@@ -73,7 +73,7 @@ const LatePeriodCard: React.FC = () => {
         </div>
 
         <div className="text-right">
-          <span className="text-2xl font-bold text-red-500">
+          <span className="text-2xl font-bold text-destructive">
             {daysLate}
           </span>
           <p className="text-xs text-muted-foreground">
