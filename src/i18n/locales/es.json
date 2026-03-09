@@ -26,7 +26,10 @@
     "send": "Enviar",
     "loading": "Cargando...",
     "sign_out": "Salir",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "add": "Agregar",
+    "show_less": "Ver menos",
+    "error": "Error"
   },
   "onboarding": {
     "name_question": "¿Cómo quieres que te llamen?",

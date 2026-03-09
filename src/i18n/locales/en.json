@@ -26,7 +26,10 @@
     "send": "Send",
     "loading": "Loading...",
     "sign_out": "Sign Out",
-    "continue": "Continue"
+    "continue": "Continue",
+    "add": "Add",
+    "show_less": "Show less",
+    "error": "Error"
   },
   "onboarding": {
     "name_question": "What would you like to be called?",
