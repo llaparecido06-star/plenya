@@ -167,9 +167,13 @@ const Index: React.FC = () => {
 
         {/* === MENOPAUSE MODE === */}
         {isToday && isMenopause && <MenopauseWellnessHub age={age} />}
+        {isToday && isMenopause && <HotFlashCounter />}
+        {isToday && isMenopause && <HRTTracker />}
         {isToday && isMenopause && <MenopauseDiaryCard />}
+        {isToday && isMenopause && <MenopauseExamsCard />}
         {isToday && isMenopause && (
           <div className="mx-4 space-y-4">
+            <MenopauseWeightChart />
             <MenopauseSleepTracker />
             <MenopauseSymptomChart />
             <MenopauseExerciseCard />
