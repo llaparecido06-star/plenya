@@ -46,7 +46,7 @@ const LatePeriodCard: React.FC = () => {
 
   return (
     <motion.div
-      className="mx-4 p-4 rounded-2xl border bg-gradient-to-br from-red-500/20 to-red-600/10 border-red-500/30"
+      className="mx-4 p-4 rounded-2xl border bg-gradient-to-br from-destructive/20 to-destructive/10 border-destructive/30 hover-scale"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
