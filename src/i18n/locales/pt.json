@@ -1118,5 +1118,19 @@
     "better": "Melhor",
     "worse": "Pior",
     "same": "Igual"
+  },
+  "monthly_report": {
+    "title": "Relatório Mensal IA",
+    "ai_badge": "IA",
+    "description": "Gere um relatório completo do seu ciclo com análise de padrões e recomendações personalizadas pela IA.",
+    "generate": "Gerar Relatório com IA",
+    "wellness_score": "Score de Bem-Estar",
+    "next_cycle": "Dica para o Próximo Ciclo",
+    "hide": "Ocultar detalhes",
+    "show": "Ver padrões e recomendações",
+    "patterns": "Padrões Identificados",
+    "correlations": "Correlações",
+    "recommendations": "Recomendações",
+    "regenerate": "Gerar novo relatório"
   }
 }
