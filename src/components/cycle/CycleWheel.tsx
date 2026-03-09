@@ -16,15 +16,15 @@ const CycleWheel: React.FC = () => {
 
   // Phase colors matching our design system
   const phaseColors: Record<CyclePhase, string> = {
-    menstrual: '#E07A5F',
-    folicular: '#81B29A',
-    ovulatoria: '#F4A261',
-    lutea: '#9B8BB0',
+    menstrual: 'hsl(var(--terracotta))',
+    folicular: 'hsl(var(--leaf-green))',
+    ovulatoria: 'hsl(var(--burnt-pink))',
+    lutea: 'hsl(var(--phase-glow))',
   };
 
   // Neutral color for awaiting state
-  const neutralColor = '#9CA3AF';
-  const lateColor = '#EF4444';
+  const neutralColor = 'hsl(var(--muted-foreground) / 0.4)';
+  const lateColor = 'hsl(var(--destructive))';
 
   // Phase angles (approximate based on typical cycle)
   const phases = [
@@ -125,7 +125,7 @@ const CycleWheel: React.FC = () => {
   }
 
   return (
-    <div id="cycle-wheel" className="relative flex flex-col items-center">
+    <div id="cycle-wheel" className="relative flex flex-col items-center animate-fade-up">
       <div className="relative">
         <svg width={size} height={size} className="drop-shadow-lg">
           {/* Background circle */}
@@ -211,7 +211,7 @@ const CycleWheel: React.FC = () => {
             // Late state - show days late
             <>
               <span className="text-3xl mb-1">⚠️</span>
-              <span className="text-2xl font-bold text-red-500">
+              <span className="text-2xl font-bold text-destructive">
                 {daysLate} {daysLate === 1 ? 'dia' : 'dias'}
               </span>
               <span className="text-sm text-muted-foreground">de atraso</span>
@@ -234,9 +234,9 @@ const CycleWheel: React.FC = () => {
             key={phase}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${
               displayPhase === phase
-                ? isLate && phase === 'lutea' 
-                  ? 'bg-red-500/20 scale-105' 
-                  : 'bg-phase-secondary/50 scale-105'
+                  ? isLate && phase === 'lutea' 
+                    ? 'bg-destructive/15 scale-105' 
+                    : 'bg-phase-secondary/50 scale-105'
                 : 'opacity-60'
             }`}
           >

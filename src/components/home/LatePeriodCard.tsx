@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, Droplets, Calendar, Check, Loader2 } from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCycle } from '@/contexts/CycleContext';
 import { useMenstruationLog } from '@/hooks/useMenstruationLog';
@@ -46,23 +46,23 @@ const LatePeriodCard: React.FC = () => {
 
   return (
     <motion.div
-      className="mx-4 p-4 rounded-2xl border bg-gradient-to-br from-red-500/20 to-red-600/10 border-red-500/30"
+      className="mx-4 p-4 rounded-2xl border bg-gradient-to-br from-destructive/20 to-destructive/10 border-destructive/30 hover-scale"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
     >
       <div className="flex items-center gap-4">
-        <div className="p-3 rounded-xl bg-red-500/20">
+        <div className="p-3 rounded-xl bg-destructive/15">
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <AlertTriangle className="w-6 h-6 text-red-500" />
+            <AlertTriangle className="w-6 h-6 text-destructive" />
           </motion.div>
         </div>
         
         <div className="flex-1">
-          <p className="text-sm font-medium text-red-600 dark:text-red-400">
+           <p className="text-sm font-medium text-destructive">
             Menstruação atrasada
           </p>
           {expectedDate && (
@@ -73,7 +73,7 @@ const LatePeriodCard: React.FC = () => {
         </div>
 
         <div className="text-right">
-          <span className="text-2xl font-bold text-red-500">
+          <span className="text-2xl font-bold text-destructive">
             {daysLate}
           </span>
           <p className="text-xs text-muted-foreground">
@@ -83,11 +83,11 @@ const LatePeriodCard: React.FC = () => {
       </div>
 
       {/* Action buttons */}
-      <div className="mt-4 pt-3 border-t border-red-500/20 space-y-2">
+      <div className="mt-4 pt-3 border-t border-destructive/20 space-y-2">
         <Button
           onClick={() => setDialogOpen(true)}
           disabled={loading}
-          className="w-full bg-red-500 hover:bg-red-600 text-white"
+          className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
         >
           {loading ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -109,7 +109,7 @@ const LatePeriodCard: React.FC = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Droplets className="w-5 h-5 text-red-500" />
+              <Droplets className="w-5 h-5 text-destructive" />
               Registrar menstruação?
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -120,7 +120,7 @@ const LatePeriodCard: React.FC = () => {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirm}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               Confirmar
             </AlertDialogAction>

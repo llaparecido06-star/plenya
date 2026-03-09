@@ -57,6 +57,7 @@ const NotificationSettings: React.FC = () => {
     requestPermission, registerServiceWorker, updateSettings,
     schedulePillReminder, scheduleRecipeReminder, scheduleTrialExpirationReminder,
     schedulePMSAlert, scheduleFertileWindowAlert, scheduleHydrationAlert,
+    scheduleOvulationAlert, scheduleLatePeriodAlert,
   } = useNotifications();
 
   const { isNative, register: registerNativePush } = useNativePush();
@@ -64,7 +65,7 @@ const NotificationSettings: React.FC = () => {
   const { isTryingToConceive, lifePhase } = useLifePhase();
   const { favorites } = useRecipeHistory();
   const { subscriptionEnd, subscribed } = useAuth();
-  const { cycleLength, cycleDay, hasDUM } = useCycle();
+  const { cycleLength, cycleDay, hasDUM, isLate } = useCycle();
 
   const isDisabled = permission !== 'granted';
   const isMenstruating = lifePhase === 'menstruating' || !lifePhase;
@@ -106,21 +107,55 @@ const NotificationSettings: React.FC = () => {
     if (permission !== 'granted' || !hasDUM || !isMenstruating) return;
 
     const now = new Date();
-    const periodDate = new Date(now);
-    periodDate.setDate(periodDate.getDate() + (cycleLength - cycleDay));
 
-    if (settings.pmsAlert) schedulePMSAlert(periodDate);
+    const expectedPeriodDate = new Date(now);
+    expectedPeriodDate.setDate(expectedPeriodDate.getDate() + (cycleLength - cycleDay));
 
-    const ovulationDay = Math.round(cycleLength / 2) - 2;
+    if (settings.pmsAlert && !isLate) {
+      schedulePMSAlert(expectedPeriodDate);
+    }
+
+    if (settings.latePeriodAlert && !isLate) {
+      scheduleLatePeriodAlert(expectedPeriodDate);
+    }
+
+    const ovulationDay = Math.round(cycleLength / 2);
+    const ovulationDate = new Date(now);
+    ovulationDate.setDate(ovulationDate.getDate() + (ovulationDay - cycleDay));
+    if (settings.ovulationAlert) {
+      scheduleOvulationAlert(ovulationDate);
+    }
+
     const fertileStart = new Date(now);
-    fertileStart.setDate(fertileStart.getDate() + (ovulationDay - cycleDay));
-    if (settings.fertileWindow) scheduleFertileWindowAlert(fertileStart);
+    fertileStart.setDate(fertileStart.getDate() + ((ovulationDay - 2) - cycleDay));
+    if (settings.fertileWindow) {
+      scheduleFertileWindowAlert(fertileStart);
+    }
 
     const lutealStart = new Date(now);
     const lutealDay = Math.round(cycleLength / 2) + 2;
     lutealStart.setDate(lutealStart.getDate() + (lutealDay - cycleDay));
-    if (settings.hydrationAlert) scheduleHydrationAlert(lutealStart);
-  }, [permission, hasDUM, isMenstruating, cycleLength, cycleDay, settings.pmsAlert, settings.fertileWindow, settings.hydrationAlert, schedulePMSAlert, scheduleFertileWindowAlert, scheduleHydrationAlert]);
+    if (settings.hydrationAlert) {
+      scheduleHydrationAlert(lutealStart);
+    }
+  }, [
+    permission,
+    hasDUM,
+    isMenstruating,
+    isLate,
+    cycleLength,
+    cycleDay,
+    settings.pmsAlert,
+    settings.fertileWindow,
+    settings.hydrationAlert,
+    settings.ovulationAlert,
+    settings.latePeriodAlert,
+    schedulePMSAlert,
+    scheduleFertileWindowAlert,
+    scheduleHydrationAlert,
+    scheduleOvulationAlert,
+    scheduleLatePeriodAlert,
+  ]);
 
   const showPillOption = contraceptiveType === 'Pílula';
   const showInjectionOption = contraceptiveType === 'Injeção';
@@ -181,7 +216,7 @@ const NotificationSettings: React.FC = () => {
 
               <NotificationRow
                 icon={<CloudRain className="w-4 h-4" />}
-                iconBg="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
+                iconBg="bg-primary/15 text-primary"
                 label="Alerta de TPM"
                 description="3 dias antes da menstruação"
                 checked={settings.pmsAlert}
@@ -190,8 +225,28 @@ const NotificationSettings: React.FC = () => {
               />
 
               <NotificationRow
+                icon={<Heart className="w-4 h-4" />}
+                iconBg="bg-accent/20 text-accent-foreground"
+                label="Dia da Ovulação"
+                description="Aviso no dia de pico fértil"
+                checked={settings.ovulationAlert}
+                onCheckedChange={(v) => updateSettings({ ovulationAlert: v })}
+                disabled={isDisabled}
+              />
+
+              <NotificationRow
+                icon={<Bell className="w-4 h-4" />}
+                iconBg="bg-destructive/15 text-destructive"
+                label="Atraso Menstrual"
+                description="1 dia após data prevista"
+                checked={settings.latePeriodAlert}
+                onCheckedChange={(v) => updateSettings({ latePeriodAlert: v })}
+                disabled={isDisabled}
+              />
+
+              <NotificationRow
                 icon={<Droplets className="w-4 h-4" />}
-                iconBg="bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
+                iconBg="bg-secondary text-secondary-foreground"
                 label="Hidratação Lútea"
                 description="Lembrete na fase lútea"
                 checked={settings.hydrationAlert}
@@ -201,7 +256,7 @@ const NotificationSettings: React.FC = () => {
 
               <NotificationRow
                 icon={<RefreshCw className="w-4 h-4" />}
-                iconBg="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+                iconBg="bg-muted text-muted-foreground"
                 label="Mudança de Fase"
                 description="Aviso ao trocar de fase do ciclo"
                 checked={settings.phaseChangeAlert}

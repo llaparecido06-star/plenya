@@ -15,6 +15,8 @@ interface NotificationSettings {
   pmsAlert: boolean;
   hydrationAlert: boolean;
   phaseChangeAlert: boolean;
+  ovulationAlert: boolean;
+  latePeriodAlert: boolean;
 }
 
 const NOTIFICATION_SETTINGS_KEY = 'plenya_notification_settings';
@@ -35,6 +37,8 @@ export const useNotifications = () => {
     pmsAlert: true,
     hydrationAlert: true,
     phaseChangeAlert: true,
+    ovulationAlert: true,
+    latePeriodAlert: true,
   });
 
   // Check for notification support (web or native)
@@ -302,6 +306,43 @@ export const useNotifications = () => {
     );
   }, [permission, settings.hydrationAlert, scheduleNotification]);
 
+  // Schedule ovulation alert (same day)
+  const scheduleOvulationAlert = useCallback(async (ovulationDate: Date) => {
+    if (permission !== 'granted' || !settings.ovulationAlert) return;
+
+    const alertDate = new Date(ovulationDate);
+    alertDate.setHours(8, 30, 0, 0);
+
+    const now = new Date();
+    if (alertDate <= now) return;
+
+    await scheduleNotification(
+      '✨ Dia da ovulação',
+      'Hoje pode ser o pico da sua janela fértil. Observe seu corpo e registre sinais importantes.',
+      alertDate,
+      'ovulation-alert'
+    );
+  }, [permission, settings.ovulationAlert, scheduleNotification]);
+
+  // Schedule late period alert (1 day after expected date)
+  const scheduleLatePeriodAlert = useCallback(async (expectedPeriodDate: Date) => {
+    if (permission !== 'granted' || !settings.latePeriodAlert) return;
+
+    const alertDate = new Date(expectedPeriodDate);
+    alertDate.setDate(alertDate.getDate() + 1);
+    alertDate.setHours(9, 0, 0, 0);
+
+    const now = new Date();
+    if (alertDate <= now) return;
+
+    await scheduleNotification(
+      '⚠️ Menstruação em atraso',
+      'Sua menstruação não foi registrada na data prevista. Se já começou, registre no app para recalcular seu ciclo.',
+      alertDate,
+      'late-period-alert'
+    );
+  }, [permission, settings.latePeriodAlert, scheduleNotification]);
+
   return {
     supported,
     permission,
@@ -315,6 +356,8 @@ export const useNotifications = () => {
     schedulePMSAlert,
     scheduleFertileWindowAlert,
     scheduleHydrationAlert,
+    scheduleOvulationAlert,
+    scheduleLatePeriodAlert,
     updateSettings,
     showNotification,
   };

@@ -37,7 +37,7 @@ const AwaitingPeriodCard: React.FC = () => {
 
   return (
     <motion.div
-      className="mx-4 p-4 rounded-2xl border bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
+      className="mx-4 p-4 rounded-2xl border bg-gradient-to-br from-primary/12 to-accent/10 border-primary/20 hover-scale"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
@@ -98,7 +98,7 @@ const AwaitingPeriodCard: React.FC = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Droplets className="w-5 h-5 text-red-500" />
+              <Droplets className="w-5 h-5 text-primary" />
               Registrar menstruação?
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -109,7 +109,7 @@ const AwaitingPeriodCard: React.FC = () => {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirm}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-primary hover:bg-primary/90"
             >
               Confirmar
             </AlertDialogAction>
