@@ -356,6 +356,8 @@ export const useNotifications = () => {
     schedulePMSAlert,
     scheduleFertileWindowAlert,
     scheduleHydrationAlert,
+    scheduleOvulationAlert,
+    scheduleLatePeriodAlert,
     updateSettings,
     showNotification,
   };
