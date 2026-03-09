@@ -259,6 +259,9 @@ const Index: React.FC = () => {
 
             {/* Symptom Map - Last 3 cycles */}
             <CycleSymptomMap />
+
+            {/* Cycle Comparator - Current vs previous cycles */}
+            <CycleComparatorCard />
           </>
         )}
 
