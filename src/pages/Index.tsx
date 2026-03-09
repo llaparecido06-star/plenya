@@ -87,6 +87,7 @@ const Index: React.FC = () => {
     lifePhase,
     pregnancyWeeks,
     pregnancyStartDate,
+    postpartumWeeks,
     isTryingToConceive,
     age,
     loading: lifePhaseLoading
