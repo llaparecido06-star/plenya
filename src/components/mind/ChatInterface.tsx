@@ -25,6 +25,14 @@ const ChatInterface: React.FC = () => {
   const { symptoms: pregnancySymptoms } = usePregnancyDiarySymptoms();
   const { goal, diet_type } = useProfile();
   const { data: todayLog } = useDailyLog();
+  const { streak } = useLoginStreak();
+
+  // Determine engagement status
+  const getStreakStatus = (): 'active' | 'absent_48h' | 'streak_at_risk' | null => {
+    if (streak === 0) return 'absent_48h';
+    if (streak === 1) return 'streak_at_risk';
+    return 'active';
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
