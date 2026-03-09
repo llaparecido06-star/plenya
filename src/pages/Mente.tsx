@@ -16,6 +16,7 @@ const Mente: React.FC = () => {
   const { lifePhase } = useLifePhase();
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
+  const isPostpartum = lifePhase === 'postpartum';
 
   return (
     <PageLayout>
@@ -37,7 +38,7 @@ const Mente: React.FC = () => {
       </div>
 
       {/* Life-phase specific meditation/breathing tips */}
-      {(isPregnant || isMenopause) && (
+      {(isPregnant || isMenopause || isPostpartum) && (
         <div className="px-4 mb-4">
           <LifePhaseBreathingCard />
         </div>

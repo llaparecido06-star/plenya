@@ -57,6 +57,7 @@ import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import PostpartumWeeksCard from '@/components/home/PostpartumWeeksCard';
 import PostpartumRecoveryCard from '@/components/home/PostpartumRecoveryCard';
+import PostpartumEvolutionChart from '@/components/home/PostpartumEvolutionChart';
 import BreastfeedingTracker from '@/components/home/BreastfeedingTracker';
 import CycleReturnCard from '@/components/home/CycleReturnCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
@@ -207,6 +208,12 @@ const Index: React.FC = () => {
         {isToday && isPostpartum && <PostpartumWeeksCard />}
         {isToday && isPostpartum && <PostpartumRecoveryCard />}
         {isToday && isPostpartum && <BreastfeedingTracker />}
+        {isToday && isPostpartum && <PostpartumEvolutionChart />}
+        {isToday && isPostpartum && (
+          <div className="px-4">
+            <WeeklySummaryCard />
+          </div>
+        )}
         {isToday && isPostpartum && <CycleReturnCard />}
 
         {/* === MENSTRUATING MODE === */}
