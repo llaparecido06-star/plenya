@@ -60,6 +60,8 @@ import MenopauseReportCard from '@/components/home/MenopauseReportCard';
 import MenopauseAlertHistory from '@/components/home/MenopauseAlertHistory';
 import LifePhaseTransitionCard from '@/components/home/LifePhaseTransitionCard';
 import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
+import PregnancyWeeklySummaryCard from '@/components/home/PregnancyWeeklySummaryCard';
+import PostpartumWeeklySummaryCard from '@/components/home/PostpartumWeeklySummaryCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import PostpartumWeeksCard from '@/components/home/PostpartumWeeksCard';
 import PostpartumRecoveryCard from '@/components/home/PostpartumRecoveryCard';
