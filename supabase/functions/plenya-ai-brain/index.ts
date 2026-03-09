@@ -576,7 +576,7 @@ serve(async (req) => {
     switch (mode) {
       case 'chat': {
         const chatPayload = payload as ChatPayload;
-        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks, chatPayload.pregnancy_trimester, chatPayload.pregnancy_symptoms, chatPayload.postpartum_weeks, chatPayload.goal, chatPayload.diet_type, chatPayload.recent_symptoms, chatPayload.phase_name, chatPayload.recent_mood, chatPayload.recent_energy) + langInstruction;
+        systemPrompt = getChatSystemPrompt(chatPayload.life_phase, chatPayload.pregnancy_weeks, chatPayload.pregnancy_trimester, chatPayload.pregnancy_symptoms, chatPayload.postpartum_weeks, chatPayload.goal, chatPayload.diet_type, chatPayload.recent_symptoms, chatPayload.phase_name, chatPayload.recent_mood, chatPayload.recent_energy, chatPayload.recent_stress, chatPayload.streak_days, chatPayload.streak_status) + langInstruction;
         
         // Build messages with history
         const messages: Array<{ role: string; content: string }> = [
