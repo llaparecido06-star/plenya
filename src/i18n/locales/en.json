@@ -1102,5 +1102,21 @@
     "yesterday": "Yesterday",
     "show_all": "View all ({{count}})",
     "show_less": "View less"
+  },
+  "cycle_comparator": {
+    "title": "Cycle Comparator",
+    "ai_insights": "AI",
+    "mood": "Mood",
+    "energy": "Energy",
+    "stress": "Stress",
+    "avg_scores": "Averages",
+    "show_details": "View day-by-day details",
+    "hide_details": "Hide details",
+    "day_comparison": "Day-by-Day Comparison",
+    "top_symptoms": "Most Frequent Symptoms",
+    "no_symptoms": "None recorded",
+    "better": "Better",
+    "worse": "Worse",
+    "same": "Same"
   }
 }
