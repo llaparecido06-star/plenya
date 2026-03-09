@@ -263,6 +263,9 @@ const Index: React.FC = () => {
 
             {/* Cycle Comparator - Current vs previous cycles */}
             <CycleComparatorCard />
+
+            {/* Monthly Report - AI-generated insights */}
+            <MonthlyReportCard />
           </>
         )}
 
