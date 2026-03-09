@@ -202,6 +202,10 @@ const ChefIACard: React.FC = () => {
                 ? `${displayedHistory.length} receita${displayedHistory.length !== 1 ? 's' : ''} salva${displayedHistory.length !== 1 ? 's' : ''}`
                 : lifePhase === 'pregnant'
                 ? `Receitas seguras para gestantes (semana ${pregnancyWeeks || '?'})!`
+                : lifePhase === 'postpartum'
+                ? 'Receitas nutritivas para o pós-parto e amamentação!'
+                : lifePhase === 'menopause'
+                ? 'Receitas ricas em fitoestrógenos e cálcio!'
                 : `Receitas personalizadas para a fase ${recipePhase}!`}
             </DialogDescription>
           </DialogHeader>
