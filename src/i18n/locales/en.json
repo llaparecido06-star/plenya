@@ -1120,17 +1120,20 @@
     "same": "Same"
   },
   "monthly_report": {
-    "title": "AI Monthly Report",
-    "ai_badge": "AI",
-    "description": "Generate a complete cycle report with AI-powered pattern analysis and personalized recommendations.",
+    "title": "Monthly AI Report",
+    "not_generated": "Report Not Yet Generated",
+    "description": "Generate a complete cycle report with pattern analysis, correlations, and personalized recommendations.",
     "generate": "Generate AI Report",
     "wellness_score": "Wellness Score",
-    "next_cycle": "Next Cycle Tip",
-    "hide": "Hide details",
-    "show": "View patterns and recommendations",
     "patterns": "Identified Patterns",
-    "correlations": "Correlations",
-    "recommendations": "Recommendations",
-    "regenerate": "Generate new report"
+    "correlations": "Found Correlations",
+    "recommendations": "Personalized Recommendations",
+    "next_cycle_tip": "Next Cycle Goal",
+    "current_report": "Current Report",
+    "history": "History",
+    "no_history": "No previous reports yet",
+    "logs": "logs",
+    "delete_confirm": "Delete report?",
+    "delete_description": "This action cannot be undone. The report will be permanently deleted."
   }
 }

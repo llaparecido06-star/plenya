@@ -1,190 +1,375 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, TrendingUp, Lightbulb, Star, ChevronDown, ChevronUp, FileText, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Sparkles, ChevronDown, ChevronUp, Target, TrendingUp, Brain, Lightbulb, History, Trash2, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR, es, enUS } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { useMonthlyReport } from '@/hooks/useMonthlyReport';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
+const getLocale = () => {
+  const lang = localStorage.getItem('i18nextLng') || 'pt';
+  if (lang.startsWith('pt')) return ptBR;
+  if (lang.startsWith('es')) return es;
+  return enUS;
+};
 
 const MonthlyReportCard: React.FC = () => {
-  const { t } = useTranslation();
-  const { report, loading, generated, generateReport } = useMonthlyReport();
-  const [expanded, setExpanded] = useState(false);
+  const { t, i18n } = useTranslation();
+  const { report, loading, generated, generateReport, savedReports, loadingHistory, deleteReport } = useMonthlyReport();
+  const [expandedSections, setExpandedSections] = useState({
+    patterns: false,
+    correlations: false,
+    recommendations: false,
+  });
+  const [activeTab, setActiveTab] = useState('current');
 
-  if (loading) {
-    return (
-      <div className="px-4">
-        <Card className="border-primary/20">
-          <CardContent className="pt-6 space-y-3">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-20 w-full rounded-lg" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-500';
+    if (score >= 60) return 'text-yellow-500';
+    return 'text-orange-500';
+  };
 
   return (
-    <div className="px-4">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-card via-accent/20 to-primary/5">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                {t('monthly_report.title', 'Relatório Mensal IA')}
-              </CardTitle>
-              <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                <Sparkles className="w-3 h-3 mr-1" />
-                {t('monthly_report.ai_badge', 'IA')}
-              </Badge>
-            </div>
-          </CardHeader>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="glass-card overflow-hidden">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              {t('monthly_report.title')}
+            </CardTitle>
+            <Badge variant="outline" className="gap-1">
+              <Brain className="w-3 h-3" />
+              IA
+            </Badge>
+          </div>
+        </CardHeader>
 
-          <CardContent className="space-y-4">
-            {!generated ? (
-              <div className="text-center py-4 space-y-3">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                  <Sparkles className="w-8 h-8 text-primary" />
+        <CardContent className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="current" className="gap-2">
+                <Sparkles className="w-4 h-4" />
+                {t('monthly_report.current_report')}
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-2">
+                <History className="w-4 h-4" />
+                {t('monthly_report.history')}
+                {savedReports.length > 0 && (
+                  <Badge variant="secondary" className="ml-1">{savedReports.length}</Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="current" className="mt-4 space-y-4">
+              {!generated && !loading && (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                    <Brain className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">{t('monthly_report.not_generated')}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {t('monthly_report.description')}
+                    </p>
+                    <Button onClick={generateReport} className="gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      {t('monthly_report.generate')}
+                    </Button>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {t('monthly_report.description', 'Gere um relatório completo do seu ciclo com análise de padrões e recomendações personalizadas pela IA.')}
-                </p>
-                <Button onClick={generateReport} className="w-full" size="sm">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {t('monthly_report.generate', 'Gerar Relatório com IA')}
-                </Button>
-              </div>
-            ) : (
-              report && (
+              )}
+
+              {loading && (
                 <div className="space-y-4">
+                  <Skeleton className="h-8 w-3/4" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              )}
+
+              {generated && report && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="space-y-4"
+                >
                   {/* Wellness Score */}
-                  <div className="bg-background/50 rounded-xl p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">
-                        {t('monthly_report.wellness_score', 'Score de Bem-Estar')}
+                  <div className="p-4 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">{t('monthly_report.wellness_score')}</span>
+                      <span className={`text-2xl font-bold ${getScoreColor(report.wellnessScore)}`}>
+                        {report.wellnessScore}/100
                       </span>
-                      <span className="text-lg font-bold text-primary">{report.wellnessScore}/10</span>
                     </div>
-                    <Progress value={report.wellnessScore * 10} className="h-2" />
+                    <Progress value={report.wellnessScore} className="h-2" />
                   </div>
 
                   {/* Summary */}
-                  <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
-                    <p className="text-sm leading-relaxed text-foreground">{report.summary}</p>
+                  <div className="space-y-2">
+                    <p className="text-sm leading-relaxed">{report.summary}</p>
                   </div>
 
+                  {/* Patterns */}
+                  {report.patterns.length > 0 && (
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => toggleSection('patterns')}
+                        className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-primary" />
+                          <span className="font-medium text-sm">{t('monthly_report.patterns')}</span>
+                        </div>
+                        {expandedSections.patterns ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+                      <AnimatePresence>
+                        {expandedSections.patterns && (
+                          <motion.ul
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-2 overflow-hidden"
+                          >
+                            {report.patterns.map((pattern, idx) => (
+                              <motion.li
+                                key={idx}
+                                initial={{ x: -10, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="flex items-start gap-2 text-sm pl-3"
+                              >
+                                <span className="text-primary mt-1">•</span>
+                                <span>{pattern}</span>
+                              </motion.li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Correlations */}
+                  {report.correlations.length > 0 && (
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => toggleSection('correlations')}
+                        className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-primary" />
+                          <span className="font-medium text-sm">{t('monthly_report.correlations')}</span>
+                        </div>
+                        {expandedSections.correlations ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+                      <AnimatePresence>
+                        {expandedSections.correlations && (
+                          <motion.ul
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-2 overflow-hidden"
+                          >
+                            {report.correlations.map((correlation, idx) => (
+                              <motion.li
+                                key={idx}
+                                initial={{ x: -10, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="flex items-start gap-2 text-sm pl-3"
+                              >
+                                <span className="text-primary mt-1">•</span>
+                                <span>{correlation}</span>
+                              </motion.li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Recommendations */}
+                  {report.recommendations.length > 0 && (
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => toggleSection('recommendations')}
+                        className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Lightbulb className="w-4 h-4 text-primary" />
+                          <span className="font-medium text-sm">{t('monthly_report.recommendations')}</span>
+                        </div>
+                        {expandedSections.recommendations ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+                      <AnimatePresence>
+                        {expandedSections.recommendations && (
+                          <motion.ul
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-2 overflow-hidden"
+                          >
+                            {report.recommendations.map((rec, idx) => (
+                              <motion.li
+                                key={idx}
+                                initial={{ x: -10, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="flex items-start gap-2 text-sm pl-3"
+                              >
+                                <span className="text-primary mt-1">•</span>
+                                <span>{rec}</span>
+                              </motion.li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
                   {/* Next Cycle Tip */}
-                  <div className="flex items-start gap-3 bg-accent/40 rounded-xl p-4">
-                    <Star className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-primary mb-1">
-                        {t('monthly_report.next_cycle', 'Dica para o Próximo Ciclo')}
+                  {report.nextCycleTip && (
+                    <div className="p-4 rounded-lg bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/20">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-full bg-accent/20">
+                          <Target className="w-4 h-4 text-accent-foreground" />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <p className="font-medium text-sm">{t('monthly_report.next_cycle_tip')}</p>
+                          <p className="text-sm text-muted-foreground">{report.nextCycleTip}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-4 space-y-3">
+              {loadingHistory && (
+                <div className="space-y-3">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+              )}
+
+              {!loadingHistory && savedReports.length === 0 && (
+                <div className="text-center py-8 space-y-2">
+                  <History className="w-12 h-12 mx-auto text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    {t('monthly_report.no_history')}
+                  </p>
+                </div>
+              )}
+
+              {!loadingHistory && savedReports.map((savedReport, idx) => (
+                <motion.div
+                  key={savedReport.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Calendar className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">
+                          {format(new Date(savedReport.report_date), 'dd MMM yyyy', { locale: getLocale() })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(savedReport.cycle_start_date), 'dd/MM', { locale: getLocale() })} - {format(new Date(savedReport.cycle_end_date), 'dd/MM', { locale: getLocale() })}
                       </p>
-                      <p className="text-sm text-foreground">{report.nextCycleTip}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`text-lg font-bold ${getScoreColor(savedReport.wellness_score)}`}>
+                        {savedReport.wellness_score}
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t('monthly_report.delete_confirm')}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t('monthly_report.delete_description')}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteReport(savedReport.id)}>
+                              {t('actions.delete')}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
 
-                  {/* Expand for more details */}
-                  <Button variant="ghost" size="sm" onClick={() => setExpanded(!expanded)} className="w-full text-xs">
-                    {expanded ? (
-                      <><ChevronUp className="w-4 h-4 mr-1" />{t('monthly_report.hide', 'Ocultar detalhes')}</>
-                    ) : (
-                      <><ChevronDown className="w-4 h-4 mr-1" />{t('monthly_report.show', 'Ver padrões e recomendações')}</>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                    {savedReport.summary}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {savedReport.avg_mood && (
+                      <Badge variant="outline" className="gap-1">
+                        {t('body.mood')}: {savedReport.avg_mood.toFixed(1)}
+                      </Badge>
                     )}
-                  </Button>
-
-                  <AnimatePresence>
-                    {expanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="space-y-4 pt-2 border-t border-border/50">
-                          {/* Patterns */}
-                          {report.patterns.length > 0 && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4 text-primary" />
-                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                  {t('monthly_report.patterns', 'Padrões Identificados')}
-                                </p>
-                              </div>
-                              <ul className="space-y-2">
-                                {report.patterns.map((p, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm">
-                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                                    {p}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                          {/* Correlations */}
-                          {report.correlations.length > 0 && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-primary" />
-                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                  {t('monthly_report.correlations', 'Correlações')}
-                                </p>
-                              </div>
-                              <ul className="space-y-2">
-                                {report.correlations.map((c, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm">
-                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-accent-foreground/40 shrink-0" />
-                                    {c}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                          {/* Recommendations */}
-                          {report.recommendations.length > 0 && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <Lightbulb className="w-4 h-4 text-primary" />
-                                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                  {t('monthly_report.recommendations', 'Recomendações')}
-                                </p>
-                              </div>
-                              <ul className="space-y-2">
-                                {report.recommendations.map((r, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm bg-background/40 rounded-lg px-3 py-2">
-                                    <span className="font-medium text-primary mr-1">{i + 1}.</span>
-                                    {r}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
+                    {savedReport.avg_energy && (
+                      <Badge variant="outline" className="gap-1">
+                        {t('body.energy')}: {savedReport.avg_energy.toFixed(1)}
+                      </Badge>
                     )}
-                  </AnimatePresence>
-
-                  {/* Regenerate */}
-                  <Button variant="ghost" size="sm" onClick={generateReport} className="w-full text-xs text-muted-foreground">
-                    <RefreshCw className="w-3 h-3 mr-1" />
-                    {t('monthly_report.regenerate', 'Gerar novo relatório')}
-                  </Button>
-                </div>
-              )
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+                    {savedReport.total_logs > 0 && (
+                      <Badge variant="outline" className="gap-1">
+                        {savedReport.total_logs} {t('monthly_report.logs')}
+                      </Badge>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
