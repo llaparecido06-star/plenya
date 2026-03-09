@@ -57,6 +57,7 @@ const NotificationSettings: React.FC = () => {
     requestPermission, registerServiceWorker, updateSettings,
     schedulePillReminder, scheduleRecipeReminder, scheduleTrialExpirationReminder,
     schedulePMSAlert, scheduleFertileWindowAlert, scheduleHydrationAlert,
+    scheduleOvulationAlert, scheduleLatePeriodAlert,
   } = useNotifications();
 
   const { isNative, register: registerNativePush } = useNativePush();
