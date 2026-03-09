@@ -87,7 +87,7 @@ const LatePeriodCard: React.FC = () => {
         <Button
           onClick={() => setDialogOpen(true)}
           disabled={loading}
-          className="w-full bg-red-500 hover:bg-red-600 text-white"
+          className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
         >
           {loading ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
