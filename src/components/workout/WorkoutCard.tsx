@@ -334,7 +334,6 @@ const WorkoutCard: React.FC = () => {
                lifePhase === 'menopause' ? t('workout.phase_info_menopause') :
                t('workout.phase_info', { title: defaultPlan.title.toLowerCase(), intensity: defaultPlan.intensity })}
             </p>
-            </p>
           </div>
         </div>
 
