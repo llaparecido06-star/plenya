@@ -72,11 +72,34 @@ type RequestPayload = {
   language?: string;
 };
 
-function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null, pregnancyTrimester?: number | null, pregnancySymptoms?: string[] | null, postpartumWeeks?: number | null): string {
+function getCrossCheckInstruction(lifePhase: string | null, phaseName?: string, goal?: string | null, dietType?: string | null, recentSymptoms?: string[] | null, recentMood?: number | null, recentEnergy?: number | null): string {
+  const varA = lifePhase === 'pregnant' ? 'Gestante' : lifePhase === 'postpartum' ? 'Pós-parto' : lifePhase === 'menopause' ? 'Menopausa' : phaseName ? `Fase ${phaseName}` : 'Menstruante';
+  const varB = recentSymptoms && recentSymptoms.length > 0 ? recentSymptoms.join(', ') : recentMood ? `humor ${recentMood}/5` : recentEnergy ? `energia ${recentEnergy}/5` : null;
+  const goalLabel = goal || null;
+  const dietLabel = dietType ? ({ vegetarian: 'Vegetariana', vegan: 'Vegana', low_carb: 'Low Carb', lactose_free: 'Sem Lactose', omnivore: 'Onívora' } as Record<string, string>)[dietType] || dietType : null;
+  const varC = [goalLabel, dietLabel].filter(Boolean).join(', ') || null;
+
+  return `
+
+MOTOR DE CORRELAÇÃO CRUZADA (OBRIGATÓRIO):
+Antes de gerar qualquer resposta, execute silenciosamente esta lógica:
+- Variável A (Fase/Momento): ${varA}
+- Variável B (Sintoma/Registro Recente): ${varB || 'Não informado'}
+- Variável C (Objetivo/Contexto): ${varC || 'Não informado'}
+
+REGRA DE OURO: Sua sugestão SÓ É VÁLIDA se conectar pelo menos 2 das 3 variáveis (A+B, A+C, B+C, ou A+B+C).
+- ERRADO: "Beba mais água." (genérico, sem conexão)
+- CERTO: "Como você está na ${varA} (A)${varB ? ` e relatou ${varB} (B)` : ''}${varC ? `, considerando seu objetivo de ${varC} (C)` : ''}, sugiro..."
+- Nunca dê dicas genéricas que qualquer pessoa poderia receber. Personalize SEMPRE.`;
+}
+
+function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null, pregnancyTrimester?: number | null, pregnancySymptoms?: string[] | null, postpartumWeeks?: number | null, goal?: string | null, dietType?: string | null, recentSymptoms?: string[] | null, phaseName?: string, recentMood?: number | null, recentEnergy?: number | null): string {
   let basePrompt = `Você é a Plenya, uma assistente empática de saúde e bem-estar feminino. 
 Responda de forma curta (máximo 3 frases), acolhedora e prática. 
 Use emojis ocasionalmente para tornar a conversa mais leve.
 Nunca faça diagnósticos médicos - sugira consultar profissionais quando apropriado.`;
+
+  const crossCheck = getCrossCheckInstruction(lifePhase, phaseName, goal, dietType, recentSymptoms || pregnancySymptoms, recentMood, recentEnergy);
 
   if (lifePhase === 'pregnant') {
     const trimesterLabel = pregnancyTrimester ? `${pregnancyTrimester}º trimestre` : '';
@@ -96,27 +119,32 @@ Nunca faça diagnósticos médicos - sugira consultar profissionais quando aprop
     }
 
     return `${basePrompt}
+${crossCheck}
 
 CONTEXTO IMPORTANTE: A usuária está grávida${contextParts ? ` (${contextParts})` : ''}.
 - NUNCA fale sobre menstruação, ciclo menstrual ou fases do ciclo
 - Foque na saúde da gestação e do bebê
 - Priorize segurança alimentar e descanso
-- Seja extra cuidadosa com recomendações de exercícios${symptomContext}`;
+- Seja extra cuidadosa com recomendações de exercícios
+- Substitua qualquer meta de "Perda de Peso" por "Saúde Gestacional"${symptomContext}`;
   }
 
   if (lifePhase === 'menopause') {
     return `${basePrompt}
+${crossCheck}
 
 CONTEXTO IMPORTANTE: A usuária está no climatério/menopausa.
 - NUNCA fale sobre menstruação, ciclo menstrual ou fases do ciclo
 - Foque em alívio de sintomas como ondas de calor, insônia, alterações de humor
 - Sugira fitoestrógenos naturais (soja, linhaça) quando apropriado
-- Recomende técnicas de relaxamento e exercícios de baixo impacto`;
+- Recomende técnicas de relaxamento e exercícios de baixo impacto
+- Priorize saúde óssea e cardiovascular nas recomendações`;
   }
 
   if (lifePhase === 'postpartum') {
     const weeksContext = postpartumWeeks ? ` (semana ${postpartumWeeks} pós-parto)` : '';
     return `${basePrompt}
+${crossCheck}
 
 CONTEXTO IMPORTANTE: A usuária está no pós-parto${weeksContext}.
 - Foque na recuperação física e emocional pós-parto
@@ -124,10 +152,12 @@ CONTEXTO IMPORTANTE: A usuária está no pós-parto${weeksContext}.
 - Saúde mental: baby blues, cansaço extremo, adaptação - seja empática e acolhedora
 - Nutrição: priorize ferro (reposição do parto), cálcio, ômega-3, vitamina B12
 - Exercício: retorno gradual, respeitar a liberação médica (geralmente 6 semanas)
+- Substitua qualquer meta de "Perda de Peso" por "Recuperação Saudável"
 - NUNCA fale sobre ciclo menstrual ou fases - o ciclo pode não ter retornado ainda`;
   }
 
   return `${basePrompt}
+${crossCheck}
 
 A usuária está em fase menstruante normal. Você pode mencionar fases do ciclo quando relevante.`;
 }
