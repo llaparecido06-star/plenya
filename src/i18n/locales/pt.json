@@ -1013,5 +1013,12 @@
     "alert_flash_title": "Alerta de Ondas de Calor",
     "alert_flash_percent": "Aumento percentual para alerta",
     "alert_flash_example": "Alerta se ondas de calor aumentarem {{percent}}% vs semana anterior"
+  },
+  "alerts": {
+    "history_title": "Alertas Recentes",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "show_all": "Ver todos ({{count}})",
+    "show_less": "Ver menos"
   }
 }

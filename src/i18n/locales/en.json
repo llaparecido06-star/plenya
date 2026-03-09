@@ -1013,5 +1013,12 @@
     "alert_flash_title": "Hot Flash Alert",
     "alert_flash_percent": "Increase percentage for alert",
     "alert_flash_example": "Alert if hot flashes increase by {{percent}}% vs previous week"
+  },
+  "alerts": {
+    "history_title": "Recent Alerts",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "show_all": "View all ({{count}})",
+    "show_less": "View less"
   }
 }

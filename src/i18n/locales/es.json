@@ -1013,5 +1013,12 @@
     "alert_flash_title": "Alerta de Sofocos",
     "alert_flash_percent": "Porcentaje de aumento para alerta",
     "alert_flash_example": "Alerta si los sofocos aumentan {{percent}}% vs semana anterior"
+  },
+  "alerts": {
+    "history_title": "Alertas Recientes",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "show_all": "Ver todos ({{count}})",
+    "show_less": "Ver menos"
   }
 }

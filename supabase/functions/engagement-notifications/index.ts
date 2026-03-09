@@ -59,6 +59,22 @@ serve(async (req) => {
       return res.json();
     };
 
+    const logAlert = async (userIds: string[], alertType: string, title: string, body: string) => {
+      if (userIds.length === 0) return;
+      for (const uid of userIds) {
+        await fetch(`${supabaseUrl}/rest/v1/alert_logs`, {
+          method: "POST",
+          headers: {
+            apikey: serviceRoleKey,
+            Authorization: `Bearer ${serviceRoleKey}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ user_id: uid, alert_type: alertType, alert_title: title, alert_body: body }),
+        });
+      }
+    };
+
     const sendPush = async (user_ids: string[], title: string, body: string, route = "/") => {
       if (user_ids.length === 0) return { skipped: true };
       const res = await fetch(sendPushUrl, {
@@ -70,6 +86,11 @@ serve(async (req) => {
         body: JSON.stringify({ user_ids, title, body, data: { route } }),
       });
       return res.json();
+    };
+
+    const sendPushAndLog = async (userIds: string[], alertType: string, title: string, body: string, route = "/") => {
+      await logAlert(userIds, alertType, title, body);
+      return sendPush(userIds, title, body, route);
     };
 
     // ─── 1. LOST STREAKS ────────────────────────────
@@ -190,8 +211,9 @@ serve(async (req) => {
         }
       }
 
-      results.hrt = await sendPush(
+      results.hrt = await sendPushAndLog(
         hrtNeedReminder,
+        "hrt_reminder",
         "💊 Lembrete de Terapia Hormonal",
         "Está na hora da sua dose de TRH. Não esqueça de registrar!",
         "/"
@@ -208,8 +230,9 @@ serve(async (req) => {
 
       const uniqueExamUsers = [...new Set(overdueExams.map((r) => r.user_id))];
 
-      results.exams = await sendPush(
+      results.exams = await sendPushAndLog(
         uniqueExamUsers,
+        "exam_overdue",
         "🩺 Exames pendentes",
         "Você tem exames de saúde vencidos. Agende uma consulta para ficar em dia!",
         "/"
@@ -295,21 +318,15 @@ serve(async (req) => {
       const trendResults: Record<string, unknown> = {};
 
       if (sleepAlertUsers.length > 0) {
-        trendResults.sleep = await sendPush(
-          sleepAlertUsers,
-          "🌙 Alerta de Sono",
-          "Você dormiu menos de 6h nas últimas 3 noites. Tente um chá de camomila antes de dormir e evite telas 1h antes de deitar.",
-          "/"
-        );
+        const sleepTitle = "🌙 Alerta de Sono";
+        const sleepBody = "Você dormiu menos de 6h nas últimas 3 noites. Tente um chá de camomila antes de dormir e evite telas 1h antes de deitar.";
+        trendResults.sleep = await sendPushAndLog(sleepAlertUsers, "sleep_low", sleepTitle, sleepBody, "/");
       }
 
       if (flashAlertUsers.length > 0) {
-        trendResults.flashes = await sendPush(
-          flashAlertUsers,
-          "🔥 Ondas de Calor em Alta",
-          "Suas ondas de calor aumentaram 50%+ esta semana. Considere reduzir cafeína e alimentos picantes, e converse com seu médico.",
-          "/"
-        );
+        const flashTitle = "🔥 Ondas de Calor em Alta";
+        const flashBody = "Suas ondas de calor aumentaram 50%+ esta semana. Considere reduzir cafeína e alimentos picantes, e converse com seu médico.";
+        trendResults.flashes = await sendPushAndLog(flashAlertUsers, "flash_spike", flashTitle, flashBody, "/");
       }
 
       results.trend_alerts = trendResults;
