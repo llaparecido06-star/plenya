@@ -295,8 +295,8 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
       <DrawerContent className="max-h-[85vh]">
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
-              <Heart className="w-4 h-4" />
+            <div className="p-2 rounded-lg bg-pink-100 text-pink-600">
+              <Heart className="w-4 h-4 fill-pink-600" />
             </div>
             Registrar Intimidade
           </DrawerTitle>
