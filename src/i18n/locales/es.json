@@ -357,7 +357,27 @@
     "updated_desc": "La app se ha adaptado a tu nueva fase.",
     "error": "Error al actualizar fase",
     "confirm_title": "Confirmar cambio de fase",
-    "confirm_desc": "Esto cambiará todo el contenido de la app (entrenamientos, nutrición, mente y home) para adaptarse a la nueva fase. ¿Deseas continuar?"
+    "confirm_desc": "Esto cambiará todo el contenido de la app (entrenamientos, nutrición, mente y home) para adaptarse a la nueva fase. ¿Deseas continuar?",
+    "setup_title_menstruating": "Configurar Ciclo",
+    "setup_title_pregnant": "Configurar Embarazo",
+    "setup_title_postpartum": "Configurar Posparto",
+    "setup_title_menopause": "Configurar Menopausia",
+    "setup_cycle_length": "Duración del ciclo (días)",
+    "setup_period_duration": "Duración del período (días)",
+    "setup_last_period": "Fecha del último período",
+    "setup_trying_conceive": "Estoy intentando quedar embarazada",
+    "setup_dum": "Fecha de última menstruación (FUM)",
+    "setup_dum_hint_pregnant": "Para calcular las semanas de gestación",
+    "setup_dum_hint_postpartum": "Para estimar la fecha de parto y semanas posparto",
+    "setup_hrt": "Estoy en TRH (Terapia de Reemplazo Hormonal)",
+    "setup_hrt_type": "Tipo de TRH",
+    "setup_symptoms_tracking": "Quiero rastrear síntomas de menopausia",
+    "setup_breastfeeding": "Estoy amamantando",
+    "setup_step_info": "Completa la información de tu nueva fase"
+  },
+  "life_phase_badge": {
+    "week": "Semana {{weeks}}",
+    "age": "{{age}} años"
   },
   "goals": {
     "lose_weight": "Perder Peso",
