@@ -230,8 +230,9 @@ serve(async (req) => {
 
       const uniqueExamUsers = [...new Set(overdueExams.map((r) => r.user_id))];
 
-      results.exams = await sendPush(
+      results.exams = await sendPushAndLog(
         uniqueExamUsers,
+        "exam_overdue",
         "🩺 Exames pendentes",
         "Você tem exames de saúde vencidos. Agende uma consulta para ficar em dia!",
         "/"
