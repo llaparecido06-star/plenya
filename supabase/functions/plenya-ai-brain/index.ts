@@ -15,6 +15,11 @@ interface ChatPayload {
   pregnancy_symptoms?: string[] | null;
   phase_name?: string;
   postpartum_weeks?: number | null;
+  goal?: string | null;
+  diet_type?: string | null;
+  recent_symptoms?: string[] | null;
+  recent_mood?: number | null;
+  recent_energy?: number | null;
 }
 
 interface TrainerPayload {
