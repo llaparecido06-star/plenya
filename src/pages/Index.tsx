@@ -161,8 +161,8 @@ const Index: React.FC = () => {
         {/* Show CycleWheel only for menstruating users viewing today */}
         {isToday && isMenstruating && <CycleWheel />}
         
-        {/* Cycle Sync Insight Card - Right below the wheel for menstruating users */}
-        {isToday && isMenstruating && <CycleSyncInsightCard />}
+        {/* Cycle Sync Insight Card - adapts per life phase */}
+        {isToday && <CycleSyncInsightCard />}
       </div>
 
       <div className="space-y-4 mt-4">
