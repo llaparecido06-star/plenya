@@ -324,12 +324,9 @@ serve(async (req) => {
       }
 
       if (flashAlertUsers.length > 0) {
-        trendResults.flashes = await sendPush(
-          flashAlertUsers,
-          "🔥 Ondas de Calor em Alta",
-          "Suas ondas de calor aumentaram 50%+ esta semana. Considere reduzir cafeína e alimentos picantes, e converse com seu médico.",
-          "/"
-        );
+        const flashTitle = "🔥 Ondas de Calor em Alta";
+        const flashBody = "Suas ondas de calor aumentaram 50%+ esta semana. Considere reduzir cafeína e alimentos picantes, e converse com seu médico.";
+        trendResults.flashes = await sendPushAndLog(flashAlertUsers, "flash_spike", flashTitle, flashBody, "/");
       }
 
       results.trend_alerts = trendResults;
