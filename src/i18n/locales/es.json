@@ -247,8 +247,11 @@
     "title": "Cuerpo",
     "subtitle": "Entrenamiento ideal para la fase {{phase}}",
     "subtitle_menopause": "Ejercicios para bienestar y salud ósea",
+    "subtitle_postpartum": "Ejercicios suaves para tu recuperación",
     "menopause_tip_title": "Ejercicios en la Menopausia",
-    "menopause_tip_desc": "Prioriza fortalecimiento óseo, equilibrio y movilidad. Ejercicios de bajo impacto son ideales."
+    "menopause_tip_desc": "Prioriza fortalecimiento óseo, equilibrio y movilidad. Ejercicios de bajo impacto son ideales.",
+    "postpartum_tip_title": "Ejercicios en el Posparto",
+    "postpartum_tip_desc": "Respeta tu cuerpo y la autorización médica. Enfócate en suelo pélvico, respiración y retorno gradual."
   },
   "mind": {
     "title": "Mente",

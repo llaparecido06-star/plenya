@@ -247,8 +247,11 @@
     "title": "Body",
     "subtitle": "Ideal workout for the {{phase}} phase",
     "subtitle_menopause": "Exercises for wellness and bone health",
+    "subtitle_postpartum": "Gentle exercises for your recovery",
     "menopause_tip_title": "Exercise During Menopause",
-    "menopause_tip_desc": "Focus on bone strengthening, balance and mobility. Low-impact exercises are ideal."
+    "menopause_tip_desc": "Focus on bone strengthening, balance and mobility. Low-impact exercises are ideal.",
+    "postpartum_tip_title": "Postpartum Exercise",
+    "postpartum_tip_desc": "Respect your body and medical clearance. Focus on pelvic floor, breathing and gradual return."
   },
   "mind": {
     "title": "Mind",
