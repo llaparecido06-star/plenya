@@ -187,7 +187,7 @@ PRIORIDADES PÓS-PARTO:
 ${fitnessLevel ? intensityGuidance[fitnessLevel] || '' : ''}
 
 REGRAS DE SEGURANÇA:
-- Antes de 6 semanas: APENAS exercícios de Kegel, respiração e caminhada leve
+${earlyPostpartum ? '- ANTES DE 6 SEMANAS: APENAS exercícios de Kegel, respiração e caminhada leve!\n' : ''}- Antes de 6 semanas sem liberação médica: apenas Kegel, respiração e caminhada leve
 - Após 6 semanas (com liberação médica): retorno gradual
 - NUNCA sugira abdominais tradicionais (risco de diástase)
 - Evite saltos e impacto alto
