@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +45,7 @@ const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
     if (user) navigate('/');
@@ -67,6 +69,10 @@ const Auth: React.FC = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password || !fullName) return;
+    if (!acceptedTerms) {
+      toast({ title: t('auth.error'), description: t('auth.must_accept_terms'), variant: 'destructive' });
+      return;
+    }
     setLoading(true);
     try {
       const { error } = await signUp(email, password, fullName);
@@ -233,7 +239,27 @@ const Auth: React.FC = () => {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              <Button type="submit" className="w-full h-12 text-lg font-semibold phase-gradient text-white" disabled={loading}>
+
+              <div className="flex items-start gap-3 py-1">
+                <Checkbox
+                  id="terms"
+                  checked={acceptedTerms}
+                  onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                  className="mt-0.5"
+                />
+                <label htmlFor="terms" className="text-xs leading-relaxed text-muted-foreground cursor-pointer">
+                  {t('auth.accept_terms')}{' '}
+                  <Link to="/termos" target="_blank" className="text-primary underline hover:text-primary/80">
+                    {t('auth.terms_link')}
+                  </Link>{' '}
+                  {t('auth.and')}{' '}
+                  <Link to="/privacidade" target="_blank" className="text-primary underline hover:text-primary/80">
+                    {t('auth.privacy_link')}
+                  </Link>.
+                </label>
+              </div>
+
+              <Button type="submit" className="w-full h-12 text-lg font-semibold phase-gradient text-white" disabled={loading || !acceptedTerms}>
                 {loading ? t('auth.creating_account') : t('auth.signup')}
               </Button>
               {renderOAuthButtons()}

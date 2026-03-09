@@ -505,7 +505,12 @@
     "error_google": "Erro no login com Google",
     "error_apple": "Erro no login com Apple",
     "tagline": "Onde sua melhor versão desperta.",
-    "plenya": "Plenya"
+    "plenya": "Plenya",
+    "accept_terms": "Li e concordo com os",
+    "terms_link": "Termos de Uso",
+    "and": "e a",
+    "privacy_link": "Política de Privacidade",
+    "must_accept_terms": "Você precisa aceitar os termos para criar sua conta."
   },
   "plans": {
     "title": "Planos Plenya",
