@@ -52,6 +52,8 @@ import MenopauseWeightChart from '@/components/home/MenopauseWeightChart';
 import HotFlashInsights from '@/components/home/HotFlashInsights';
 import MenopauseReportCard from '@/components/home/MenopauseReportCard';
 import MenopauseAlertHistory from '@/components/home/MenopauseAlertHistory';
+import LifePhaseTransitionCard from '@/components/home/LifePhaseTransitionCard';
+import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
