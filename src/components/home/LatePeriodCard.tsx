@@ -57,7 +57,7 @@ const LatePeriodCard: React.FC = () => {
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <AlertTriangle className="w-6 h-6 text-red-500" />
+            <AlertTriangle className="w-6 h-6 text-destructive" />
           </motion.div>
         </div>
         
