@@ -47,8 +47,8 @@ const App = () => (
             <Toaster />
             <Sonner />
             <NotificationPrompt />
-            <LGPDConsentBanner />
             <BrowserRouter>
+              <LGPDConsentBanner />
               <AnimatePresence mode="wait">
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
