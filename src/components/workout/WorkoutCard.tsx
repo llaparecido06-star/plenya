@@ -155,6 +155,8 @@ const WorkoutCard: React.FC = () => {
     }
   }, [savedWorkout, workoutPhase]);
 
+  const { postpartumWeeks } = useLifePhase();
+
   const handleGenerateAIWorkout = async () => {
     const goalText = goals.length > 0 ? goals.join(', ') : null;
     
@@ -165,6 +167,7 @@ const WorkoutCard: React.FC = () => {
       fitness_level: fitness_level || 'moderate',
       life_phase: lifePhase || undefined,
       pregnancy_weeks: pregnancyWeeks || undefined,
+      postpartum_weeks: postpartumWeeks || undefined,
     });
 
     if (result) {
