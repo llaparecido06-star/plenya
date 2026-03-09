@@ -109,7 +109,7 @@ const AwaitingPeriodCard: React.FC = () => {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirm}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-primary hover:bg-primary/90"
             >
               Confirmar
             </AlertDialogAction>
