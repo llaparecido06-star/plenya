@@ -329,7 +329,11 @@ const WorkoutCard: React.FC = () => {
           <div>
             <h3 className="text-xl font-bold text-foreground">{t('workout.workout_of_day')}</h3>
             <p className="text-sm text-muted-foreground">
-              {t('workout.phase_info', { title: defaultPlan.title.toLowerCase(), intensity: defaultPlan.intensity })}
+              {lifePhase === 'pregnant' ? t('workout.phase_info_pregnant') :
+               lifePhase === 'postpartum' ? t('workout.phase_info_postpartum') :
+               lifePhase === 'menopause' ? t('workout.phase_info_menopause') :
+               t('workout.phase_info', { title: defaultPlan.title.toLowerCase(), intensity: defaultPlan.intensity })}
+            </p>
             </p>
           </div>
         </div>
