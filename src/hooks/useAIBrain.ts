@@ -8,7 +8,7 @@ type AIMode = 'chat' | 'trainer' | 'nutrition_scanner' | 'chef' | 'estimate_macr
 interface ChatPayload {
   message: string;
   history: Array<{ role: 'user' | 'assistant'; content: string }>;
-  life_phase: 'menstruating' | 'pregnant' | 'menopause' | null;
+  life_phase: 'menstruating' | 'pregnant' | 'menopause' | 'postpartum' | null;
   pregnancy_weeks?: number | null;
   pregnancy_trimester?: number | null;
   pregnancy_symptoms?: string[] | null;

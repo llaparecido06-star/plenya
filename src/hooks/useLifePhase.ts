@@ -3,12 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { parseLocalDate } from '@/lib/dateUtils';
 
-export type LifePhase = 'menstruating' | 'pregnant' | 'menopause';
+export type LifePhase = 'menstruating' | 'pregnant' | 'menopause' | 'postpartum';
 
 interface LifePhaseData {
   lifePhase: LifePhase | null;
   pregnancyStartDate: Date | null;
   pregnancyWeeks: number | null;
+  postpartumWeeks: number | null;
   isTryingToConceive: boolean;
   dateOfBirth: Date | null;
   age: number | null;
@@ -21,6 +22,7 @@ export const useLifePhase = (): LifePhaseData => {
     lifePhase: null,
     pregnancyStartDate: null,
     pregnancyWeeks: null,
+    postpartumWeeks: null,
     isTryingToConceive: false,
     dateOfBirth: null,
     age: null,
@@ -57,11 +59,20 @@ export const useLifePhase = (): LifePhaseData => {
 
           // Calculate pregnancy weeks
           let pregnancyWeeks: number | null = null;
+          let postpartumWeeks: number | null = null;
           if (profile.life_phase === 'pregnant' && pregnancyStartDate) {
             const daysSinceStart = Math.floor(
               (Date.now() - pregnancyStartDate.getTime()) / (24 * 60 * 60 * 1000)
             );
             pregnancyWeeks = Math.floor(daysSinceStart / 7);
+          }
+          // For postpartum, calculate weeks since pregnancy_start_date + 40 weeks (approx birth)
+          if (profile.life_phase === 'postpartum' && pregnancyStartDate) {
+            const estimatedBirth = new Date(pregnancyStartDate.getTime() + 40 * 7 * 24 * 60 * 60 * 1000);
+            const daysSinceBirth = Math.floor(
+              (Date.now() - estimatedBirth.getTime()) / (24 * 60 * 60 * 1000)
+            );
+            postpartumWeeks = Math.max(0, Math.floor(daysSinceBirth / 7));
           }
 
           // Calculate age
@@ -79,6 +90,7 @@ export const useLifePhase = (): LifePhaseData => {
             lifePhase: profile.life_phase as LifePhase | null,
             pregnancyStartDate,
             pregnancyWeeks,
+            postpartumWeeks,
             isTryingToConceive: profile.is_trying_to_conceive ?? false,
             dateOfBirth,
             age,

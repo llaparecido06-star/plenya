@@ -55,6 +55,10 @@ import MenopauseAlertHistory from '@/components/home/MenopauseAlertHistory';
 import LifePhaseTransitionCard from '@/components/home/LifePhaseTransitionCard';
 import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
+import PostpartumWeeksCard from '@/components/home/PostpartumWeeksCard';
+import PostpartumRecoveryCard from '@/components/home/PostpartumRecoveryCard';
+import BreastfeedingTracker from '@/components/home/BreastfeedingTracker';
+import CycleReturnCard from '@/components/home/CycleReturnCard';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
 import TrialExpirationBanner from '@/components/subscription/TrialExpirationBanner';
@@ -83,6 +87,7 @@ const Index: React.FC = () => {
     lifePhase,
     pregnancyWeeks,
     pregnancyStartDate,
+    postpartumWeeks,
     isTryingToConceive,
     age,
     loading: lifePhaseLoading
@@ -96,7 +101,8 @@ const Index: React.FC = () => {
   // Determine what mode we're in based on life phase
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
-  const isMenstruating = lifePhase === 'menstruating' || !lifePhase;
+  const isPostpartum = lifePhase === 'postpartum';
+  const isMenstruating = lifePhase === 'menstruating' || (!lifePhase && !isPostpartum);
 
   return (
     <PageLayout>
@@ -122,7 +128,9 @@ const Index: React.FC = () => {
                 ? t('home.subtitle_pregnant')
                 : isMenopause
                   ? t('home.subtitle_menopause')
-                  : t('home.subtitle_menstruating')
+                  : isPostpartum
+                    ? t('home.subtitle_postpartum', 'Cuidando de você e do bebê')
+                    : t('home.subtitle_menstruating')
               : t('home.subtitle_history')}
           </p>
         </motion.div>
@@ -194,6 +202,12 @@ const Index: React.FC = () => {
             <MenopauseExerciseCard />
           </div>
         )}
+
+        {/* === POSTPARTUM MODE === */}
+        {isToday && isPostpartum && <PostpartumWeeksCard />}
+        {isToday && isPostpartum && <PostpartumRecoveryCard />}
+        {isToday && isPostpartum && <BreastfeedingTracker />}
+        {isToday && isPostpartum && <CycleReturnCard />}
 
         {/* === MENSTRUATING MODE === */}
         {isToday && isMenstruating && (

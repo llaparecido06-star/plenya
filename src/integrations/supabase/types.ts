@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      breastfeeding_logs: {
+        Row: {
+          created_at: string
+          duration_minutes: number | null
+          feed_type: string
+          id: string
+          log_date: string
+          notes: string | null
+          quantity_ml: number | null
+          side: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number | null
+          feed_type?: string
+          id?: string
+          log_date?: string
+          notes?: string | null
+          quantity_ml?: number | null
+          side?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number | null
+          feed_type?: string
+          id?: string
+          log_date?: string
+          notes?: string | null
+          quantity_ml?: number | null
+          side?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -448,6 +484,51 @@ export type Database = {
           log_date?: string
           skipped?: boolean | null
           taken_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      postpartum_logs: {
+        Row: {
+          bleeding_level: number | null
+          created_at: string
+          first_period_returned: boolean | null
+          id: string
+          log_date: string
+          mood: number | null
+          notes: string | null
+          pain_level: number | null
+          sleep_hours: number | null
+          stitches_healing: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bleeding_level?: number | null
+          created_at?: string
+          first_period_returned?: boolean | null
+          id?: string
+          log_date?: string
+          mood?: number | null
+          notes?: string | null
+          pain_level?: number | null
+          sleep_hours?: number | null
+          stitches_healing?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bleeding_level?: number | null
+          created_at?: string
+          first_period_returned?: boolean | null
+          id?: string
+          log_date?: string
+          mood?: number | null
+          notes?: string | null
+          pain_level?: number | null
+          sleep_hours?: number | null
+          stitches_healing?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

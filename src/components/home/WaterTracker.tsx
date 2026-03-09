@@ -11,18 +11,21 @@ const WaterTracker: React.FC = () => {
   // Adaptive goals: pregnant 2.3L (~9 glasses), menopause 1.8L (~7 glasses), default 2L (~8 glasses)
   const getGlassCount = () => {
     if (lifePhase === 'pregnant') return 9;
+    if (lifePhase === 'postpartum') return 10; // Breastfeeding needs more
     if (lifePhase === 'menopause') return 7;
     return 8;
   };
 
   const getLiterGoal = () => {
     if (lifePhase === 'pregnant') return '2.3L';
+    if (lifePhase === 'postpartum') return '2.7L';
     if (lifePhase === 'menopause') return '1.8L';
     return '2L';
   };
 
   const getHint = () => {
     if (lifePhase === 'pregnant') return t('water.hint_pregnant', 'Gestantes precisam de mais hidratação 💧');
+    if (lifePhase === 'postpartum') return t('water.hint_postpartum', 'Amamentação exige hidratação extra 🤱');
     if (lifePhase === 'menopause') return t('water.hint_menopause', 'Hidratação ajuda com ondas de calor 💜');
     return '';
   };
