@@ -1118,5 +1118,19 @@
     "better": "Better",
     "worse": "Worse",
     "same": "Same"
+  },
+  "monthly_report": {
+    "title": "AI Monthly Report",
+    "ai_badge": "AI",
+    "description": "Generate a complete cycle report with AI-powered pattern analysis and personalized recommendations.",
+    "generate": "Generate AI Report",
+    "wellness_score": "Wellness Score",
+    "next_cycle": "Next Cycle Tip",
+    "hide": "Hide details",
+    "show": "View patterns and recommendations",
+    "patterns": "Identified Patterns",
+    "correlations": "Correlations",
+    "recommendations": "Recommendations",
+    "regenerate": "Generate new report"
   }
 }

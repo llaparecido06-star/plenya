@@ -49,9 +49,21 @@ interface ChefPayload {
   diet_type?: string;
 }
 
+interface MonthlyReportPayload {
+  cycle_day: number;
+  cycle_length: number;
+  phase: string;
+  avg_mood: number;
+  avg_energy: number;
+  avg_stress: number;
+  top_symptoms: string[];
+  total_logs: number;
+  period_days: number;
+}
+
 type RequestPayload = {
-  mode: 'chat' | 'trainer' | 'nutrition_scanner' | 'chef' | 'estimate_macros';
-  payload: ChatPayload | TrainerPayload | NutritionScannerPayload | ChefPayload | EstimateMacrosPayload;
+  mode: 'chat' | 'trainer' | 'nutrition_scanner' | 'chef' | 'estimate_macros' | 'monthly_report';
+  payload: ChatPayload | TrainerPayload | NutritionScannerPayload | ChefPayload | EstimateMacrosPayload | MonthlyReportPayload;
   language?: string;
 };
 
@@ -756,6 +768,81 @@ Seja realista nas estimativas. Não inclua texto fora do JSON.` + langInstructio
         } catch {
           console.error('Failed to parse macro estimate:', content);
           return new Response(JSON.stringify({ error: 'Falha ao estimar macros.' }), {
+            status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+
+      case 'monthly_report': {
+        const reportPayload = payload as MonthlyReportPayload;
+        
+        const reportPrompt = `Você é a Plenya IA, especialista em saúde feminina e análise de dados de ciclo menstrual.
+
+Analise os dados abaixo e gere um relatório mensal completo e personalizado.
+
+DADOS DO CICLO:
+- Dia do ciclo: ${reportPayload.cycle_day}/${reportPayload.cycle_length}
+- Fase atual: ${reportPayload.phase}
+- Humor médio: ${reportPayload.avg_mood}/5
+- Energia média: ${reportPayload.avg_energy}/5
+- Estresse médio: ${reportPayload.avg_stress}/5
+- Dias de menstruação: ${reportPayload.period_days}
+- Total de registros: ${reportPayload.total_logs}
+- Sintomas mais frequentes: ${reportPayload.top_symptoms.join(', ')}
+
+RESPONDA APENAS COM JSON VÁLIDO neste formato:
+{
+  "summary": "Resumo geral do ciclo em 2-3 frases, destacando o aspecto mais importante",
+  "patterns": ["Padrão 1 identificado", "Padrão 2 identificado", "Padrão 3"],
+  "correlations": ["Correlação 1 entre sintomas/humor/energia", "Correlação 2"],
+  "recommendations": ["Recomendação prática 1", "Recomendação 2", "Recomendação 3"],
+  "nextCycleTip": "Uma dica específica e acionável para o próximo ciclo",
+  "wellnessScore": 7
+}
+
+INSTRUÇÕES:
+- wellnessScore: nota de 1-10 baseada em humor, energia e sintomas
+- patterns: identifique 2-4 padrões claros do comportamento hormonal
+- correlations: encontre 1-3 relações entre sintomas, humor e fase do ciclo
+- recommendations: 3-5 dicas práticas de nutrição, exercício ou autocuidado
+- nextCycleTip: uma ação concreta para melhorar o próximo ciclo
+- Seja empática, prática e baseada em ciência
+- Use linguagem acolhedora e motivacional` + langInstruction;
+
+        const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: reportPrompt },
+              { role: 'user', content: 'Gere o relatório mensal baseado nos dados fornecidos.' },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('AI gateway error:', response.status, errorText);
+          throw new Error(`AI gateway error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        let content = data.choices?.[0]?.message?.content || '{}';
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) content = jsonMatch[0];
+        
+        try {
+          const report = JSON.parse(content);
+          return new Response(JSON.stringify({ report }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } catch {
+          console.error('Failed to parse monthly report:', content);
+          return new Response(JSON.stringify({ error: 'Falha ao gerar relatório.' }), {
             status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
