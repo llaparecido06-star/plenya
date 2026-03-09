@@ -58,7 +58,7 @@ const ChefIACard: React.FC = () => {
     return dietType ? labels[dietType] || null : null;
   };
 
-  const recipePhase = lifePhase === 'pregnant' ? 'folicular' : currentPhase;
+  const recipePhase = lifePhase === 'pregnant' ? 'gestante' : lifePhase === 'postpartum' ? 'pos_parto' : lifePhase === 'menopause' ? 'menopausa' : currentPhase;
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
