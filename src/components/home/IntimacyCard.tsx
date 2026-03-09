@@ -149,8 +149,8 @@ const IntimacyCard: React.FC = () => {
         transition={{ delay: 0.3 }}
       >
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-pink-400 to-rose-500 shadow-lg shadow-rose-500/30">
-            <Heart className="w-6 h-6 text-white" />
+          <div className="p-3 rounded-xl bg-gradient-to-br from-pink-400 to-pink-500 shadow-lg shadow-pink-500/30">
+            <Heart className="w-6 h-6 text-white fill-white" />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-foreground">Intimidade & Saúde</h3>
