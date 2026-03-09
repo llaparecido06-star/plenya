@@ -216,7 +216,7 @@ const NotificationSettings: React.FC = () => {
 
               <NotificationRow
                 icon={<CloudRain className="w-4 h-4" />}
-                iconBg="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
+                iconBg="bg-primary/15 text-primary"
                 label="Alerta de TPM"
                 description="3 dias antes da menstruação"
                 checked={settings.pmsAlert}
@@ -225,8 +225,28 @@ const NotificationSettings: React.FC = () => {
               />
 
               <NotificationRow
+                icon={<Heart className="w-4 h-4" />}
+                iconBg="bg-accent/20 text-accent-foreground"
+                label="Dia da Ovulação"
+                description="Aviso no dia de pico fértil"
+                checked={settings.ovulationAlert}
+                onCheckedChange={(v) => updateSettings({ ovulationAlert: v })}
+                disabled={isDisabled}
+              />
+
+              <NotificationRow
+                icon={<Bell className="w-4 h-4" />}
+                iconBg="bg-destructive/15 text-destructive"
+                label="Atraso Menstrual"
+                description="1 dia após data prevista"
+                checked={settings.latePeriodAlert}
+                onCheckedChange={(v) => updateSettings({ latePeriodAlert: v })}
+                disabled={isDisabled}
+              />
+
+              <NotificationRow
                 icon={<Droplets className="w-4 h-4" />}
-                iconBg="bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
+                iconBg="bg-secondary text-secondary-foreground"
                 label="Hidratação Lútea"
                 description="Lembrete na fase lútea"
                 checked={settings.hydrationAlert}
@@ -236,7 +256,7 @@ const NotificationSettings: React.FC = () => {
 
               <NotificationRow
                 icon={<RefreshCw className="w-4 h-4" />}
-                iconBg="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+                iconBg="bg-muted text-muted-foreground"
                 label="Mudança de Fase"
                 description="Aviso ao trocar de fase do ciclo"
                 checked={settings.phaseChangeAlert}
