@@ -30,6 +30,7 @@ const Corpo: React.FC = () => {
       return t('pregnancy.workout_trimester_3');
     }
     if (isMenopause) return t('body.subtitle_menopause');
+    if (isPostpartum) return t('body.subtitle_postpartum', 'Exercícios suaves para sua recuperação');
     return t('body.subtitle', { phase: phaseInfo.name });
   };
 
