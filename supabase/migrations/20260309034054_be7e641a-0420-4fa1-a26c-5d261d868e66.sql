@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles DROP CONSTRAINT profiles_life_phase_check;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_life_phase_check CHECK (life_phase = ANY (ARRAY['menstruating'::text, 'pregnant'::text, 'menopause'::text, 'postpartum'::text]));
