@@ -211,8 +211,9 @@ serve(async (req) => {
         }
       }
 
-      results.hrt = await sendPush(
+      results.hrt = await sendPushAndLog(
         hrtNeedReminder,
+        "hrt_reminder",
         "💊 Lembrete de Terapia Hormonal",
         "Está na hora da sua dose de TRH. Não esqueça de registrar!",
         "/"
