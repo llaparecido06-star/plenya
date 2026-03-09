@@ -60,6 +60,8 @@ import MenopauseReportCard from '@/components/home/MenopauseReportCard';
 import MenopauseAlertHistory from '@/components/home/MenopauseAlertHistory';
 import LifePhaseTransitionCard from '@/components/home/LifePhaseTransitionCard';
 import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
+import PregnancyWeeklySummaryCard from '@/components/home/PregnancyWeeklySummaryCard';
+import PostpartumWeeklySummaryCard from '@/components/home/PostpartumWeeklySummaryCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
 import PostpartumWeeksCard from '@/components/home/PostpartumWeeksCard';
 import PostpartumRecoveryCard from '@/components/home/PostpartumRecoveryCard';
@@ -188,6 +190,7 @@ const Index: React.FC = () => {
         {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 34 && <HospitalBagCard />}
         {isToday && isPregnant && <BabyRegistryCard />}
         {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 32 && <BirthPlaylistCard />}
+        {isToday && isPregnant && <PregnancyWeeklySummaryCard />}
         {isToday && isPregnant && <AppointmentChecklist />}
         {isToday && isPregnant && <PregnancyDiaryCard />}
         {isToday && isPregnant && <LifePhaseTransitionCard />}
@@ -218,11 +221,7 @@ const Index: React.FC = () => {
         {isToday && isPostpartum && <PostpartumRecoveryCard />}
         {isToday && isPostpartum && <BreastfeedingTracker />}
         {isToday && isPostpartum && <PostpartumEvolutionChart />}
-        {isToday && isPostpartum && (
-          <div className="px-4">
-            <WeeklySummaryCard />
-          </div>
-        )}
+        {isToday && isPostpartum && <PostpartumWeeklySummaryCard />}
         {isToday && isPostpartum && <CycleReturnCard />}
 
         {/* === MENSTRUATING MODE === */}
