@@ -124,6 +124,9 @@ const Index: React.FC = () => {
             </div>
           </div>
           
+          {/* Life Phase Badge */}
+          {isToday && <LifePhaseBadge />}
+          
           <p className="text-sm text-muted-foreground mt-1">
             {isToday
               ? isPregnant
