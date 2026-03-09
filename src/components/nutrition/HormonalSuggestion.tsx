@@ -218,6 +218,8 @@ const HormonalSuggestion: React.FC = () => {
     ? `${t('pregnancy.trimester_' + trimester)} — ${t('pregnancy.week')} ${pregnancyWeeks || '?'}`
     : isMenopause
     ? t('menopause.title')
+    : isPostpartum
+    ? t('postpartum.title', 'Pós-Parto')
     : phaseInfo.name;
 
   return (
