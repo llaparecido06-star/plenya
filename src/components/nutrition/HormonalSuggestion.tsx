@@ -171,6 +171,7 @@ const HormonalSuggestion: React.FC = () => {
 
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
+  const isPostpartum = lifePhase === 'postpartum';
   const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
 
   const suggestion = useMemo((): PhaseSuggestion => {
