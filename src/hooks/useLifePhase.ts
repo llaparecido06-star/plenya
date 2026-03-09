@@ -59,11 +59,20 @@ export const useLifePhase = (): LifePhaseData => {
 
           // Calculate pregnancy weeks
           let pregnancyWeeks: number | null = null;
+          let postpartumWeeks: number | null = null;
           if (profile.life_phase === 'pregnant' && pregnancyStartDate) {
             const daysSinceStart = Math.floor(
               (Date.now() - pregnancyStartDate.getTime()) / (24 * 60 * 60 * 1000)
             );
             pregnancyWeeks = Math.floor(daysSinceStart / 7);
+          }
+          // For postpartum, calculate weeks since pregnancy_start_date + 40 weeks (approx birth)
+          if (profile.life_phase === 'postpartum' && pregnancyStartDate) {
+            const estimatedBirth = new Date(pregnancyStartDate.getTime() + 40 * 7 * 24 * 60 * 60 * 1000);
+            const daysSinceBirth = Math.floor(
+              (Date.now() - estimatedBirth.getTime()) / (24 * 60 * 60 * 1000)
+            );
+            postpartumWeeks = Math.max(0, Math.floor(daysSinceBirth / 7));
           }
 
           // Calculate age
