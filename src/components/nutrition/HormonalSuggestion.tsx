@@ -186,6 +186,15 @@ const HormonalSuggestion: React.FC = () => {
       };
     }
 
+    if (isPostpartum) {
+      return {
+        title: t(postpartumSuggestion.titleKey, 'Nutrição Pós-Parto'),
+        description: t(postpartumSuggestion.descKey, 'Alimentos para recuperação e produção de leite. Priorize ferro, cálcio e ômega-3.'),
+        nutrients: postpartumSuggestion.nutrientKeys.map(k => t(k)),
+        foods: postpartumSuggestion.foods[dietKey] || postpartumSuggestion.foods.default,
+      };
+    }
+
     if (isPregnant) {
       const base = pregnancySuggestions[trimester];
       return {
@@ -203,7 +212,7 @@ const HormonalSuggestion: React.FC = () => {
       nutrients: base.nutrientKeys.map(k => t(k)),
       foods: base.foods[dietKey] || base.foods.default,
     };
-  }, [currentPhase, diet_type, isPregnant, isMenopause, trimester, t]);
+  }, [currentPhase, diet_type, isPregnant, isMenopause, isPostpartum, trimester, t]);
 
   const contextLabel = isPregnant
     ? `${t('pregnancy.trimester_' + trimester)} — ${t('pregnancy.week')} ${pregnancyWeeks || '?'}`
