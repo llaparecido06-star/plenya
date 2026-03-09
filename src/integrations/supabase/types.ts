@@ -514,6 +514,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          alert_thresholds: Json | null
           avatar_url: string | null
           contraceptive_brand: string | null
           contraceptive_details: Json | null
@@ -554,6 +555,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          alert_thresholds?: Json | null
           avatar_url?: string | null
           contraceptive_brand?: string | null
           contraceptive_details?: Json | null
@@ -594,6 +596,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          alert_thresholds?: Json | null
           avatar_url?: string | null
           contraceptive_brand?: string | null
           contraceptive_details?: Json | null

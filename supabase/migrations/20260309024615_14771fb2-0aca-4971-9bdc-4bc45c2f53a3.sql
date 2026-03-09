@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS alert_thresholds jsonb DEFAULT '{"sleep_min_hours": 6, "sleep_consecutive_nights": 3, "hot_flash_increase_percent": 50, "alerts_enabled": true}'::jsonb;
