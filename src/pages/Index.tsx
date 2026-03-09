@@ -180,6 +180,7 @@ const Index: React.FC = () => {
         {isToday && isMenopause && <MenopauseDiaryCard />}
         {isToday && isMenopause && <MenopauseExamsCard />}
         {isToday && isMenopause && <MenopauseReportCard />}
+        {isToday && isMenopause && <MenopauseAlertHistory />}
         {isToday && isMenopause && (
           <div className="mx-4 space-y-4">
             <MenopauseMonthlyTrends />
