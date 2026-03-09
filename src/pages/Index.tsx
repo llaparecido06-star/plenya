@@ -63,6 +63,7 @@ import WeeklySummaryCard from '@/components/home/WeeklySummaryCard';
 import PregnancyWeeklySummaryCard from '@/components/home/PregnancyWeeklySummaryCard';
 import PostpartumWeeklySummaryCard from '@/components/home/PostpartumWeeklySummaryCard';
 import NextContraceptiveCard from '@/components/home/NextContraceptiveCard';
+import MedicationQuickLog from '@/components/home/MedicationQuickLog';
 import PostpartumWeeksCard from '@/components/home/PostpartumWeeksCard';
 import PostpartumRecoveryCard from '@/components/home/PostpartumRecoveryCard';
 import PostpartumEvolutionChart from '@/components/home/PostpartumEvolutionChart';
@@ -248,6 +249,9 @@ const Index: React.FC = () => {
 
             {/* Next Contraceptive Reminder (Injection, Ring, Patch) */}
             <NextContraceptiveCard />
+
+            {/* Medication / Injection Quick Log */}
+            <MedicationQuickLog />
 
             {/* Weekly Summary */}
             <div className="px-4">

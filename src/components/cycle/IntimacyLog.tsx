@@ -285,8 +285,8 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
           >
-            <div className={`p-3 rounded-xl ${hasIntimacyData ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-600'}`}>
-              <Flame className="w-5 h-5" fill={hasIntimacyData ? 'currentColor' : 'none'} />
+            <div className={`p-3 rounded-xl ${hasIntimacyData ? 'bg-pink-500 text-white' : 'bg-pink-100 text-pink-600'}`}>
+              <Heart className="w-5 h-5" fill={hasIntimacyData ? 'currentColor' : 'none'} />
             </div>
             <span className="text-xs font-medium text-foreground text-center">Sexo & Libido</span>
           </motion.button>
@@ -295,8 +295,8 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
       <DrawerContent className="max-h-[85vh]">
         <DrawerHeader>
           <DrawerTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
-              <Heart className="w-4 h-4" />
+            <div className="p-2 rounded-lg bg-pink-100 text-pink-600">
+              <Heart className="w-4 h-4 fill-pink-600" />
             </div>
             Registrar Intimidade
           </DrawerTitle>
@@ -408,7 +408,7 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
           {renderTagGroup('After-Care', aftercareTags, selectedAftercare, setSelectedAftercare)}
 
           <Button 
-            className="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white"
+            className="w-full mt-6 bg-pink-500 hover:bg-pink-600 text-white"
             onClick={handleSave}
             disabled={saving || saved || !isAuthenticated}
           >
@@ -425,7 +425,7 @@ const IntimacyLog: React.FC<IntimacyLogProps> = ({ showAlert = false, alertOnly 
             ) : !isAuthenticated ? (
               'Faça login para salvar'
             ) : (
-              'Salvar Registro 💜'
+              'Salvar Registro 💗'
             )}
           </Button>
         </div>

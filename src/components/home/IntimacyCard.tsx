@@ -149,8 +149,8 @@ const IntimacyCard: React.FC = () => {
         transition={{ delay: 0.3 }}
       >
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-pink-400 to-rose-500 shadow-lg shadow-rose-500/30">
-            <Heart className="w-6 h-6 text-white" />
+          <div className="p-3 rounded-xl bg-gradient-to-br from-pink-400 to-pink-500 shadow-lg shadow-pink-500/30">
+            <Heart className="w-6 h-6 text-white fill-white" />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-foreground">Intimidade & Saúde</h3>
@@ -169,7 +169,7 @@ const IntimacyCard: React.FC = () => {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="flex items-center gap-2">
-                <Heart className="w-5 h-5 text-rose-500" />
+                <Heart className="w-5 h-5 text-pink-500 fill-pink-500" />
                 Intimidade & Saúde
               </DialogTitle>
               <Button
@@ -373,7 +373,7 @@ const IntimacyCard: React.FC = () => {
                               <Heart
                                 className={`w-7 h-7 transition-all ${
                                   level <= pleasureLevel
-                                    ? 'text-rose-500 fill-rose-500'
+                                    ? 'text-pink-500 fill-pink-500'
                                     : 'text-muted-foreground/30'
                                 }`}
                               />
