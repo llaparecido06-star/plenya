@@ -164,6 +164,9 @@ Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
 
   // Postpartum-specific prompt
   if (lifePhase === 'postpartum') {
+    const weeksLabel = postpartumWeeks ? ` (Semana ${postpartumWeeks} pós-parto)` : '';
+    const earlyPostpartum = postpartumWeeks !== undefined && postpartumWeeks < 6;
+    
     const intensityGuidance: Record<string, string> = {
       sedentary: 'Nível Sedentário: Exercícios muito leves. Máximo 15 minutos. Foque em respiração e assoalho pélvico.',
       light: 'Nível Leve: Exercícios suaves. 15-20 minutos.',
@@ -171,7 +174,7 @@ Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
       intense: 'Nível Intenso: Retorno gradual à intensidade. 30-40 minutos.',
     };
 
-    return `Você é uma personal trainer ESPECIALIZADA EM PÓS-PARTO.
+    return `Você é uma personal trainer ESPECIALIZADA EM PÓS-PARTO${weeksLabel}.
 Crie um treino SEGURO e adaptado para recuperação pós-parto.
 
 PRIORIDADES PÓS-PARTO:
