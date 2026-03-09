@@ -90,6 +90,7 @@ export const useLifePhase = (): LifePhaseData => {
             lifePhase: profile.life_phase as LifePhase | null,
             pregnancyStartDate,
             pregnancyWeeks,
+            postpartumWeeks,
             isTryingToConceive: profile.is_trying_to_conceive ?? false,
             dateOfBirth,
             age,
