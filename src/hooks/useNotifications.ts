@@ -32,6 +32,9 @@ export const useNotifications = () => {
     recipeReminder: false,
     recipeReminderTime: '11:00',
     trialExpiration: true,
+    pmsAlert: true,
+    hydrationAlert: true,
+    phaseChangeAlert: true,
   });
 
   // Check for notification support (web or native)
