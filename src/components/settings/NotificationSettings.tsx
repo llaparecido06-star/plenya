@@ -65,7 +65,7 @@ const NotificationSettings: React.FC = () => {
   const { isTryingToConceive, lifePhase } = useLifePhase();
   const { favorites } = useRecipeHistory();
   const { subscriptionEnd, subscribed } = useAuth();
-  const { cycleLength, cycleDay, hasDUM } = useCycle();
+  const { cycleLength, cycleDay, hasDUM, isLate } = useCycle();
 
   const isDisabled = permission !== 'granted';
   const isMenstruating = lifePhase === 'menstruating' || !lifePhase;
