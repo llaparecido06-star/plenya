@@ -53,7 +53,9 @@ const WeeklyPregnancyInsight: React.FC = () => {
   const { t } = useTranslation();
   const { chat, loading } = useAIBrain();
   const { pregnancyWeeks } = useLifePhase();
-  const { mood, energy } = useDailyLog();
+  const { data: dailyData } = useDailyLog();
+  const mood = dailyData.mood;
+  const energy = dailyData.energy;
   const [insight, setInsight] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
 
