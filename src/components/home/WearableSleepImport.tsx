@@ -24,6 +24,11 @@ const WearableSleepImport: React.FC = () => {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; errors: number } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { isNative, available, syncing, checkAvailability, syncSleepToDatabase } = useHealthSync();
+
+  useEffect(() => {
+    checkAvailability();
+  }, [checkAvailability]);
 
   const parseCSV = (text: string): SleepEntry[] => {
     const lines = text.trim().split('\n');
