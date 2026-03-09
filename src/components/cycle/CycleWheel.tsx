@@ -211,7 +211,7 @@ const CycleWheel: React.FC = () => {
             // Late state - show days late
             <>
               <span className="text-3xl mb-1">⚠️</span>
-              <span className="text-2xl font-bold text-red-500">
+              <span className="text-2xl font-bold text-destructive">
                 {daysLate} {daysLate === 1 ? 'dia' : 'dias'}
               </span>
               <span className="text-sm text-muted-foreground">de atraso</span>
