@@ -330,7 +330,8 @@ serve(async (req) => {
       }
 
       results.trend_alerts = trendResults;
-    }
+
+    return new Response(JSON.stringify({ success: true, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
