@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, Droplets, Calendar, Check, Loader2 } from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCycle } from '@/contexts/CycleContext';
 import { useMenstruationLog } from '@/hooks/useMenstruationLog';
