@@ -10,6 +10,7 @@ import { useAIBrain } from '@/hooks/useAIBrain';
 import { usePregnancyDiarySymptoms } from '@/hooks/usePregnancyDiarySymptoms';
 import { useProfile } from '@/hooks/useProfile';
 import { useDailyLog } from '@/hooks/useDailyLog';
+import { useLoginStreak } from '@/hooks/useLoginStreak';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 const ChatInterface: React.FC = () => {
