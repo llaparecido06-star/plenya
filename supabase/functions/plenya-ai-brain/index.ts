@@ -161,6 +161,53 @@ RESPONDA APENAS COM JSON VÁLIDO no formato:
 Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
   }
 
+  // Postpartum-specific prompt
+  if (lifePhase === 'postpartum') {
+    const intensityGuidance: Record<string, string> = {
+      sedentary: 'Nível Sedentário: Exercícios muito leves. Máximo 15 minutos. Foque em respiração e assoalho pélvico.',
+      light: 'Nível Leve: Exercícios suaves. 15-20 minutos.',
+      moderate: 'Nível Moderado: Exercícios intermediários (se liberada pelo médico). 20-30 minutos.',
+      intense: 'Nível Intenso: Retorno gradual à intensidade. 30-40 minutos.',
+    };
+
+    return `Você é uma personal trainer ESPECIALIZADA EM PÓS-PARTO.
+Crie um treino SEGURO e adaptado para recuperação pós-parto.
+
+PRIORIDADES PÓS-PARTO:
+- Fortalecimento do assoalho pélvico (Kegel progressivo)
+- Ativação do transverso abdominal (recuperação da diástase)
+- Fortalecimento de costas e postura (amamentação causa dores)
+- Mobilidade e alongamento
+- Exercícios de respiração e relaxamento
+
+${fitnessLevel ? intensityGuidance[fitnessLevel] || '' : ''}
+
+REGRAS DE SEGURANÇA:
+- Antes de 6 semanas: APENAS exercícios de Kegel, respiração e caminhada leve
+- Após 6 semanas (com liberação médica): retorno gradual
+- NUNCA sugira abdominais tradicionais (risco de diástase)
+- Evite saltos e impacto alto
+- Sempre inclua aquecimento e volta à calma
+- Considere privação de sono: treinos curtos e energizantes
+
+RESPONDA APENAS COM JSON VÁLIDO no formato:
+{
+  "title": "Nome do treino",
+  "duration": "XX min",
+  "intensity": "Baixa/Moderada",
+  "exercises": [
+    {
+      "name": "Nome do exercício",
+      "sets": 3,
+      "reps": "12",
+      "observation": "Dica de segurança para pós-parto"
+    }
+  ]
+}
+
+Inclua 4-6 exercícios seguros. Não inclua texto fora do JSON.`;
+  }
+
   // Pregnancy-specific prompt
   if (lifePhase === 'pregnant') {
     const trimester = pregnancyWeeks ? (pregnancyWeeks <= 12 ? 1 : pregnancyWeeks <= 27 ? 2 : 3) : 1;
