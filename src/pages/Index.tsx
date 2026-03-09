@@ -14,6 +14,7 @@ import HistoryCalendar from '@/components/history/HistoryCalendar';
 import DayDataSummary from '@/components/history/DayDataSummary';
 import IntimacyLog from '@/components/cycle/IntimacyLog';
 import GardenStreak from '@/components/home/GardenStreak';
+import LifePhaseBadge from '@/components/home/LifePhaseBadge';
 import AdaptiveHomeCard from '@/components/home/AdaptiveHomeCard';
 import SOSPartnerButton from '@/components/home/SOSPartnerButton';
 import WaterTracker from '@/components/home/WaterTracker';
