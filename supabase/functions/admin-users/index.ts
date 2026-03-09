@@ -7,6 +7,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const ALL_USER_TABLES = [
+  'daily_logs', 'menstruation_logs', 'intimacy_logs', 'nutrition_intake',
+  'workouts', 'pill_logs', 'chat_messages', 'login_streaks',
+  'contraceptive_history', 'recipe_history', 'push_tokens',
+  'hot_flash_logs', 'cycle_diary', 'breastfeeding_logs', 'kick_logs',
+  'menopause_diary', 'menopause_exams', 'pregnancy_diary',
+  'pregnancy_appointments', 'alert_logs', 'monthly_reports',
+  'postpartum_logs', 'user_roles', 'profiles',
+];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -18,7 +28,6 @@ serve(async (req) => {
   );
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
 
@@ -26,7 +35,6 @@ serve(async (req) => {
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     if (userError || !userData.user) throw new Error("User not authenticated");
 
-    // Check admin role
     const { data: roleData } = await supabase
       .from("user_roles")
       .select("role")
@@ -44,7 +52,7 @@ serve(async (req) => {
     const url = new URL(req.url);
     const action = url.searchParams.get("action");
 
-    // GET metrics
+    // ─── METRICS ───────────────────────────────────────────────
     if (action === "metrics") {
       const { count: totalUsers } = await supabase
         .from("profiles")
@@ -67,26 +75,69 @@ serve(async (req) => {
         .select("*", { count: "exact", head: true })
         .eq("onboarding_completed", true);
 
+      // Life phase distribution
+      const { data: phaseData } = await supabase
+        .from("profiles")
+        .select("life_phase");
+      const lifePhaseDistribution: Record<string, number> = {};
+      (phaseData || []).forEach((p: any) => {
+        const phase = p.life_phase || 'unknown';
+        lifePhaseDistribution[phase] = (lifePhaseDistribution[phase] || 0) + 1;
+      });
+
+      // Content counts
+      const [dailyLogs, meals, workouts, chatMsgs, intimacyLogs, menstruationLogs] = await Promise.all([
+        supabase.from("daily_logs").select("*", { count: "exact", head: true }),
+        supabase.from("nutrition_intake").select("*", { count: "exact", head: true }),
+        supabase.from("workouts").select("*", { count: "exact", head: true }),
+        supabase.from("chat_messages").select("*", { count: "exact", head: true }),
+        supabase.from("intimacy_logs").select("*", { count: "exact", head: true }),
+        supabase.from("menstruation_logs").select("*", { count: "exact", head: true }),
+      ]);
+
+      // Registrations last 30 days (by day)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const { data: recentProfiles } = await supabase
+        .from("profiles")
+        .select("created_at")
+        .gte("created_at", thirtyDaysAgo.toISOString());
+
+      const registrationsByDay: Record<string, number> = {};
+      (recentProfiles || []).forEach((p: any) => {
+        const day = p.created_at?.split('T')[0];
+        if (day) registrationsByDay[day] = (registrationsByDay[day] || 0) + 1;
+      });
+
       return new Response(JSON.stringify({
         total_users: totalUsers ?? 0,
         premium_users: premiumUsers ?? 0,
         active_users: activeUsers ?? 0,
         onboarded_users: onboardedUsers ?? 0,
+        life_phase_distribution: lifePhaseDistribution,
+        content_counts: {
+          daily_logs: dailyLogs.count ?? 0,
+          meals: meals.count ?? 0,
+          workouts: workouts.count ?? 0,
+          chat_messages: chatMsgs.count ?? 0,
+          intimacy_logs: intimacyLogs.count ?? 0,
+          menstruation_logs: menstruationLogs.count ?? 0,
+        },
+        registrations_by_day: registrationsByDay,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // GET users list
+    // ─── LIST USERS ────────────────────────────────────────────
     if (action === "list") {
       const search = url.searchParams.get("search") || "";
       const page = parseInt(url.searchParams.get("page") || "0");
-      const filterPremium = url.searchParams.get("premium"); // "true" or "false"
-      const filterActive = url.searchParams.get("active"); // "true"
-      const filterLifePhase = url.searchParams.get("life_phase"); // e.g. "menstruating"
+      const filterPremium = url.searchParams.get("premium");
+      const filterActive = url.searchParams.get("active");
+      const filterLifePhase = url.searchParams.get("life_phase");
       const pageSize = 20;
 
-      // If filtering by active, get active user IDs first
       let activeUserIds: Set<string> | null = null;
       if (filterActive === "true") {
         const sevenDaysAgo = new Date();
@@ -98,77 +149,53 @@ serve(async (req) => {
         activeUserIds = new Set((activeLogins || []).map((l: any) => l.user_id));
       }
 
-      // Build profile query with filters for server-side filtering
       let profileQuery = supabase
         .from("profiles")
         .select("user_id, full_name, premium_override, onboarding_completed, created_at, life_phase, goal, diet_type, fitness_level, contraceptive_type, last_period_start");
 
-      if (filterPremium === "true") {
-        profileQuery = profileQuery.eq("premium_override", true);
-      }
-      if (filterLifePhase) {
-        profileQuery = profileQuery.eq("life_phase", filterLifePhase);
-      }
+      if (filterPremium === "true") profileQuery = profileQuery.eq("premium_override", true);
+      if (filterLifePhase) profileQuery = profileQuery.eq("life_phase", filterLifePhase);
 
       const { data: profiles } = await profileQuery;
       const profileMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);
 
-      // When using filters, we get all auth users and filter in memory
       const hasFilters = filterPremium || filterActive || filterLifePhase;
+
+      const mapUser = (u: any, profile: any) => ({
+        id: u.id,
+        email: u.email,
+        full_name: profile?.full_name || null,
+        premium_override: profile?.premium_override || false,
+        onboarding_completed: profile?.onboarding_completed || false,
+        life_phase: profile?.life_phase || null,
+        goal: profile?.goal || null,
+        diet_type: profile?.diet_type || null,
+        fitness_level: profile?.fitness_level || null,
+        contraceptive_type: profile?.contraceptive_type || null,
+        last_period_start: profile?.last_period_start || null,
+        created_at: profile?.created_at || u.created_at,
+        last_sign_in_at: u.last_sign_in_at || null,
+      });
 
       let allUsers: any[] = [];
       let totalCount = 0;
 
       if (hasFilters) {
-        // Fetch more users for filtering (up to 1000)
-        const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({
-          page: 1,
-          perPage: 1000,
-        });
+        const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
         if (listError) throw listError;
 
-        let users = authUsers.users.map((u: any) => {
-          const profile = profileMap.get(u.id);
-          return {
-            id: u.id,
-            email: u.email,
-            full_name: profile?.full_name || null,
-            premium_override: profile?.premium_override || false,
-            onboarding_completed: profile?.onboarding_completed || false,
-            life_phase: profile?.life_phase || null,
-            goal: profile?.goal || null,
-            diet_type: profile?.diet_type || null,
-            fitness_level: profile?.fitness_level || null,
-            contraceptive_type: profile?.contraceptive_type || null,
-            last_period_start: profile?.last_period_start || null,
-            created_at: profile?.created_at || u.created_at,
-            last_sign_in_at: u.last_sign_in_at || null,
-          };
-        });
-
-        // Apply filters
-        if (filterPremium === "true") {
-          users = users.filter((u: any) => u.premium_override);
-        }
-        if (filterLifePhase) {
-          users = users.filter((u: any) => u.life_phase === filterLifePhase);
-        }
-        if (activeUserIds) {
-          users = users.filter((u: any) => activeUserIds!.has(u.id));
-        }
+        let users = authUsers.users.map((u: any) => mapUser(u, profileMap.get(u.id)));
+        if (filterPremium === "true") users = users.filter((u: any) => u.premium_override);
+        if (filterLifePhase) users = users.filter((u: any) => u.life_phase === filterLifePhase);
+        if (activeUserIds) users = users.filter((u: any) => activeUserIds!.has(u.id));
         if (search) {
           const s = search.toLowerCase();
           users = users.filter((u: any) => u.email?.toLowerCase().includes(s) || u.full_name?.toLowerCase().includes(s));
         }
-
         totalCount = users.length;
         allUsers = users.slice(page * pageSize, (page + 1) * pageSize);
       } else {
-        // No filters - use paginated auth list
-        const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({
-          page: page + 1,
-          perPage: pageSize,
-        });
+        const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({ page: page + 1, perPage: pageSize });
         if (listError) throw listError;
 
         const userIds = authUsers.users.map((u: any) => u.id);
@@ -178,30 +205,11 @@ serve(async (req) => {
           .in("user_id", userIds);
         const unfilteredMap = new Map(unfilteredProfiles?.map((p: any) => [p.user_id, p]) || []);
 
-        allUsers = authUsers.users.map((u: any) => {
-          const profile = unfilteredMap.get(u.id);
-          return {
-            id: u.id,
-            email: u.email,
-            full_name: profile?.full_name || null,
-            premium_override: profile?.premium_override || false,
-            onboarding_completed: profile?.onboarding_completed || false,
-            life_phase: profile?.life_phase || null,
-            goal: profile?.goal || null,
-            diet_type: profile?.diet_type || null,
-            fitness_level: profile?.fitness_level || null,
-            contraceptive_type: profile?.contraceptive_type || null,
-            last_period_start: profile?.last_period_start || null,
-            created_at: profile?.created_at || u.created_at,
-            last_sign_in_at: u.last_sign_in_at || null,
-          };
-        });
-
+        allUsers = authUsers.users.map((u: any) => mapUser(u, unfilteredMap.get(u.id)));
         if (search) {
           const s = search.toLowerCase();
           allUsers = allUsers.filter((u: any) => u.email?.toLowerCase().includes(s) || u.full_name?.toLowerCase().includes(s));
         }
-
         totalCount = authUsers.total;
       }
 
@@ -210,7 +218,47 @@ serve(async (req) => {
       });
     }
 
-    // GET user subscription info from Stripe
+    // ─── USER STATS (activity counts) ──────────────────────────
+    if (action === "user-stats") {
+      const targetId = url.searchParams.get("user_id");
+      if (!targetId) throw new Error("user_id required");
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const since30 = thirtyDaysAgo.toISOString().split("T")[0];
+
+      const [logins, dailyLogs, meals, workoutsData, chatMsgs, intimacy, menstruation, pillLogs, diaryEntries] = await Promise.all([
+        supabase.from("login_streaks").select("*", { count: "exact", head: true }).eq("user_id", targetId).gte("login_date", since30),
+        supabase.from("daily_logs").select("*", { count: "exact", head: true }).eq("user_id", targetId).gte("log_date", since30),
+        supabase.from("nutrition_intake").select("*", { count: "exact", head: true }).eq("user_id", targetId).gte("intake_date", since30),
+        supabase.from("workouts").select("*", { count: "exact", head: true }).eq("user_id", targetId).gte("workout_date", since30),
+        supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", targetId),
+        supabase.from("intimacy_logs").select("*", { count: "exact", head: true }).eq("user_id", targetId),
+        supabase.from("menstruation_logs").select("*", { count: "exact", head: true }).eq("user_id", targetId),
+        supabase.from("pill_logs").select("*", { count: "exact", head: true }).eq("user_id", targetId),
+        supabase.from("cycle_diary").select("*", { count: "exact", head: true }).eq("user_id", targetId),
+      ]);
+
+      return new Response(JSON.stringify({
+        last_30_days: {
+          logins: logins.count ?? 0,
+          daily_logs: dailyLogs.count ?? 0,
+          meals: meals.count ?? 0,
+          workouts: workoutsData.count ?? 0,
+        },
+        lifetime: {
+          chat_messages: chatMsgs.count ?? 0,
+          intimacy_logs: intimacy.count ?? 0,
+          menstruation_logs: menstruation.count ?? 0,
+          pill_logs: pillLogs.count ?? 0,
+          diary_entries: diaryEntries.count ?? 0,
+        },
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ─── USER SUBSCRIPTION (Stripe) ────────────────────────────
     if (action === "user-subscription") {
       const targetEmail = url.searchParams.get("email");
       if (!targetEmail) throw new Error("email required");
@@ -232,15 +280,8 @@ serve(async (req) => {
       }
 
       const customer = customers.data[0];
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customer.id,
-        limit: 5,
-      });
-
-      const payments = await stripe.paymentIntents.list({
-        customer: customer.id,
-        limit: 10,
-      });
+      const subscriptions = await stripe.subscriptions.list({ customer: customer.id, limit: 5 });
+      const payments = await stripe.paymentIntents.list({ customer: customer.id, limit: 10 });
 
       const subData = subscriptions.data.map((sub) => ({
         id: sub.id,
@@ -272,7 +313,7 @@ serve(async (req) => {
       });
     }
 
-    // POST toggle premium
+    // ─── TOGGLE PREMIUM ────────────────────────────────────────
     if (action === "toggle-premium" && req.method === "POST") {
       const { user_id, premium_override } = await req.json();
       if (!user_id) throw new Error("user_id required");
@@ -281,7 +322,6 @@ serve(async (req) => {
         .from("profiles")
         .update({ premium_override: !!premium_override })
         .eq("user_id", user_id);
-
       if (error) throw error;
 
       return new Response(JSON.stringify({ success: true }), {
@@ -289,28 +329,49 @@ serve(async (req) => {
       });
     }
 
-    // POST delete user
-    if (action === "delete-user" && req.method === "POST") {
+    // ─── GRANT ADMIN ───────────────────────────────────────────
+    if (action === "grant-admin" && req.method === "POST") {
       const { user_id } = await req.json();
       if (!user_id) throw new Error("user_id required");
 
-      // Prevent self-deletion
-      if (user_id === userData.user.id) {
-        throw new Error("Cannot delete your own admin account");
-      }
+      const { error } = await supabase
+        .from("user_roles")
+        .upsert({ user_id, role: "admin" }, { onConflict: "user_id,role" });
+      if (error) throw error;
 
-      // Delete all user data from tables
-      const tables = [
-        'daily_logs', 'menstruation_logs', 'intimacy_logs', 'nutrition_intake',
-        'workouts', 'pill_logs', 'chat_messages', 'login_streaks',
-        'contraceptive_history', 'recipe_history', 'push_tokens', 'profiles'
-      ];
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-      for (const table of tables) {
+    // ─── REVOKE ADMIN ──────────────────────────────────────────
+    if (action === "revoke-admin" && req.method === "POST") {
+      const { user_id } = await req.json();
+      if (!user_id) throw new Error("user_id required");
+      if (user_id === userData.user.id) throw new Error("Cannot revoke your own admin role");
+
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", user_id)
+        .eq("role", "admin");
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ─── DELETE USER ───────────────────────────────────────────
+    if (action === "delete-user" && req.method === "POST") {
+      const { user_id } = await req.json();
+      if (!user_id) throw new Error("user_id required");
+      if (user_id === userData.user.id) throw new Error("Cannot delete your own admin account");
+
+      for (const table of ALL_USER_TABLES) {
         await supabase.from(table).delete().eq('user_id', user_id);
       }
 
-      // Delete from auth
       const { error: deleteError } = await supabase.auth.admin.deleteUser(user_id);
       if (deleteError) throw deleteError;
 

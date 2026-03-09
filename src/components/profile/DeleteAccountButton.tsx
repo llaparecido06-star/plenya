@@ -32,17 +32,19 @@ const DeleteAccountButton: React.FC = () => {
     if (!user || confirmation !== confirmWord) return;
     setLoading(true);
     try {
-      await supabase.from('daily_logs').delete().eq('user_id', user.id);
-      await supabase.from('menstruation_logs').delete().eq('user_id', user.id);
-      await supabase.from('intimacy_logs').delete().eq('user_id', user.id);
-      await supabase.from('nutrition_intake').delete().eq('user_id', user.id);
-      await supabase.from('workouts').delete().eq('user_id', user.id);
-      await supabase.from('pill_logs').delete().eq('user_id', user.id);
-      await supabase.from('chat_messages').delete().eq('user_id', user.id);
-      await supabase.from('login_streaks').delete().eq('user_id', user.id);
-      await supabase.from('contraceptive_history').delete().eq('user_id', user.id);
-      await supabase.from('recipe_history').delete().eq('user_id', user.id);
-      await supabase.from('profiles').delete().eq('user_id', user.id);
+      // Delete all user data from every table
+      const tables = [
+        'daily_logs', 'menstruation_logs', 'intimacy_logs', 'nutrition_intake',
+        'workouts', 'pill_logs', 'chat_messages', 'login_streaks',
+        'contraceptive_history', 'recipe_history', 'push_tokens',
+        'hot_flash_logs', 'cycle_diary', 'breastfeeding_logs', 'kick_logs',
+        'menopause_diary', 'menopause_exams', 'pregnancy_diary',
+        'pregnancy_appointments', 'alert_logs', 'monthly_reports',
+        'postpartum_logs', 'profiles',
+      ];
+      for (const table of tables) {
+        await supabase.from(table as any).delete().eq('user_id', user.id);
+      }
 
       await signOut();
       toast.success(t('delete_account.success'));
