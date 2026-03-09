@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getPlanByProductId, PlanKey } from '@/data/stripePlans';
+import { storeAuthForBackground } from '@/lib/backgroundSync';
 
 interface AuthContextType {
   user: User | null;
