@@ -4,7 +4,11 @@ import { Star, Sparkles, Heart } from 'lucide-react';
 import { useCycle } from '@/contexts/CycleContext';
 
 const TryingToConceiveCard: React.FC = () => {
-  const { cycleDay, cycleLength } = useCycle();
+  const { cycleDay, cycleLength, hasDUM, isLate } = useCycle();
+
+  // Don't show fertile window when no DUM registered or period is late
+  // Fertile predictions are unreliable in these states
+  if (!hasDUM || isLate) return null;
 
   // Calculate fertile window (typically days 10-16 of a 28-day cycle)
   // Adjusted based on actual cycle length
