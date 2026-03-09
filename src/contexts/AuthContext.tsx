@@ -58,10 +58,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => subscription.unsubscribe();
   }, []);
 
-  // Check subscription when user changes
+  // Check subscription and store auth for background sync when user changes
   useEffect(() => {
     if (user) {
       checkSubscription();
+      storeAuthForBackground();
       const interval = setInterval(checkSubscription, 60000);
       return () => clearInterval(interval);
     } else {
