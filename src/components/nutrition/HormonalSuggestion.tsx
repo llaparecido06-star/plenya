@@ -149,6 +149,19 @@ const menopauseSuggestion = {
   },
 };
 
+const postpartumSuggestion = {
+  titleKey: 'nutrition.postpartum_title',
+  descKey: 'nutrition.postpartum_desc',
+  nutrientKeys: ['nutrition.iron', 'nutrition.calcium', 'nutrition.omega3', 'nutrition.vitamin_b12'],
+  foods: {
+    default: ['Salmão', 'Ovos', 'Aveia', 'Espinafre', 'Batata doce'],
+    vegetarian: ['Ovos', 'Aveia', 'Espinafre', 'Lentilha', 'Castanhas'],
+    vegan: ['Aveia', 'Espinafre', 'Lentilha', 'Castanhas', 'Sementes de chia'],
+    low_carb: ['Salmão', 'Ovos', 'Abacate', 'Espinafre', 'Castanhas'],
+    lactose_free: ['Salmão', 'Ovos', 'Aveia', 'Espinafre', 'Batata doce'],
+  },
+};
+
 const HormonalSuggestion: React.FC = () => {
   const { t } = useTranslation();
   const { currentPhase, getPhaseInfo } = useCycle();
