@@ -20,6 +20,7 @@ const Corpo: React.FC = () => {
   const phaseInfo = getPhaseInfo();
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
+  const isPostpartum = lifePhase === 'postpartum';
 
   const getSubtitle = () => {
     if (isPregnant) {
