@@ -101,7 +101,8 @@ const Index: React.FC = () => {
   // Determine what mode we're in based on life phase
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
-  const isMenstruating = lifePhase === 'menstruating' || !lifePhase;
+  const isPostpartum = lifePhase === 'postpartum';
+  const isMenstruating = lifePhase === 'menstruating' || (!lifePhase && !isPostpartum);
 
   return (
     <PageLayout>
