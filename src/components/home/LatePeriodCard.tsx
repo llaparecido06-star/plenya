@@ -62,7 +62,7 @@ const LatePeriodCard: React.FC = () => {
         </div>
         
         <div className="flex-1">
-          <p className="text-sm font-medium text-red-600 dark:text-red-400">
+           <p className="text-sm font-medium text-destructive">
             Menstruação atrasada
           </p>
           {expectedDate && (
