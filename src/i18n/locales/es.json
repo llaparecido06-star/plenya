@@ -999,6 +999,19 @@
     "weekly_top_symptoms": "Síntomas más frecuentes",
     "weekly_ai_tip": "Consejo personalizado",
     "weekly_get_tip": "Generar consejos con IA",
-    "weekly_refresh_tip": "Actualizar consejos"
+    "weekly_refresh_tip": "Actualizar consejos",
+
+    "alert_settings_title": "Alertas Inteligentes",
+    "alert_settings_sub": "Personaliza umbrales de alerta",
+    "alert_saved": "¡Configuración de alertas guardada!",
+    "alert_enabled": "Alertas activadas",
+    "alert_enabled_desc": "Recibe notificaciones basadas en tendencias",
+    "alert_sleep_title": "Alerta de Sueño",
+    "alert_sleep_hours": "Mínimo de horas de sueño",
+    "alert_sleep_nights": "Noches consecutivas",
+    "alert_sleep_example": "Alerta si duermes menos de {{hours}}h por {{nights}} noches seguidas",
+    "alert_flash_title": "Alerta de Sofocos",
+    "alert_flash_percent": "Porcentaje de aumento para alerta",
+    "alert_flash_example": "Alerta si los sofocos aumentan {{percent}}% vs semana anterior"
   }
 }

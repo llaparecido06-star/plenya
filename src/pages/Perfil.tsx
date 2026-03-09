@@ -8,7 +8,7 @@ import AuthForm from '@/components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
 import {
   LogOut, Target, Dumbbell, Heart, Baby, Activity, Utensils, Zap, Crown, Globe,
-  Lock, Bell, CalendarDays, Settings, Trash2, ChevronRight, Pill, FileText
+  Lock, Bell, CalendarDays, Settings, Trash2, ChevronRight, Pill, FileText, Gauge
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import DUMPicker from '@/components/profile/DUMPicker';
@@ -26,6 +26,7 @@ import DeleteAccountButton from '@/components/profile/DeleteAccountButton';
 import MedicationTracker from '@/components/profile/MedicationTracker';
 import ChangePasswordCard from '@/components/profile/ChangePasswordCard';
 import BellyPhotoGallery from '@/components/home/BellyPhotoGallery';
+import MenopauseAlertSettings from '@/components/settings/MenopauseAlertSettings';
 import { useTranslation } from 'react-i18next';
 
 const goalConfig: Record<string, { labelKey: string; icon: React.ElementType; color: string }> = {
@@ -259,6 +260,12 @@ const Perfil: React.FC = () => {
           <MenuItem icon={Bell} label={t('profile.notifications')} sublabel={t('profile.notifications_sub')} iconClassName="bg-emerald-100 text-emerald-600">
             <NotificationSettings />
           </MenuItem>
+
+          {lifePhase === 'menopause' && (
+            <MenuItem icon={Gauge} label={t('menopause.alert_settings_title')} sublabel={t('menopause.alert_settings_sub')} iconClassName="bg-orange-100 text-orange-600">
+              <MenopauseAlertSettings />
+            </MenuItem>
+          )}
 
           <MenuItem icon={FileText} label={t('profile.medical_report')} sublabel={t('profile.medical_report_sub')} iconClassName="bg-amber-100 text-amber-600">
             <MedicalReportButton />

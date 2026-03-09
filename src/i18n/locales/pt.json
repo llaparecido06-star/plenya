@@ -999,6 +999,19 @@
     "weekly_top_symptoms": "Sintomas mais frequentes",
     "weekly_ai_tip": "Dica personalizada",
     "weekly_get_tip": "Gerar dicas com IA",
-    "weekly_refresh_tip": "Atualizar dicas"
+    "weekly_refresh_tip": "Atualizar dicas",
+
+    "alert_settings_title": "Alertas Inteligentes",
+    "alert_settings_sub": "Personalize limiares de alerta",
+    "alert_saved": "Configurações de alerta salvas!",
+    "alert_enabled": "Alertas ativados",
+    "alert_enabled_desc": "Receba notificações baseadas em tendências",
+    "alert_sleep_title": "Alerta de Sono",
+    "alert_sleep_hours": "Mínimo de horas de sono",
+    "alert_sleep_nights": "Noites consecutivas",
+    "alert_sleep_example": "Alerta se dormir menos de {{hours}}h por {{nights}} noites seguidas",
+    "alert_flash_title": "Alerta de Ondas de Calor",
+    "alert_flash_percent": "Aumento percentual para alerta",
+    "alert_flash_example": "Alerta se ondas de calor aumentarem {{percent}}% vs semana anterior"
   }
 }

@@ -218,32 +218,46 @@ serve(async (req) => {
 
     // ─── 7. SMART TREND ALERTS (Menopause) ───────────
     if (type === "trend_alerts" || type === "all") {
-      const menopauseProfiles: { user_id: string }[] = await dbFetch(
-        "profiles?life_phase=eq.menopause&select=user_id"
+      const menopauseProfiles: { user_id: string; alert_thresholds: {
+        sleep_min_hours?: number;
+        sleep_consecutive_nights?: number;
+        hot_flash_increase_percent?: number;
+        alerts_enabled?: boolean;
+      } | null }[] = await dbFetch(
+        "profiles?life_phase=eq.menopause&select=user_id,alert_thresholds"
       );
 
       const alertUsers: { userId: string; alerts: string[] }[] = [];
 
       for (const profile of menopauseProfiles) {
         const userId = profile.user_id;
+        const th = profile.alert_thresholds || {};
+        
+        // Skip if alerts disabled
+        if (th.alerts_enabled === false) continue;
+
+        const sleepMinHours = th.sleep_min_hours ?? 6;
+        const sleepNights = th.sleep_consecutive_nights ?? 3;
+        const flashPercent = th.hot_flash_increase_percent ?? 50;
+        
         const alerts: string[] = [];
 
-        // --- Sleep alert: 3 consecutive nights < 6h ---
-        const threeDaysAgo = new Date();
-        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        // --- Sleep alert: N consecutive nights < Xh ---
+        const daysAgo = new Date();
+        daysAgo.setDate(daysAgo.getDate() - sleepNights);
         const sleepLogs: { notes: string; log_date: string }[] = await dbFetch(
-          `daily_logs?user_id=eq.${userId}&log_date=gte.${threeDaysAgo.toISOString().split("T")[0]}&order=log_date.desc&limit=3&select=notes,log_date`
+          `daily_logs?user_id=eq.${userId}&log_date=gte.${daysAgo.toISOString().split("T")[0]}&order=log_date.desc&limit=${sleepNights}&select=notes,log_date`
         );
 
-        if (sleepLogs.length >= 3) {
+        if (sleepLogs.length >= sleepNights) {
           let consecutiveLow = 0;
           for (const log of sleepLogs) {
             try {
               const parsed = JSON.parse(log.notes || "{}");
-              if (parsed.sleep_hours && parsed.sleep_hours < 6) consecutiveLow++;
+              if (parsed.sleep_hours && parsed.sleep_hours < sleepMinHours) consecutiveLow++;
             } catch { /* ignore */ }
           }
-          if (consecutiveLow >= 3) {
+          if (consecutiveLow >= sleepNights) {
             alerts.push("sleep_low");
           }
         }
@@ -264,7 +278,7 @@ serve(async (req) => {
 
         if (prevFlashes.length > 0) {
           const increase = ((recentFlashes.length - prevFlashes.length) / prevFlashes.length) * 100;
-          if (increase >= 50) {
+          if (increase >= flashPercent) {
             alerts.push("flash_spike");
           }
         }
