@@ -83,7 +83,7 @@ const LatePeriodCard: React.FC = () => {
       </div>
 
       {/* Action buttons */}
-      <div className="mt-4 pt-3 border-t border-red-500/20 space-y-2">
+      <div className="mt-4 pt-3 border-t border-destructive/20 space-y-2">
         <Button
           onClick={() => setDialogOpen(true)}
           disabled={loading}
