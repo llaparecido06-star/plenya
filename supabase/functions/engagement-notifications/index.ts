@@ -59,6 +59,22 @@ serve(async (req) => {
       return res.json();
     };
 
+    const logAlert = async (userIds: string[], alertType: string, title: string, body: string) => {
+      if (userIds.length === 0) return;
+      for (const uid of userIds) {
+        await fetch(`${supabaseUrl}/rest/v1/alert_logs`, {
+          method: "POST",
+          headers: {
+            apikey: serviceRoleKey,
+            Authorization: `Bearer ${serviceRoleKey}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ user_id: uid, alert_type: alertType, alert_title: title, alert_body: body }),
+        });
+      }
+    };
+
     const sendPush = async (user_ids: string[], title: string, body: string, route = "/") => {
       if (user_ids.length === 0) return { skipped: true };
       const res = await fetch(sendPushUrl, {
@@ -70,6 +86,11 @@ serve(async (req) => {
         body: JSON.stringify({ user_ids, title, body, data: { route } }),
       });
       return res.json();
+    };
+
+    const sendPushAndLog = async (userIds: string[], alertType: string, title: string, body: string, route = "/") => {
+      await logAlert(userIds, alertType, title, body);
+      return sendPush(userIds, title, body, route);
     };
 
     // ─── 1. LOST STREAKS ────────────────────────────
