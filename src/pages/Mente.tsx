@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
 import { useLifePhase } from '@/hooks/useLifePhase';
+import { Brain } from 'lucide-react';
 
 const Mente: React.FC = () => {
   const { t } = useTranslation();
@@ -18,36 +19,45 @@ const Mente: React.FC = () => {
   const isMenopause = lifePhase === 'menopause';
   const isPostpartum = lifePhase === 'postpartum';
 
+  const getSubtitle = () => {
+    if (isPregnant) return t('mind.subtitle_pregnant');
+    if (isMenopause) return t('mind.subtitle_menopause');
+    if (isPostpartum) return t('mind.subtitle_postpartum', 'Saúde emocional no pós-parto');
+    return t('mind.subtitle');
+  };
+
   return (
     <PageLayout>
-      <div className="hero-gradient pt-12 pb-4 px-4">
-        <motion.h1
-          className="text-2xl font-bold text-foreground mb-2"
-          initial={{ opacity: 0, y: -20 }}
+      <div className="px-5 pt-10 pb-3">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 mb-1"
         >
-          {t('mind.title')}
-        </motion.h1>
-        <p className="text-muted-foreground">
-          {isPregnant ? t('mind.subtitle_pregnant') : isMenopause ? t('mind.subtitle_menopause') : lifePhase === 'postpartum' ? t('mind.subtitle_postpartum', 'Saúde emocional no pós-parto') : t('mind.subtitle')}
-        </p>
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Brain className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-foreground">{t('mind.title')}</h1>
+            <p className="text-sm text-muted-foreground">{getSubtitle()}</p>
+          </div>
+        </motion.div>
       </div>
 
-      <div className="px-4 mb-4">
+      <div className="px-4 mb-3">
         <BreathingCard />
       </div>
 
-      {/* Life-phase specific meditation/breathing tips */}
       {(isPregnant || isMenopause || isPostpartum) && (
-        <div className="px-4 mb-4">
+        <div className="px-4 mb-3">
           <LifePhaseBreathingCard />
         </div>
       )}
 
       <Tabs defaultValue="checkin" className="px-4">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="checkin">{t('mind.checkin_tab')}</TabsTrigger>
-          <TabsTrigger value="chat">{t('mind.chat_tab')}</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-3 rounded-xl h-10">
+          <TabsTrigger value="checkin" className="rounded-lg text-sm">{t('mind.checkin_tab')}</TabsTrigger>
+          <TabsTrigger value="chat" className="rounded-lg text-sm">{t('mind.chat_tab')}</TabsTrigger>
         </TabsList>
         <TabsContent value="checkin">
           <EmotionalCheckin />
