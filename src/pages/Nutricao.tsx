@@ -15,6 +15,12 @@ import { useNutrition } from '@/hooks/useNutrition';
 import { useProfile } from '@/hooks/useProfile';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { useTranslation } from 'react-i18next';
+import { Apple } from 'lucide-react';
+
+const fadeUp = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+};
 
 const Nutricao: React.FC = () => {
   const { t } = useTranslation();
@@ -24,58 +30,55 @@ const Nutricao: React.FC = () => {
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
 
+  const getSubtitle = () => {
+    if (isPregnant) return t('nutrition.subtitle_pregnant');
+    if (isMenopause) return t('nutrition.subtitle_menopause');
+    if (lifePhase === 'postpartum') return t('nutrition.subtitle_postpartum', 'Nutrição para recuperação e amamentação');
+    return t('nutrition.subtitle');
+  };
+
   return (
     <PageLayout>
-      <div className="hero-gradient pt-12 pb-6 px-4">
-        <motion.h1
-          className="text-2xl font-bold text-foreground mb-2"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          {t('nutrition.title')}
-        </motion.h1>
-        <p className="text-muted-foreground">
-          {isPregnant ? t('nutrition.subtitle_pregnant') : isMenopause ? t('nutrition.subtitle_menopause') : lifePhase === 'postpartum' ? t('nutrition.subtitle_postpartum', 'Nutrição para recuperação e amamentação') : t('nutrition.subtitle')}
-        </p>
-      </div>
-
-      <div className="px-4 -mt-2 mb-4">
-        <ChefIACard />
-      </div>
-
-      <div className="px-4">
+      <div className="px-5 pt-10 pb-3">
         <motion.div
-          className="glass-card p-4"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 mb-1"
         >
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">{t('nutrition.macros_today')}</h3>
-            <MacroGoalEditor />
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Apple className="w-5 h-5 text-primary" />
           </div>
-          <MacroRings
-            protein={{ current: totals.protein, goal: macro_protein_goal }}
-            carbs={{ current: totals.carbs, goal: macro_carbs_goal }}
-            fat={{ current: totals.fat, goal: macro_fat_goal }}
-          />
+          <div>
+            <h1 className="text-xl font-bold text-foreground">{t('nutrition.title')}</h1>
+            <p className="text-sm text-muted-foreground">{getSubtitle()}</p>
+          </div>
         </motion.div>
       </div>
 
-      <div className="mt-6">
-        <HormonalSuggestion />
-      </div>
+      <motion.div className="space-y-3" initial="initial" animate="animate" transition={{ staggerChildren: 0.06 }}>
+        <motion.div variants={fadeUp} className="px-4">
+          <ChefIACard />
+        </motion.div>
 
-      <div className="px-4 mt-6">
-        <AddMealDrawer />
-      </div>
+        <motion.div variants={fadeUp} className="px-4">
+          <div className="glass-card p-4">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-semibold text-foreground text-sm">{t('nutrition.macros_today')}</h3>
+              <MacroGoalEditor />
+            </div>
+            <MacroRings
+              protein={{ current: totals.protein, goal: macro_protein_goal }}
+              carbs={{ current: totals.carbs, goal: macro_carbs_goal }}
+              fat={{ current: totals.fat, goal: macro_fat_goal }}
+            />
+          </div>
+        </motion.div>
 
-      <div className="mt-6">
-        <MonthlySummaryCard />
-      </div>
-
-      <div className="mt-6">
-        <RecentMealsHistory />
-      </div>
+        <motion.div variants={fadeUp}><HormonalSuggestion /></motion.div>
+        <motion.div variants={fadeUp} className="px-4"><AddMealDrawer /></motion.div>
+        <motion.div variants={fadeUp}><MonthlySummaryCard /></motion.div>
+        <motion.div variants={fadeUp}><RecentMealsHistory /></motion.div>
+      </motion.div>
 
       <MealScanner />
       <TutorialOverlay tutorialKey="nutrition" steps={nutritionTutorialSteps} />

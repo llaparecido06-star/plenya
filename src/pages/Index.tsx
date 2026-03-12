@@ -81,245 +81,251 @@ import { useContraceptive } from '@/hooks/useContraceptive';
 import { useLifePhase } from '@/hooks/useLifePhase';
 import { isPillMethod, hasExpirationDate, isHormonalMethod } from '@/data/contraceptiveMethods';
 
+const stagger = {
+  animate: { transition: { staggerChildren: 0.06 } },
+};
+const fadeUp = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+};
+
 const Index: React.FC = () => {
   const { t } = useTranslation();
+  const { getPhaseInfo, hasDUM, isLate } = useCycle();
+  const { isToday } = useSelectedDate();
+  const { contraceptive_type } = useContraceptive();
   const {
-    getPhaseInfo,
-    hasDUM,
-    isLate
-  } = useCycle();
-  const {
-    isToday
-  } = useSelectedDate();
-  const {
-    contraceptive_type
-  } = useContraceptive();
-  const {
-    lifePhase,
-    pregnancyWeeks,
-    pregnancyStartDate,
-    postpartumWeeks,
-    isTryingToConceive,
-    age,
-    loading: lifePhaseLoading
+    lifePhase, pregnancyWeeks, pregnancyStartDate,
+    postpartumWeeks, isTryingToConceive, age, loading: lifePhaseLoading,
   } = useLifePhase();
   const phaseInfo = getPhaseInfo();
   const [showCalendar, setShowCalendar] = useState(false);
   const showPillTracker = isPillMethod(contraceptive_type);
   const showDeviceExpiration = hasExpirationDate(contraceptive_type);
-  const usesHormonal = isHormonalMethod(contraceptive_type);
 
-  // Determine what mode we're in based on life phase
   const isPregnant = lifePhase === 'pregnant';
   const isMenopause = lifePhase === 'menopause';
   const isPostpartum = lifePhase === 'postpartum';
   const isMenstruating = lifePhase === 'menstruating' || (!lifePhase && !isPostpartum);
 
+  // Greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('home.greeting_morning', 'Bom dia');
+    if (hour < 18) return t('home.greeting_afternoon', 'Boa tarde');
+    return t('home.greeting_evening', 'Boa noite');
+  };
+
   return (
     <PageLayout>
-      <div className="hero-gradient pt-12 pb-6 my-[10px] py-0">
+      {/* === COMPACT HEADER === */}
+      <div className="pt-safe-top px-5 pt-10 pb-3">
         <motion.div
-          className="text-center mb-6 px-4"
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          {/* Header with Streak and Calendar */}
-          <div className="flex items-center justify-between mb-4">
-            <GardenStreak />
+          {/* Top row: greeting + calendar */}
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold text-foreground">
+                {getGreeting()} ✨
+              </h1>
+            </div>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" onClick={() => setShowCalendar(!showCalendar)}>
-                <Calendar className="w-5 h-5 text-primary" />
+              <GardenStreak />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-xl h-9 w-9"
+                onClick={() => setShowCalendar(!showCalendar)}
+              >
+                <Calendar className="w-[18px] h-[18px] text-muted-foreground" />
               </Button>
             </div>
           </div>
-          
-          {/* Life Phase Badge */}
-          {isToday && <LifePhaseBadge />}
-          
-          <p className="text-sm text-muted-foreground mt-1">
-            {isToday
-              ? isPregnant
-                ? t('home.subtitle_pregnant')
-                : isMenopause
-                  ? t('home.subtitle_menopause')
-                  : isPostpartum
-                    ? t('home.subtitle_postpartum', 'Cuidando de você e do bebê')
-                    : t('home.subtitle_menstruating')
-              : t('home.subtitle_history')}
-          </p>
+
+          {/* Subtitle + badge */}
+          <div className="flex items-center gap-2 mt-1">
+            {isToday && <LifePhaseBadge />}
+          </div>
         </motion.div>
-
-        {/* Calendar Dropdown */}
-        <AnimatePresence>
-          {showCalendar && (
-            <div className="px-4 mb-4">
-              <HistoryCalendar onClose={() => setShowCalendar(false)} onDaySelect={() => setShowCalendar(false)} />
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Show CycleWheel only for menstruating users viewing today */}
-        {isToday && isMenstruating && <CycleWheel />}
-        
-        {/* Cycle Sync Insight Card - adapts per life phase */}
-        {isToday && <CycleSyncInsightCard />}
       </div>
 
-      <div className="space-y-4 mt-4">
-        {/* Trial Expiration Banner */}
-        {isToday && <TrialExpirationBanner />}
-        
-        {/* Upgrade Banner for free users */}
-        {isToday && <UpgradeBanner />}
+      {/* Calendar Dropdown */}
+      <AnimatePresence>
+        {showCalendar && (
+          <motion.div
+            className="px-4 mb-3"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <HistoryCalendar onClose={() => setShowCalendar(false)} onDaySelect={() => setShowCalendar(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* PWA Install Banner */}
-        {isToday && <PWAInstallBanner />}
+      {/* === CYCLE HERO (menstruating only) === */}
+      {isToday && isMenstruating && (
+        <motion.div
+          className="px-4 mb-2"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <CycleWheel />
+        </motion.div>
+      )}
 
+      {/* Cycle Sync Insight Card */}
+      {isToday && <CycleSyncInsightCard />}
+
+      {/* === BANNERS === */}
+      <motion.div className="space-y-3 mt-3" variants={stagger} initial="initial" animate="animate">
+        {isToday && (
+          <motion.div variants={fadeUp}><TrialExpirationBanner /></motion.div>
+        )}
+        {isToday && (
+          <motion.div variants={fadeUp}><UpgradeBanner /></motion.div>
+        )}
+        {isToday && (
+          <motion.div variants={fadeUp}><PWAInstallBanner /></motion.div>
+        )}
+      </motion.div>
+
+      {/* === MAIN CONTENT SECTIONS === */}
+      <motion.div
+        className="space-y-3 mt-2"
+        variants={stagger}
+        initial="initial"
+        animate="animate"
+      >
         {/* === PREGNANT MODE === */}
-        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyStartDate && (
-          <PregnancyWeeksCard weeks={pregnancyWeeks} pregnancyStartDate={pregnancyStartDate} />
+        {isToday && isPregnant && (
+          <>
+            {pregnancyWeeks !== null && pregnancyStartDate && (
+              <motion.div variants={fadeUp}>
+                <PregnancyWeeksCard weeks={pregnancyWeeks} pregnancyStartDate={pregnancyStartDate} />
+              </motion.div>
+            )}
+            {pregnancyWeeks !== null && pregnancyWeeks >= 20 && (
+              <motion.div variants={fadeUp}><KickCounterCard /></motion.div>
+            )}
+            {pregnancyWeeks !== null && pregnancyWeeks >= 36 && (
+              <motion.div variants={fadeUp}><ContractionTimerCard /></motion.div>
+            )}
+            <motion.div variants={fadeUp}><BirthCountdownCard /></motion.div>
+            <motion.div variants={fadeUp}><WeeklyPregnancyInsight /></motion.div>
+            {pregnancyWeeks !== null && pregnancyWeeks >= 28 && (
+              <motion.div variants={fadeUp}><BirthPlanCard /></motion.div>
+            )}
+            <motion.div variants={fadeUp}><GestationalWeightTracker /></motion.div>
+            {pregnancyWeeks !== null && pregnancyWeeks >= 34 && (
+              <motion.div variants={fadeUp}><HospitalBagCard /></motion.div>
+            )}
+            <motion.div variants={fadeUp}><BabyRegistryCard /></motion.div>
+            {pregnancyWeeks !== null && pregnancyWeeks >= 32 && (
+              <motion.div variants={fadeUp}><BirthPlaylistCard /></motion.div>
+            )}
+            <motion.div variants={fadeUp}><PregnancyWeeklySummaryCard /></motion.div>
+            <motion.div variants={fadeUp}><AppointmentChecklist /></motion.div>
+            <motion.div variants={fadeUp}><PregnancyDiaryCard /></motion.div>
+            <motion.div variants={fadeUp}><LifePhaseTransitionCard /></motion.div>
+          </>
         )}
-        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 20 && (
-          <KickCounterCard />
-        )}
-        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 36 && (
-          <ContractionTimerCard />
-        )}
-        {isToday && isPregnant && <BirthCountdownCard />}
-        {isToday && isPregnant && <WeeklyPregnancyInsight />}
-        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 28 && <BirthPlanCard />}
-        {isToday && isPregnant && <GestationalWeightTracker />}
-        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 34 && <HospitalBagCard />}
-        {isToday && isPregnant && <BabyRegistryCard />}
-        {isToday && isPregnant && pregnancyWeeks !== null && pregnancyWeeks >= 32 && <BirthPlaylistCard />}
-        {isToday && isPregnant && <PregnancyWeeklySummaryCard />}
-        {isToday && isPregnant && <AppointmentChecklist />}
-        {isToday && isPregnant && <PregnancyDiaryCard />}
-        {isToday && isPregnant && <LifePhaseTransitionCard />}
 
         {/* === MENOPAUSE MODE === */}
-        {isToday && isMenopause && <MenopauseWellnessHub age={age} />}
-        {isToday && isMenopause && <MenopauseWeeklySummary />}
-        {isToday && isMenopause && <HotFlashCounter />}
-        {isToday && isMenopause && <HotFlashInsights />}
-        {isToday && isMenopause && <HotFlashSleepCorrelation />}
-        {isToday && isMenopause && <HRTTracker />}
-        {isToday && isMenopause && <MenopauseDiaryCard />}
-        {isToday && isMenopause && <MenopauseExamsCard />}
-        {isToday && isMenopause && <MenopauseReportCard />}
-        {isToday && isMenopause && <MenopauseAlertHistory />}
         {isToday && isMenopause && (
-          <div className="mx-4 space-y-4">
-            <MenopauseMonthlyTrends />
-            <MenopauseWeightChart />
-            <MenopauseSleepTracker />
-            <WearableSleepImport />
-            <MenopauseSymptomChart />
-            <MenopauseExerciseCard />
-          </div>
+          <>
+            <motion.div variants={fadeUp}><MenopauseWellnessHub age={age} /></motion.div>
+            <motion.div variants={fadeUp}><MenopauseWeeklySummary /></motion.div>
+            <motion.div variants={fadeUp}><HotFlashCounter /></motion.div>
+            <motion.div variants={fadeUp}><HotFlashInsights /></motion.div>
+            <motion.div variants={fadeUp}><HotFlashSleepCorrelation /></motion.div>
+            <motion.div variants={fadeUp}><HRTTracker /></motion.div>
+            <motion.div variants={fadeUp}><MenopauseDiaryCard /></motion.div>
+            <motion.div variants={fadeUp}><MenopauseExamsCard /></motion.div>
+            <motion.div variants={fadeUp}><MenopauseReportCard /></motion.div>
+            <motion.div variants={fadeUp}><MenopauseAlertHistory /></motion.div>
+            <motion.div variants={fadeUp} className="mx-4 space-y-3">
+              <MenopauseMonthlyTrends />
+              <MenopauseWeightChart />
+              <MenopauseSleepTracker />
+              <WearableSleepImport />
+              <MenopauseSymptomChart />
+              <MenopauseExerciseCard />
+            </motion.div>
+          </>
         )}
 
         {/* === POSTPARTUM MODE === */}
-        {isToday && isPostpartum && <PostpartumWeeksCard />}
-        {isToday && isPostpartum && <PostpartumRecoveryCard />}
-        {isToday && isPostpartum && <BreastfeedingTracker />}
-        {isToday && isPostpartum && <PostpartumEvolutionChart />}
-        {isToday && isPostpartum && <PostpartumWeeklySummaryCard />}
-        {isToday && isPostpartum && <CycleReturnCard />}
+        {isToday && isPostpartum && (
+          <>
+            <motion.div variants={fadeUp}><PostpartumWeeksCard /></motion.div>
+            <motion.div variants={fadeUp}><PostpartumRecoveryCard /></motion.div>
+            <motion.div variants={fadeUp}><BreastfeedingTracker /></motion.div>
+            <motion.div variants={fadeUp}><PostpartumEvolutionChart /></motion.div>
+            <motion.div variants={fadeUp}><PostpartumWeeklySummaryCard /></motion.div>
+            <motion.div variants={fadeUp}><CycleReturnCard /></motion.div>
+          </>
+        )}
 
         {/* === MENSTRUATING MODE === */}
         {isToday && isMenstruating && (
           <>
-            {/* Trying to Conceive Card - Golden Fertile Window */}
-            {isTryingToConceive && <TryingToConceiveCard />}
+            {isTryingToConceive && (
+              <motion.div variants={fadeUp}><TryingToConceiveCard /></motion.div>
+            )}
+            <motion.div variants={fadeUp}><PMSPredictionCard /></motion.div>
 
-            {/* PMS Prediction Card */}
-            <PMSPredictionCard />
-
-            {/* Period State Cards - Conditional based on DUM and late status */}
             {!isPregnant && (
-              <>
-                {!hasDUM ? (
-                  <AwaitingPeriodCard />
-                ) : isLate ? (
-                  <LatePeriodCard />
-                ) : (
-                  <NextPeriodCard />
-                )}
-              </>
+              <motion.div variants={fadeUp}>
+                {!hasDUM ? <AwaitingPeriodCard /> : isLate ? <LatePeriodCard /> : <NextPeriodCard />}
+              </motion.div>
             )}
 
-            {/* Next Contraceptive Reminder (Injection, Ring, Patch) */}
-            <NextContraceptiveCard />
+            <motion.div variants={fadeUp}><NextContraceptiveCard /></motion.div>
+            <motion.div variants={fadeUp}><MedicationQuickLog /></motion.div>
 
-            {/* Medication / Injection Quick Log */}
-            <MedicationQuickLog />
-
-            {/* Weekly Summary */}
-            <div className="px-4">
+            <motion.div variants={fadeUp} className="px-4">
               <WeeklySummaryCard />
-            </div>
+            </motion.div>
 
-            {/* Cycle Diary with AI */}
-            <CycleDiaryCard />
-
-            {/* Symptom Map - Last 3 cycles */}
-            <CycleSymptomMap />
-
-            {/* Cycle Comparator - Current vs previous cycles */}
-            <CycleComparatorCard />
-
-            {/* Monthly Report - AI-generated insights */}
-            <MonthlyReportCard />
+            <motion.div variants={fadeUp}><CycleDiaryCard /></motion.div>
+            <motion.div variants={fadeUp}><CycleSymptomMap /></motion.div>
+            <motion.div variants={fadeUp}><CycleComparatorCard /></motion.div>
+            <motion.div variants={fadeUp}><MonthlyReportCard /></motion.div>
           </>
         )}
 
-        {/* Show historical data summary when viewing past dates */}
+        {/* Historical data */}
         {!isToday && <DayDataSummary />}
-        
-        {/* IntimacyLog drawer - always rendered so it can receive events from DayDataSummary */}
         {!isToday && <IntimacyLog hideTrigger />}
-        
-        {/* Show current day components when viewing today */}
+
+        {/* Today common cards */}
         {isToday && (
           <>
-            {/* Adaptive Home Card - Shows based on contraceptive method (menstruating only, NOT pregnant) */}
-            {isMenstruating && !isPregnant && <AdaptiveHomeCard />}
-            
-            {/* Water Tracker - All modes */}
-            <WaterTracker />
+            {isMenstruating && !isPregnant && (
+              <motion.div variants={fadeUp}><AdaptiveHomeCard /></motion.div>
+            )}
+            <motion.div variants={fadeUp}><WaterTracker /></motion.div>
 
-            {/* Pill Tracker - Menstruating only, NOT pregnant */}
             {isMenstruating && !isPregnant && showPillTracker && (
-              <div className="px-4">
-                <PillTracker />
-              </div>
+              <motion.div variants={fadeUp} className="px-4"><PillTracker /></motion.div>
+            )}
+            {isMenstruating && !isPregnant && showDeviceExpiration && (
+              <motion.div variants={fadeUp} className="px-4"><DeviceExpirationCard /></motion.div>
             )}
 
-            {/* Device Expiration Card (DIU/Implant) - Menstruating only, NOT pregnant */}
-            {isMenstruating && !isPregnant && showDeviceExpiration && (
-              <div className="px-4">
-                <DeviceExpirationCard />
-              </div>
-            )}
-            
-            {/* Recipe of the Day - All modes */}
-            <RecipeOfTheDayCard />
-            
-            {/* Chef Suggestion - All modes */}
-            <ChefSuggestion />
-            
-            
-            {/* Quick Log - All modes */}
-            <QuickLog />
-            
-            {/* SOS Partner FAB */}
+            <motion.div variants={fadeUp}><RecipeOfTheDayCard /></motion.div>
+            <motion.div variants={fadeUp}><ChefSuggestion /></motion.div>
+            <motion.div variants={fadeUp}><QuickLog /></motion.div>
             <SOSPartnerButton />
           </>
         )}
-      </div>
+      </motion.div>
 
-      {/* Tutorial Overlay */}
       <TutorialOverlay tutorialKey="home" steps={homeTutorialSteps} />
     </PageLayout>
   );
