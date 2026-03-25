@@ -186,13 +186,13 @@
     "profile": "Perfil"
   },
   "chat": {
-    "title": "Plenya - Assistente de Bem-estar",
+    "title": "Elena - Assistente de Bem-estar",
     "subtitle_pregnant": "Cuidando de você e do bebê 🤰",
     "subtitle_menopause": "Apoio no climatério 🌸",
     "subtitle_postpartum": "Apoio na maternidade 🌷",
     "subtitle_default": "Sempre aqui para você 💜",
-    "placeholder": "Digite sua mensagem...",
-    "typing": "Plenya está digitando",
+    "placeholder": "Pergunte para a Elena...",
+    "typing": "Elena está pensando",
     "error_fallback": "Desculpe, estou tendo dificuldades para responder agora. Pode tentar novamente? 💜"
   },
   "nutrition": {
@@ -242,7 +242,13 @@
     "preg_tri3_desc": "Reforce ferro para o parto e fibras para o intestino. Mantenha energia estável.",
     "meno_title": "Equilíbrio Hormonal Natural",
     "meno_desc": "Fitoestrógenos, cálcio e ômega-3 ajudam a aliviar sintomas e proteger ossos e coração.",
-    "menopause_suggestion": "Nutrição para Menopausa"
+    "menopause_suggestion": "Nutrição para Menopausa",
+    "postpartum_suggestion": "Sugestão Pós-Parto",
+    "postpartum_title": "Nutrição Pós-Parto",
+    "postpartum_desc": "Alimentos para recuperação e produção de leite. Priorize ferro, cálcio e ômega-3.",
+    "subtitle_postpartum": "Nutrição para recuperação e amamentação",
+    "protein": "Proteína",
+    "vitamin_b12": "Vitamina B12"
   },
   "body": {
     "title": "Corpo",
@@ -868,8 +874,8 @@
     "weekly_summary": "Resumo da semana",
     "days_logged": "{{count}} dias registrados",
     "top_symptom": "Mais frequente",
-    "get_tip": "Gerar dica personalizada com IA",
-    "new_tip": "Nova dica",
+    "get_tip": "Pedir dica para a Elena",
+    "new_tip": "Nova dica da Elena",
     "nutrition_title": "Nutrição para Menopausa",
     "nut_phyto": "Fitoestrógenos (soja, linhaça) ajudam no equilíbrio hormonal",
     "nut_calcium": "Cálcio e vitamina D para proteger os ossos",
@@ -1092,9 +1098,9 @@
     "weekly_days": "dias",
     "weekly_mood": "Humor médio",
     "weekly_top_symptoms": "Sintomas mais frequentes",
-    "weekly_ai_tip": "Dica personalizada",
-    "weekly_get_tip": "Gerar dicas com IA",
-    "weekly_refresh_tip": "Atualizar dicas",
+    "weekly_ai_tip": "Dica da Elena",
+    "weekly_get_tip": "Pedir dicas para a Elena",
+    "weekly_refresh_tip": "Nova dica da Elena",
 
     "alert_settings_title": "Alertas Inteligentes",
     "alert_settings_sub": "Personalize limiares de alerta",
