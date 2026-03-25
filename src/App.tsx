@@ -32,11 +32,25 @@ const FAQ = lazy(() => import("./pages/FAQ"));
 const queryClient = new QueryClient();
 
 // Loading fallback component
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="animate-pulse text-muted-foreground">Carregando...</div>
-  </div>
-);
+const loadingPhrases = [
+  'Elena está preparando seus dados... ✨',
+  'Sintonizando com seu corpo... 🌸',
+  'Quase lá, gerando seu protocolo de hoje... 🌿',
+  'Cuidando dos detalhes para você... 💜',
+  'Organizando seu bem-estar... 🦋',
+];
+
+const PageLoader = () => {
+  const phrase = loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)];
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center animate-pulse">
+        <span className="text-xl">🌺</span>
+      </div>
+      <p className="text-sm text-muted-foreground animate-fade-in">{phrase}</p>
+    </div>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

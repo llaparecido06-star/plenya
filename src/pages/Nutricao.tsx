@@ -55,14 +55,14 @@ const Nutricao: React.FC = () => {
         </motion.div>
       </div>
 
-      <motion.div className="space-y-3" initial="initial" animate="animate" transition={{ staggerChildren: 0.06 }}>
+      <motion.div className="space-y-4 pb-6" initial="initial" animate="animate" transition={{ staggerChildren: 0.06 }}>
         <motion.div variants={fadeUp} className="px-4">
           <ChefIACard />
         </motion.div>
 
         <motion.div variants={fadeUp} className="px-4">
-          <div className="glass-card p-4">
-            <div className="flex items-center justify-between mb-1">
+          <div className="glass-card p-5 rounded-2xl">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-foreground text-sm">{t('nutrition.macros_today')}</h3>
               <MacroGoalEditor />
             </div>

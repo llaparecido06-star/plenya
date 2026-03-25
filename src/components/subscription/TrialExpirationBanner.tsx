@@ -42,7 +42,7 @@ const TrialExpirationBanner: React.FC = () => {
             ⏰ Seu trial expira em {daysLeft} {daysLeft === 1 ? 'dia' : 'dias'}!
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Continue com acesso ilimitado ao Chef IA, relatórios e mais.
+            Continue com acesso ilimitado à Elena, relatórios e mais.
           </p>
           <Button
             size="sm"

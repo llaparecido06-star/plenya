@@ -161,7 +161,7 @@ const RecipeOfTheDayCard: React.FC = () => {
             className="w-full"
             onClick={handleGoToNutrition}
           >
-            Ver mais no Chef IA
+            Ver mais com a Elena
           </Button>
         </div>
       </motion.div>
@@ -261,7 +261,7 @@ const RecipeOfTheDayCard: React.FC = () => {
                     handleGoToNutrition();
                   }}
                 >
-                  Ver receita completa no Chef IA
+                  Ver receita completa com a Elena
                 </Button>
               </div>
             </motion.div>
