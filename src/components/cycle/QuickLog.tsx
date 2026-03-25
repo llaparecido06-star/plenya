@@ -141,40 +141,49 @@ const QuickLog: React.FC = () => {
     switch (selectedLog) {
       case 'symptom':
         return (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Selecione os sintomas que você está sentindo hoje
-            </p>
-          <div className="flex flex-wrap gap-2">
-              {sortedSymptoms.map((symptom, index) => {
-              const isPriority = isPregnant
-                    ? trimesterSymptomPriority[trimester]?.includes(symptom)
-                    : phaseSymptomPriority[currentPhase]?.includes(symptom);
-                return (
-                  <div key={symptom} className="flex flex-col items-start gap-1">
-                    <button
-                      onClick={() => toggleSymptom(symptom)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        selectedSymptoms.includes(symptom)
-                          ? 'bg-primary text-primary-foreground'
-                          : isPriority 
-                            ? 'bg-phase-secondary/50 text-foreground ring-1 ring-phase-primary/30 hover:bg-phase-secondary/70'
-                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                      }`}
-                    >
-                      {isPriority && index < 3 && '⚡ '}{symptom}
-                    </button>
-                    {selectedSymptoms.includes(symptom) && (
-                      <MedicationEffectBadge
-                        medicationName={medicationName}
-                        symptom={symptom}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+           <div className="space-y-4">
+             <p className="text-sm text-muted-foreground">
+               Selecione os sintomas que você está sentindo hoje
+             </p>
+           <div className="grid grid-cols-2 gap-2.5">
+               {sortedSymptoms.map((symptom, index) => {
+               const isPriority = isPregnant
+                     ? trimesterSymptomPriority[trimester]?.includes(symptom)
+                     : phaseSymptomPriority[currentPhase]?.includes(symptom);
+                 return (
+                   <div key={symptom} className="flex flex-col gap-1">
+                     <button
+                       onClick={() => toggleSymptom(symptom)}
+                       className={`w-full px-4 py-3 rounded-2xl text-sm font-medium transition-all text-left ${
+                         selectedSymptoms.includes(symptom)
+                           ? 'bg-primary text-primary-foreground shadow-md'
+                           : isPriority 
+                             ? 'bg-phase-secondary/50 text-foreground ring-1 ring-phase-primary/30 hover:bg-phase-secondary/70'
+                             : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                       }`}
+                     >
+                       {isPriority && index < 3 && '⚡ '}{symptom}
+                       {selectedSymptoms.includes(symptom) && (
+                         <motion.span
+                           initial={{ scale: 0 }}
+                           animate={{ scale: 1 }}
+                           className="inline-block ml-2"
+                         >
+                           ✓
+                         </motion.span>
+                       )}
+                     </button>
+                     {selectedSymptoms.includes(symptom) && (
+                       <MedicationEffectBadge
+                         medicationName={medicationName}
+                         symptom={symptom}
+                       />
+                     )}
+                   </div>
+                 );
+               })}
+             </div>
+           </div>
         );
       case 'mood':
         return (
