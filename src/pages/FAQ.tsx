@@ -67,7 +67,7 @@ const faqs = [
     items: [
       {
         q: 'O que está incluso no plano gratuito?',
-        a: 'O plano gratuito inclui rastreamento de ciclo, registro de sintomas, humor e peso, e acesso básico ao Chef IA e treinos.',
+        a: 'O plano gratuito inclui rastreamento de ciclo, registro de sintomas, humor e peso, e acesso básico à Elena Chef e treinos.',
       },
       {
         q: 'Como cancelar minha assinatura?',

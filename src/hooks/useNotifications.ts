@@ -243,7 +243,7 @@ export const useNotifications = () => {
 
     await scheduleNotification(
       '⏰ Seu trial Premium expira em 2 dias!',
-      'Aproveite para assinar e continuar com acesso ao Chef IA, relatórios e muito mais.',
+      'Aproveite para assinar e continuar com acesso à Elena, relatórios e muito mais.',
       reminderDate,
       'trial-expiration'
     );
