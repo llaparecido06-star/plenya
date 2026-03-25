@@ -114,7 +114,7 @@ const HotFlashSleepCorrelation: React.FC = () => {
       : 'não identificados';
 
     const result = await chat({
-      message: `Sou uma mulher na menopausa. Esta semana tive ${data.hotFlashCount} episódios de ondas de calor, ${data.nightFlashPercent}% deles à noite. ${data.avgSleepHours ? `Durmo em média ${data.avgSleepHours}h.` : ''} Gatilhos principais: ${triggersText}. Me dê: 1) Uma sugestão de receita refrescante para o jantar do Chef IA. 2) Uma técnica de respiração para resfriamento corporal. 3) Uma dica para melhorar o sono. Máximo 4 frases, tom carinhoso.`,
+      message: `Sou uma mulher na menopausa. Esta semana tive ${data.hotFlashCount} episódios de ondas de calor, ${data.nightFlashPercent}% deles à noite. ${data.avgSleepHours ? `Durmo em média ${data.avgSleepHours}h.` : ''} Gatilhos principais: ${triggersText}. Me dê: 1) Uma sugestão de receita refrescante para o jantar. 2) Uma técnica de respiração para resfriamento corporal. 3) Uma dica para melhorar o sono. Máximo 4 frases, tom carinhoso.`,
       history: [],
       life_phase: 'menopause',
     });
