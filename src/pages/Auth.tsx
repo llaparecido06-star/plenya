@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable';
 import logoImage from '@/assets/logo-plenya.png';
 
 const translateLoginError = (msg: string, t: (key: string) => string): string => {
@@ -87,11 +88,10 @@ const Auth: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin },
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
       });
-      if (error) throw error;
+      if (result.error) throw result.error;
     } catch (error: any) {
       toast({ title: t('auth.error_google'), description: error.message || t('auth.error_try_again'), variant: 'destructive' });
       setGoogleLoading(false);
@@ -101,11 +101,10 @@ const Auth: React.FC = () => {
   const handleAppleSignIn = async () => {
     setAppleLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: { redirectTo: window.location.origin },
+      const result = await lovable.auth.signInWithOAuth('apple', {
+        redirect_uri: window.location.origin,
       });
-      if (error) throw error;
+      if (result.error) throw result.error;
     } catch (error: any) {
       toast({ title: t('auth.error_apple'), description: error.message || t('auth.error_try_again'), variant: 'destructive' });
       setAppleLoading(false);
