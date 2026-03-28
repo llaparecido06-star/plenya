@@ -74,7 +74,7 @@ import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
 import TrialExpirationBanner from '@/components/subscription/TrialExpirationBanner';
 import PWAInstallBanner from '@/components/home/PWAInstallBanner';
-import ManuOrbHero from '@/components/home/ManuOrbHero';
+import MaluOrbHero from '@/components/home/MaluOrbHero';
 import ShareHormonalDayModal from '@/components/home/ShareHormonalDayModal';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
@@ -172,7 +172,7 @@ const Index: React.FC = () => {
       {/* === MANU ORB HERO === */}
       {isToday && (
         <div className="px-4">
-          <ManuOrbHero />
+          <MaluOrbHero />
         </div>
       )}
 

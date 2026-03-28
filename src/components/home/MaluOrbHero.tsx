@@ -40,7 +40,7 @@ const phaseInsights: Record<CyclePhase, {
   },
 };
 
-const ManuOrbHero: React.FC = () => {
+const MaluOrbHero: React.FC = () => {
   const { currentPhase, cycleDay, hasDUM } = useCycle();
   const data = phaseInsights[currentPhase];
 
@@ -99,4 +99,4 @@ const ManuOrbHero: React.FC = () => {
   );
 };
 
-export default ManuOrbHero;
+export default MaluOrbHero;
