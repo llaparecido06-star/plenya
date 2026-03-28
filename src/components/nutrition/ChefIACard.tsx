@@ -160,7 +160,7 @@ const ChefIACard: React.FC = () => {
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-foreground">Malu Chef</h3>
               <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-xs font-medium text-amber-600">
-                Manu
+                Malu
               </span>
               {favorites.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-xs font-medium text-yellow-600 dark:text-yellow-400">
