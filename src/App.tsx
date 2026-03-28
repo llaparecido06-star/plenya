@@ -28,6 +28,7 @@ const Termos = lazy(() => import("./pages/Termos"));
 const Admin = lazy(() => import("./pages/Admin"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const FAQ = lazy(() => import("./pages/FAQ"));
+const Landing = lazy(() => import("./pages/Landing"));
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,7 @@ const App = () => (
                       }
                     />
                     <Route path="/instalar" element={<Instalar />} />
+                    <Route path="/welcome" element={<Landing />} />
                     <Route path="/privacidade" element={<Privacidade />} />
                     <Route path="/termos" element={<Termos />} />
                     <Route path="/faq" element={<FAQ />} />

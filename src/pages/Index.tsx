@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar } from 'lucide-react';
+import { Calendar, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 
@@ -74,6 +74,8 @@ import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import UpgradeBanner from '@/components/subscription/UpgradeBanner';
 import TrialExpirationBanner from '@/components/subscription/TrialExpirationBanner';
 import PWAInstallBanner from '@/components/home/PWAInstallBanner';
+import ManuOrbHero from '@/components/home/ManuOrbHero';
+import ShareHormonalDayModal from '@/components/home/ShareHormonalDayModal';
 import { homeTutorialSteps } from '@/components/tutorial/tutorialSteps';
 import { useCycle } from '@/contexts/CycleContext';
 import { useSelectedDate } from '@/contexts/SelectedDateContext';
@@ -100,6 +102,7 @@ const Index: React.FC = () => {
   } = useLifePhase();
   const phaseInfo = getPhaseInfo();
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const showPillTracker = isPillMethod(contraceptive_type);
   const showDeviceExpiration = hasExpirationDate(contraceptive_type);
 
@@ -165,6 +168,13 @@ const Index: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* === MANU ORB HERO === */}
+      {isToday && (
+        <div className="px-4">
+          <ManuOrbHero />
+        </div>
+      )}
 
       {/* === CYCLE HERO (menstruating only) === */}
       {isToday && isMenstruating && (
@@ -326,6 +336,21 @@ const Index: React.FC = () => {
         )}
       </motion.div>
 
+      {/* Share button */}
+      {isToday && isMenstruating && hasDUM && (
+        <div className="px-4 pb-4">
+          <Button
+            onClick={() => setShowShareModal(true)}
+            variant="outline"
+            className="w-full h-12 rounded-2xl border-primary/20 hover:-translate-y-0.5 hover:shadow-lg transition-all"
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            Compartilhar meu Dia Hormonal ✨
+          </Button>
+        </div>
+      )}
+
+      <ShareHormonalDayModal open={showShareModal} onClose={() => setShowShareModal(false)} />
       <TutorialOverlay tutorialKey="home" steps={homeTutorialSteps} />
     </PageLayout>
   );
