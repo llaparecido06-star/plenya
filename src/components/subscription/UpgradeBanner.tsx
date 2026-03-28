@@ -34,7 +34,7 @@ const UpgradeBanner: React.FC = () => {
               <Sparkles className="w-4 h-4" />
             </div>
             <p className="text-xs text-white/80 mt-0.5">
-              Elena Chef, Relatório Médico, Chat ilimitado e mais
+              Manu Chef, Relatório Médico, Chat ilimitado e mais
             </p>
           </div>
           <ArrowRight className="w-5 h-5 text-white/80" />
