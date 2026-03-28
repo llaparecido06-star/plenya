@@ -142,7 +142,7 @@ const ChefIACard: React.FC = () => {
   const displayedHistory = showFavoritesOnly ? favorites : savedRecipes;
 
   return (
-    <PremiumGate feature="Elena Chef" mode="inline">
+    <PremiumGate feature="Manu Chef" mode="inline">
       <motion.button
         id="chef-ia-card"
         onClick={() => { setShowDialog(true); resetState(); }}
@@ -158,9 +158,9 @@ const ChefIACard: React.FC = () => {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-foreground">Elena Chef</h3>
+              <h3 className="font-semibold text-foreground">Manu Chef</h3>
               <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-xs font-medium text-amber-600">
-                Elena
+                Manu
               </span>
               {favorites.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-xs font-medium text-yellow-600 dark:text-yellow-400">
@@ -189,7 +189,7 @@ const ChefIACard: React.FC = () => {
               )}
               <DialogTitle className="flex items-center gap-2 flex-1">
                 <ChefHat className="w-5 h-5 text-amber-500" />
-                {inputMode === 'history' ? 'Minhas Receitas' : 'Elena Chef'}
+                {inputMode === 'history' ? 'Minhas Receitas' : 'Manu Chef'}
                 {diet_type && getDietLabel(diet_type) && inputMode !== 'history' && (
                   <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-normal">
                     {getDietLabel(diet_type)}
@@ -228,7 +228,7 @@ const ChefIACard: React.FC = () => {
                   </div>
                 </motion.div>
                 <p className="text-muted-foreground mt-4">
-                  {aiLoading ? 'Elena está preparando suas receitas...' : 'Carregando receitas...'}
+                  {aiLoading ? 'Manu está preparando suas receitas...' : 'Carregando receitas...'}
                 </p>
               </motion.div>
             ) : selectedSavedRecipe ? (

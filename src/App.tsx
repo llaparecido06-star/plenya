@@ -33,7 +33,7 @@ const queryClient = new QueryClient();
 
 // Loading fallback component
 const loadingPhrases = [
-  'Elena está preparando seus dados... ✨',
+  'Manu está preparando seus dados... ✨',
   'Sintonizando com seu corpo... 🌸',
   'Quase lá, gerando seu protocolo de hoje... 🌿',
   'Cuidando dos detalhes para você... 💜',
