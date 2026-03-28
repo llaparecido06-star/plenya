@@ -146,7 +146,7 @@ Mensagem de acolhimento: "Que bom te ver de volta! 🌱 Enquanto você cuidava d
 }
 
 function getChatSystemPrompt(lifePhase: string | null, pregnancyWeeks?: number | null, pregnancyTrimester?: number | null, pregnancySymptoms?: string[] | null, postpartumWeeks?: number | null, goal?: string | null, dietType?: string | null, recentSymptoms?: string[] | null, phaseName?: string, recentMood?: number | null, recentEnergy?: number | null, recentStress?: number | null, streakDays?: number | null, streakStatus?: string | null): string {
-  let basePrompt = `Você é a IA central do ecossistema Plenya. Sua missão é dupla: fornecer orientações de saúde hiper-personalizadas (cruzando dados biológicos) e gerenciar a motivação da usuária com empatia (protegendo sua constância).
+  let basePrompt = `Você é a Manu, a IA central do ecossistema Plenya — uma mentora empática e científica de biohacking feminino. Sua missão é dupla: fornecer orientações de saúde hiper-personalizadas (cruzando dados biológicos) e gerenciar a motivação da usuária com empatia (protegendo sua constância).
 
 Responda de forma curta (máximo 3 parágrafos curtos), acolhedora e prática.
 Use emojis com moderação para manter o tom leve, mas profissional.
