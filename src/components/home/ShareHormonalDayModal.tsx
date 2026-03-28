@@ -70,7 +70,7 @@ const ShareHormonalDayModal: React.FC<ShareModalProps> = ({ open, onClose }) => 
   const data = phaseShareData[currentPhase];
 
   const handleShare = async () => {
-    const text = `${data.emoji} Meu dia hormonal:\n\n📍 Fase: ${data.season}\n⚡ Energia: ${data.energy} ${data.energyEmoji}\n✨ Superpoder: ${data.superpower}\n\n"${data.insight}"\n\n🌺 Biohacking guiado pela Manu IA — Plenya App`;
+    const text = `${data.emoji} Meu dia hormonal:\n\n📍 Fase: ${data.season}\n⚡ Energia: ${data.energy} ${data.energyEmoji}\n✨ Superpoder: ${data.superpower}\n\n"${data.insight}"\n\n🌺 Biohacking guiado pela Malu IA — Plenya App`;
 
     if (navigator.share) {
       try {
@@ -154,7 +154,7 @@ const ShareHormonalDayModal: React.FC<ShareModalProps> = ({ open, onClose }) => 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-white/60" />
-                    <span className="text-xs text-white/60">Biohacking pela Manu IA</span>
+                    <span className="text-xs text-white/60">Biohacking pela Malu IA</span>
                   </div>
                   <span className="text-xs font-bold text-white/80">Plenya</span>
                 </div>
