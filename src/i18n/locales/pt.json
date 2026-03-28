@@ -186,13 +186,13 @@
     "profile": "Perfil"
   },
   "chat": {
-    "title": "Manu - Assistente de Bem-estar",
+    "title": "Malu - Assistente de Bem-estar",
     "subtitle_pregnant": "Cuidando de você e do bebê 🤰",
     "subtitle_menopause": "Apoio no climatério 🌸",
     "subtitle_postpartum": "Apoio na maternidade 🌷",
     "subtitle_default": "Sempre aqui para você 💜",
-    "placeholder": "Pergunte para a Manu...",
-    "typing": "Manu está pensando",
+    "placeholder": "Pergunte para a Malu...",
+    "typing": "Malu está pensando",
     "error_fallback": "Desculpe, estou tendo dificuldades para responder agora. Pode tentar novamente? 💜"
   },
   "nutrition": {
@@ -874,8 +874,8 @@
     "weekly_summary": "Resumo da semana",
     "days_logged": "{{count}} dias registrados",
     "top_symptom": "Mais frequente",
-    "get_tip": "Pedir dica para a Manu",
-    "new_tip": "Nova dica da Manu",
+    "get_tip": "Pedir dica para a Malu",
+    "new_tip": "Nova dica da Malu",
     "nutrition_title": "Nutrição para Menopausa",
     "nut_phyto": "Fitoestrógenos (soja, linhaça) ajudam no equilíbrio hormonal",
     "nut_calcium": "Cálcio e vitamina D para proteger os ossos",
@@ -1098,9 +1098,9 @@
     "weekly_days": "dias",
     "weekly_mood": "Humor médio",
     "weekly_top_symptoms": "Sintomas mais frequentes",
-    "weekly_ai_tip": "Dica da Manu",
-    "weekly_get_tip": "Pedir dicas para a Manu",
-    "weekly_refresh_tip": "Nova dica da Manu",
+    "weekly_ai_tip": "Dica da Malu",
+    "weekly_get_tip": "Pedir dicas para a Malu",
+    "weekly_refresh_tip": "Nova dica da Malu",
 
     "alert_settings_title": "Alertas Inteligentes",
     "alert_settings_sub": "Personalize limiares de alerta",

@@ -11,28 +11,28 @@ const phaseInsights: Record<CyclePhase, {
   glowColor: string;
 }> = {
   menstrual: {
-    insight: 'A Manu notou que seu corpo pede recolhimento. É tempo de focar no essencial.',
+    insight: 'A Malu notou que seu corpo pede recolhimento. É tempo de focar no essencial.',
     season: 'Inverno Interior',
     emoji: '🌙',
     orbColors: 'from-violet-500 via-purple-600 to-indigo-700',
     glowColor: 'bg-violet-500/20',
   },
   folicular: {
-    insight: 'Sua energia está subindo! A Manu sugere aproveitar esse pico para iniciar novos projetos.',
+    insight: 'Sua energia está subindo! A Malu sugere aproveitar esse pico para iniciar novos projetos.',
     season: 'Primavera Interior',
     emoji: '🌱',
     orbColors: 'from-emerald-400 via-teal-500 to-cyan-600',
     glowColor: 'bg-emerald-500/20',
   },
   ovulatoria: {
-    insight: 'Você está no seu ápice magnético! A Manu recomenda focar em conexões e comunicação hoje.',
+    insight: 'Você está no seu ápice magnético! A Malu recomenda focar em conexões e comunicação hoje.',
     season: 'Verão Interior',
     emoji: '☀️',
     orbColors: 'from-amber-400 via-orange-500 to-rose-500',
     glowColor: 'bg-amber-500/20',
   },
   lutea: {
-    insight: 'Seu corpo está desacelerando. A Manu lembra: produtividade agora é sobre organização, não exaustão.',
+    insight: 'Seu corpo está desacelerando. A Malu lembra: produtividade agora é sobre organização, não exaustão.',
     season: 'Outono Interior',
     emoji: '🍂',
     orbColors: 'from-orange-500 via-amber-600 to-yellow-700',
@@ -91,7 +91,7 @@ const ManuOrbHero: React.FC = () => {
           <p className="text-sm text-foreground leading-relaxed">{data.insight}</p>
           <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            Insight da Manu IA
+            Insight da Malu IA
           </p>
         </div>
       </div>

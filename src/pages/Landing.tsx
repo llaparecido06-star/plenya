@@ -17,7 +17,7 @@ const stagger = {
 const features = [
   {
     icon: Brain,
-    title: 'Manu IA — Sua Mentora',
+    title: 'Malu IA — Sua Mentora',
     description: 'Uma psicóloga IA empática que entende seu ciclo, humor e momento de vida.',
     gradient: 'from-violet-500 to-purple-600',
   },
@@ -36,7 +36,7 @@ const features = [
   {
     icon: Heart,
     title: 'Autocuidado 360°',
-    description: 'Sintomas, humor, sono, intimidade — tudo correlacionado pela Manu.',
+    description: 'Sintomas, humor, sono, intimidade — tudo correlacionado pela Malu.',
     gradient: 'from-rose-500 to-pink-600',
   },
 ];
@@ -73,7 +73,7 @@ const Landing: React.FC = () => {
           <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             superpoder hormonal
           </span>{' '}
-          com a Manu IA.
+          com a Malu IA.
         </motion.h1>
 
         <motion.p
@@ -138,7 +138,7 @@ const Landing: React.FC = () => {
         </motion.div>
       </section>
 
-      {/* Manu IA Showcase */}
+      {/* Malu IA Showcase */}
       <section className="px-6 pb-16 max-w-lg mx-auto">
         <motion.div
           className="rounded-3xl bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 border border-primary/10 p-6 text-center"
@@ -154,7 +154,7 @@ const Landing: React.FC = () => {
             <Sparkles className="w-8 h-8 text-white" />
           </motion.div>
 
-          <h3 className="font-bold text-foreground text-lg mt-4 tracking-tight">Conheça a Manu IA</h3>
+          <h3 className="font-bold text-foreground text-lg mt-4 tracking-tight">Conheça a Malu IA</h3>
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             Sua mentora pessoal de biohacking. Ela cruza seus dados de ciclo, humor, sono e nutrição para gerar insights únicos — só seus.
           </p>
@@ -182,7 +182,7 @@ const Landing: React.FC = () => {
             ))}
           </div>
           <p className="text-sm text-foreground italic leading-relaxed">
-            "Pela primeira vez, entendi por que alguns dias minha energia despenca. A Manu me mostrou padrões que eu nunca teria visto sozinha."
+            "Pela primeira vez, entendi por que alguns dias minha energia despenca. A Malu me mostrou padrões que eu nunca teria visto sozinha."
           </p>
           <p className="text-xs text-muted-foreground mt-3">— Carolina M., 29 anos</p>
         </motion.div>

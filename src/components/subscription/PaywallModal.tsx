@@ -20,12 +20,12 @@ const freeFeatures = [
 ];
 
 const premiumFeatures = [
-  { icon: Brain, label: 'Psicóloga Manu IA ilimitada', highlight: true },
+  { icon: Brain, label: 'Psicóloga Malu IA ilimitada', highlight: true },
   { icon: Utensils, label: 'Cardápios completos por fase' },
   { icon: Dumbbell, label: 'Treinos personalizados ilimitados' },
   { icon: Heart, label: 'Correlação cruzada de dados' },
   { icon: Sparkles, label: 'Relatório médico mensal' },
-  { icon: Zap, label: 'Manu Chef com foto da geladeira' },
+  { icon: Zap, label: 'Malu Chef com foto da geladeira' },
 ];
 
 const PaywallModal: React.FC<PaywallModalProps> = ({ open, onClose, feature }) => {
@@ -139,7 +139,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ open, onClose, feature }) =
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                  🔒 Psicóloga Manu IA bloqueada
+                  🔒 Psicóloga Malu IA bloqueada
                 </p>
               </div>
             </div>
